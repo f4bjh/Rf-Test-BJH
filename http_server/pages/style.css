@@ -1,0 +1,485 @@
+/* CSS Document */
+
+body {
+	background: #212121;
+	font-size:22px;
+	line-height: 32px;
+	color: #ffffff;
+	word-wrap:break-word !important;
+	font-family: 'Open Sans', sans-serif;
+	}
+
+h1 {
+	font-size: 60px;
+	text-align: center;
+	color: #FFF;
+}	
+
+h3 {
+	font-size: 30px;
+	text-align: center;
+	color: #FFF;
+}
+
+h3 a {
+	color: #FFF;
+}
+
+a {
+	color: #FFF;
+}
+
+h1 {
+	text-align:center;
+	font-family: 'Bree Serif', 'serif';
+	}
+
+h2 {
+	text-align:center;
+	text-decoration: underline overline dotted red;
+	}
+
+#container {
+	margin: 0 auto;
+}
+
+p {
+	text-align: center;
+}
+
+nav {
+	margin: 50px 0;
+	background-color: #E64A19;
+}
+
+nav ul {
+	padding: 0;
+  margin: 0;
+	list-style: none;
+	position: relative;
+	}
+	
+nav ul li {
+	display:inline-block;
+	background-color: #E64A19;
+	}
+
+nav a {
+	display:block;
+	padding:0 10px;	
+	color:#FFF;
+	font-size:20px;
+	line-height: 60px;
+	text-decoration:none;
+}
+
+nav a:hover { 
+	background-color: #000000; 
+}
+
+/* Hide Dropdowns by Default */
+nav ul ul {
+	display: none;
+	position: absolute; 
+	top: 60px; /* the height of the main nav */
+}
+	
+/* Display Dropdowns on Hover */
+nav ul li:hover > ul {
+	display:inherit;
+}
+	
+/* Fisrt Tier Dropdown */
+nav ul ul li {
+	width:170px;
+	float:none;
+	display:list-item;
+	position: relative;
+}
+
+/* Second, Third and more Tiers	*/
+nav ul ul ul li {
+	position: relative;
+	top:-60px; 
+	left:170px;
+}
+
+.dl {
+    display: inline-block;
+    position: relative;
+ 	top:-50%; 
+	left:40%;
+	}
+
+.MHz {
+    display: inline-block;
+    font-size: 200px;
+    position: absolute;
+    top: 600px;
+    left: 450px;
+    margin: 0;
+	color: rgb(0,255,0);
+  }
+
+.min_dBm {
+    display: inline-block;
+    font-size: 70px;
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    margin: 0;
+	color: rgb(0,255,0);
+  }
+
+.avg_dBm {
+    display: inline-block;
+    font-size: 70px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin: 0;
+	color: rgb(255,255,255);
+  }
+  
+ .max_dBm {
+    display: inline-block;
+    font-size: 70px;
+    position: absolute;
+    top: 60%;
+    left: 50%;
+    margin: 0;
+	color: rgb(255,0,0);
+}
+
+  
+.bas_de_page {
+    position: absolute;
+    top: 90%;
+    left: 50%;
+    margin: 0;
+  }  
+  
+.recentre {
+  position: relative;
+  width: 0;
+  height: 200px;
+  }
+	
+/* Change this in order to change the Dropdown symbol */
+
+li > a:only-child:after { content: ''; }
+li > a:after { content:  ' +'; }
+
+.gauge_style {
+            position: relative;
+			left: 0%;
+            width: 40vw;
+            height: 40vw;
+            box-sizing: border-box;
+            float:left;
+            margin:20px
+        }
+
+.gauge {
+    position: relative;
+    border-radius: 50%/100% 100% 0 0;
+    background-color: var(--color, #a22);
+    overflow: hidden;
+}
+.gauge:before{
+    content: "";
+    display: block;
+    padding-top: 50%;   /* ratio of 2:1*/
+}
+.gauge .chart {
+  overflow: hidden;
+}
+.gauge .mask {
+  position: absolute;
+  left: 20%;
+  right: 20%;
+  bottom: 0;
+  top: 40%;
+  background-color: #fff;
+  border-radius: 50%/100% 100% 0 0;
+}
+
+.gauge .percentage {
+    position:  absolute;
+    top: -1px;
+    left: -1px;
+    bottom: 0;
+    right: -1px;
+    background-color: var(--background, #aaa);
+    transform:rotate(var(--rotation)); 
+    transform-origin: bottom center; 
+    transition-duration: 600;
+}
+.gauge:hover {
+  --rotation: 100deg;
+}
+.gauge .value {
+  position:absolute; bottom:0%; left:0;   
+  width:100%; 
+  text-align: center;
+}
+
+.gauge .min {
+  position:absolute; 
+  bottom:0; left:5%;   
+}
+.gauge .max {
+  position:absolute; 
+  bottom:0; right:5%;   
+ }
+
+:root {
+    --bg-color: none;
+    --ia-color: #666;
+    --a-color: rgb(0, 255, 0);
+    --padding-p: 4px;
+    --bar-w: 16px;
+    --bar-pad: 8px;
+  
+    /* no need to change after here */
+    --padding: calc(var(--padding-p)*2);
+    --bar-h: calc(var(--bar-w)*4);
+    --bar-r: calc(var(--bar-w)/2);
+    --bar-p: calc(var(--padding-p) + var(--bar-w));
+    --bar-p-t: calc(var(--bar-p)*2);
+    --c-w: calc(var(--bar-p-t) + var(--bar-h));
+    --bar-h-t: calc(var(--bar-h)*2);
+    --c-h-np: calc(var(--bar-p-t) + var(--bar-h-t));
+    --c-h: calc(calc(var(--c-h-np) + var(--padding-p)) + var(--bar-pad));
+  }
+  
+  .s7s {
+    display: inline-block;
+    width: var(--c-w);
+    height: var(--c-h);
+    background: var(--bg-color);
+    position: relative;
+    margin: 0;
+  }
+  .s7s input {
+    display: none;
+  }
+  
+  .s7s seg {
+    background: var(--ia-color);
+    border-radius: var(--bar-r);
+    height: var(--bar-h);
+    width: var(--bar-w);
+  }
+  
+  .s7s seg:nth-of-type(3n+1) {
+    height: var(--bar-w);
+    width: var(--bar-h);
+    left: 50%;
+    margin-left: calc(var(--bar-h) / -2);
+  }
+  
+  .s7s seg:nth-of-type(1) {
+    position: absolute;
+    top: var(--padding);
+  }
+  
+  .s7s seg:nth-of-type(2) {
+    position: absolute;
+    top: var(--bar-p);
+    right: var(--padding);
+  }
+  
+  .s7s seg:nth-of-type(3) {
+    position: absolute;
+    bottom: var(--bar-p);
+    right: var(--padding);
+  }
+  
+  .s7s seg:nth-of-type(4) {
+    position: absolute;
+    bottom: var(--padding);
+  }
+  
+  .s7s seg:nth-of-type(5) {
+    position: absolute;
+    bottom: var(--bar-p);
+    left: var(--padding);
+  }
+  
+  .s7s seg:nth-of-type(6) {
+    position: absolute;
+    top: var(--bar-p);
+    left: var(--padding);
+  }
+  
+  .s7s seg:nth-of-type(7) {
+    position: absolute;
+    top: 50%;
+    margin-top: calc(var(--bar-r) * -1);
+  }
+  
+  input[value='0'] ~ seg:nth-of-type(1) {
+    background: var(--a-color);
+  }
+  input[value='0'] ~ seg:nth-of-type(2) {
+    background: var(--a-color);
+  }
+  input[value='0'] ~ seg:nth-of-type(3) {
+    background: var(--a-color);
+  }
+  input[value='0'] ~ seg:nth-of-type(4) {
+    background: var(--a-color);
+  }
+  input[value='0'] ~ seg:nth-of-type(5) {
+    background: var(--a-color);
+  }
+  input[value='0'] ~ seg:nth-of-type(6) {
+    background: var(--a-color);
+  }
+  
+  input[value='1'] ~ seg:nth-of-type(2) {
+    background: var(--a-color);
+  }
+  input[value='1'] ~ seg:nth-of-type(3) {
+    background: var(--a-color);
+  }
+  
+  input[value='2'] ~ seg:nth-of-type(1) {
+    background: var(--a-color);
+  }
+  input[value='2'] ~ seg:nth-of-type(2) {
+    background: var(--a-color);
+  }
+  input[value='2'] ~ seg:nth-of-type(4) {
+    background: var(--a-color);
+  }
+  input[value='2'] ~ seg:nth-of-type(5) {
+    background: var(--a-color);
+  }
+  input[value='2'] ~ seg:nth-of-type(7) {
+    background: var(--a-color);
+  }
+  
+  input[value='3'] ~ seg:nth-of-type(1) {
+    background: var(--a-color);
+  }
+  input[value='3'] ~ seg:nth-of-type(2) {
+    background: var(--a-color);
+  }
+  input[value='3'] ~ seg:nth-of-type(3) {
+    background: var(--a-color);
+  }
+  input[value='3'] ~ seg:nth-of-type(4) {
+    background: var(--a-color);
+  }
+  input[value='3'] ~ seg:nth-of-type(7) {
+    background: var(--a-color);
+  }
+  
+  input[value='4'] ~ seg:nth-of-type(2) {
+    background: var(--a-color);
+  }
+  input[value='4'] ~ seg:nth-of-type(3) {
+    background: var(--a-color);
+  }
+  input[value='4'] ~ seg:nth-of-type(6) {
+    background: var(--a-color);
+  }
+  input[value='4'] ~ seg:nth-of-type(7) {
+    background: var(--a-color);
+  }
+  
+  
+  input[value='5'] ~ seg:nth-of-type(1) {
+    background: var(--a-color);
+  }
+  input[value='5'] ~ seg:nth-of-type(3) {
+    background: var(--a-color);
+  }
+  input[value='5'] ~ seg:nth-of-type(4) {
+    background: var(--a-color);
+  }
+  input[value='5'] ~ seg:nth-of-type(6) {
+    background: var(--a-color);
+  }
+  input[value='5'] ~ seg:nth-of-type(7) {
+    background: var(--a-color);
+  }
+  
+  input[value='6'] ~ seg:nth-of-type(1) {
+    background: var(--a-color);
+  }
+  input[value='6'] ~ seg:nth-of-type(3) {
+    background: var(--a-color);
+  }
+  input[value='6'] ~ seg:nth-of-type(4) {
+    background: var(--a-color);
+  }
+  input[value='6'] ~ seg:nth-of-type(5) {
+    background: var(--a-color);
+  }
+  input[value='6'] ~ seg:nth-of-type(6) {
+    background: var(--a-color);
+  }
+  input[value='6'] ~ seg:nth-of-type(7) {
+    background: var(--a-color);
+  }
+  
+  
+  input[value='7'] ~ seg:nth-of-type(1) {
+    background: var(--a-color);
+  }
+  input[value='7'] ~ seg:nth-of-type(2) {
+    background: var(--a-color);
+  }
+  input[value='7'] ~ seg:nth-of-type(3) {
+    background: var(--a-color);
+  }
+  
+  
+  input[value='8'] ~ seg:nth-of-type(1) {
+    background: var(--a-color);
+  }
+  input[value='8'] ~ seg:nth-of-type(2) {
+    background: var(--a-color);
+  }
+  input[value='8'] ~ seg:nth-of-type(3) {
+    background: var(--a-color);
+  }
+  input[value='8'] ~ seg:nth-of-type(4) {
+    background: var(--a-color);
+  }
+  input[value='8'] ~ seg:nth-of-type(5) {
+    background: var(--a-color);
+  }
+  input[value='8'] ~ seg:nth-of-type(6) {
+    background: var(--a-color);
+  }
+  input[value='8'] ~ seg:nth-of-type(7) {
+    background: var(--a-color);
+  }
+  
+  input[value='9'] ~ seg:nth-of-type(1) {
+    background: var(--a-color);
+  }
+  input[value='9'] ~ seg:nth-of-type(2) {
+    background: var(--a-color);
+  }
+  input[value='9'] ~ seg:nth-of-type(3) {
+    background: var(--a-color);
+  }
+  input[value='9'] ~ seg:nth-of-type(4) {
+    background: var(--a-color);
+  }
+  input[value='9'] ~ seg:nth-of-type(6) {
+    background: var(--a-color);
+  }
+  input[value='9'] ~ seg:nth-of-type(7) {
+    background: var(--a-color);
+  }
+  
+  display_MHz {
+	font-size: 60px;
+	color: #FFF;
+}	

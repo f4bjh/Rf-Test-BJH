@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<link rel="stylesheet" href="style.css" />
+<title>Frequency meter</title>
+
+<script type = "text/javascript" src="script.js"></script>
+
+
+ 
+<style type="text/css">
+html, body {
+	height:100%;
+	width:100%;}
+ 
+.fig {
+	position: relative;
+   	float:left;
+   	height:15px;
+   	width:10px;
+   	margin:5px;
+	}
+ 
+.figt, .figb {
+	width:10px;
+  	height:9px;
+  	border: solid;
+  	font-size:0;
+   	line-height:0;
+   	float:left;
+   	position: relative;
+   	}
+ 
+.figt {
+	border-width: 4px 4px 2px 4px;
+    }
+ 
+.figb {
+    border-width: 2px 4px 4px 4px;
+    }        
+</style>
+ 
+</head>
+<body>
+  <h1>Rf-Test-BJH</h1>
+ 
+   <div id="container">
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="#measures">Measures</a>
+                    <!-- First Tier Drop Down -->
+                    <ul>
+                        <li><a href="generator.html">RF Generator</a></li>
+                        <li><a href="frequencymeter.html">Frequencymeter</a></li>
+                        <li><a href="powermeter.html">Power-meter</a></li>
+                    </ul>
+                </li>
+                <li><a href="#">Settings</a>
+                    <ul>
+                        <li><a href="upload.html">Upload fw</a></li>
+                        <li><a href="wifi.html">Wifi</a></li>
+                    </ul>
+                </li>
+                <li><a href="about.html">About</a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <div class='recentre'></div>
+	
+	 <h2>Frequency-meter</h2>
+
+	<div class='s7s'>
+        <input value='1'/>
+        <seg></seg>
+        <seg></seg>
+        <seg></seg>
+        <seg></seg>
+        <seg></seg>
+        <seg></seg>
+        <seg></seg>
+    </div>
+
+    <div class='s7s'>
+        <input value='8'/>
+        <seg></seg>
+        <seg></seg>
+        <seg></seg>
+        <seg></seg>
+        <seg></seg>
+        <seg></seg>
+        <seg></seg>
+    </div>
+	<div class='s7s'>
+        <input value='7'/>
+        <seg></seg>
+        <seg></seg>
+        <seg></seg>
+        <seg></seg>
+        <seg></seg>
+        <seg></seg>
+        <seg></seg>
+    </div>
+	<div class='s7s'>
+        <input value='4'/>
+        <seg></seg>
+        <seg></seg>
+        <seg></seg>
+        <seg></seg>
+        <seg></seg>
+        <seg></seg>
+        <seg></seg>
+    </div>
+	<div class='MHz'>MHz</div>
+        
+		
+<!--		
+        <script>
+            // This is only for incrementing purpose - it is totaly posible to use this without js - just set the value for each segment on the backend
+            function set7SegmentVal(container,val){
+                var els = container.querySelectorAll(".s7s input");
+                for(let k =0; k< els.length;k++){
+                    els[k].setAttribute("value",((val+"").padStart(els.length))[k]);
+                }
+                return els.length;
+            }
+            
+            
+            var i = 0;
+            setInterval(()=>{
+                var len = set7SegmentVal(document,i);
+                i=(i+1)%Math.pow(10,len);
+            },100);
+        </script>
+-->
+
+<footer>
+   <p class='bas_de_page'>F4BJH - return to <a href="index.html">Home</a></p>
+ </footer>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <title>RF power meter</title>
+
+    <meta name="viewport" content="width=1024, maximum-scale=1">
+    <link href="jquery.gauge.css" type="text/css" rel="stylesheet">
+ 
+</head>
+<body>
+  <h1>Rf-Test-BJH</h1>
+
+   <div id="container">
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="#measures">Measures</a>
+                    <!-- First Tier Drop Down -->
+                    <ul>
+                        <li><a href="generator.html">RF Generator</a></li>
+                        <li><a href="frequencymeter.html">Frequencymeter</a></li>
+                        <li><a href="powermeter.html">Power-meter</a></li>
+                    </ul>
+                </li>
+                <li><a href="#">Settings</a>
+                    <ul>
+                        <li><a href="upload.html">Upload fw</a></li>
+                        <li><a href="wifi.html">Wifi</a></li>
+                    </ul>
+                </li>
+                <li><a href="about.html">About</a></li>
+            </ul>
+        </nav>
+    </div>
+ 
+ <h2>Power meter</h2>
+
+     <div class="power gauge_style"></div>
+
+    <script src="jquery.min.js"></script>
+    <script type="text/javascript" src="jquery.gauge.min.js"></script>
+    <script>
+
+         // second example
+        $('.power').gauge({
+            values: {
+                0 : '-30',
+                20: '-20',
+                40: '-10',
+                60: '0',
+                80: '+10',
+                100: '+20'
+            },
+            colors: {
+                0 : '#378618',
+				60: '#ffa500',
+                80: '#f00'
+            },
+            angles: [
+                180,
+                360
+            ],
+            lineWidth: 10,
+            arrowWidth: 20,
+            arrowColor: '#FFFFFF',
+            inset:true,
+
+            value: 30
+        });
+    </script>
+
+	<div class='min_dBm'>min: -17 dBm</div>
+	<div class='avg_dBm'>avg: -15 dBm</div>
+	<div class='max_dBm'>max: -14 dBm</div>
+	
+<footer>
+   <p class='bas_de_page'>F4BJH - return to <a href="index.html">Home</a></p>
+ </footer>	
+	
+</body>
+</html>
+
