@@ -18,3 +18,5 @@ $ idf.py menuconfig
 $ idf.py build
 
 ~/esp/esp-idf$ openocd -f board/esp32s3-builtin.cfg
+
+$ minicom -D /dev/ttyACM0
