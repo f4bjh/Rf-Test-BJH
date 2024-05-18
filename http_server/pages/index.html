@@ -40,6 +40,27 @@ wich partition has booted
     <h3> ota_0 -> fw version : </h3>
     <h3> ota_0 -> build date : </h3>
 idem ota_1
+
+<div id="content"></div>
+
+<script type="text/javascript">  
+    var content = document.getElementById('content');
+    var socket = new WebSocket('ws://192.168.4.1/ws');
+
+    socket.onopen = function () {
+	socket.send("Hello Server!");
+    };
+
+    socket.onmessage = function (message) {
+        console.log("Message from server ", message.data);
+	content.innerHTML += message.data +'<br />';
+    };
+
+    socket.onerror = function (error) {
+        console.log('WebSocket error: ' + error);
+    };
+</script>
+
  <footer>
    <p class='bas_de_page'>F4BJH</p>
  </footer>
