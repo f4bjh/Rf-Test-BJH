@@ -300,24 +300,26 @@ static esp_err_t ws_handler(httpd_req_t *req)
     return ESP_OK;
 }
 
-//char counter =0; 
+char counter =0; 
 static void send_counter(void *arg)
 {
-//    char * data;
-    static const char * data = "Hello client";
+    char data[4];
     struct async_resp_arg *resp_arg = arg;
     httpd_handle_t hd = resp_arg->hd;
     int fd = resp_arg->fd;
     httpd_ws_frame_t ws_pkt;
+
+    counter++;
+    sprintf(data,"%d",counter);
+    data[4] = '\0';
+
     memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
-//    counter++;
     ws_pkt.payload = (uint8_t*)data;
-    ws_pkt.len = strlen(data);
-//    memcpy(ws_pkt.payload, &counter, sizeof(counter));
-//    ws_pkt.len = sizeof(counter);
+    ws_pkt.len = sizeof(4*sizeof(char));
     ws_pkt.type = HTTPD_WS_TYPE_TEXT;
 
     httpd_ws_send_frame_async(hd, fd, &ws_pkt);
+
     free(resp_arg);
 }
 
@@ -328,7 +330,7 @@ static void ws_server_send_data(httpd_handle_t* server)
 
     // Send async message to all connected clients that use websocket protocol every 10 seconds
     while (send_messages) {
-        vTaskDelay(100000 / portTICK_PERIOD_MS);
+        vTaskDelay(10000 / portTICK_PERIOD_MS);
 
         if (!*server) { // httpd might not have been created by now
             continue;

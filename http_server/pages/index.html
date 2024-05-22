@@ -53,7 +53,7 @@ idem ota_1
 
     socket.onmessage = function (message) {
         console.log("Message from server ", message.data);
-	content.innerHTML += message.data +'<br />';
+	content.innerHTML = message.data +'<br />';
     };
 
     socket.onerror = function (error) {
