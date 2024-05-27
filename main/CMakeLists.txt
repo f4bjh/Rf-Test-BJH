@@ -3,6 +3,7 @@ idf_component_register(
 	SRCS "../wifi/softap.c"
 	SRCS "../http_server/keep_alive.c"
 	SRCS "../http_server/server.c"
+	SRCS "../cJSON/cJSON.c"
 	INCLUDE_DIRS "../include"
 	EMBED_TXTFILES ../http_server/pages/about.html
 	EMBED_TXTFILES ../http_server/pages/frequencymeter.html

@@ -114,10 +114,10 @@ nav ul ul ul li {
 .unit-Hz {
     display: inline;
     font-size: 125px;
-	color: rgb(0,255,0);
-	position: relative;
+    color: rgb(0,255,0);
+    position: relative;
     top: -10px;
-	left: 10px;
+    left: 10px;
     }
 
 .min_dBm {
@@ -140,7 +140,7 @@ nav ul ul ul li {
 	color: rgb(255,255,255);
   }
   
- .max_dBm {
+.max_dBm {
     display: inline-block;
     font-size: 70px;
     position: absolute;

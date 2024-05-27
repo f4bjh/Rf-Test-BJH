@@ -9,7 +9,9 @@
 #include "lwip/sockets.h"
 #include "esp_log.h"
 #include "keep_alive.h"
+#include "esp_chip_info.h"
 
+#include "cJSON.h"
 #include "http_server.h"
 
 /*
@@ -300,28 +302,144 @@ static esp_err_t ws_handler(httpd_req_t *req)
     return ESP_OK;
 }
 
-char counter =0; 
-static void send_counter(void *arg)
+typedef struct json_data_s {
+  char tag;
+  char length;
+  char *value;  
+} json_data_t;
+
+static void send_chip_info(void *arg)
 {
-    char data[4];
+    char tag;
+    char length;    
+    char value[32];
     struct async_resp_arg *resp_arg = arg;
     httpd_handle_t hd = resp_arg->hd;
     int fd = resp_arg->fd;
     httpd_ws_frame_t ws_pkt;
 
-    counter++;
-    sprintf(data,"%d",counter);
-    data[4] = '\0';
+    esp_chip_info_t chip_info;
+    //uint32_t flash_size;
+    esp_chip_info(&chip_info);
 
+    unsigned major_rev = chip_info.revision / 100;
+    unsigned minor_rev = chip_info.revision % 100;
+
+#if 0
+    printf("This is %s chip with %d CPU core(s), %s%s%s%s, ",
+           CONFIG_IDF_TARGET,
+           chip_info.cores,
+           (chip_info.features & CHIP_FEATURE_WIFI_BGN) ? "WiFi/" : "",
+           (chip_info.features & CHIP_FEATURE_BT) ? "BT" : "",
+           (chip_info.features & CHIP_FEATURE_BLE) ? "BLE" : "",
+           (chip_info.features & CHIP_FEATURE_IEEE802154) ? ", 802.15.4 (Zigbee/Thread)" : "");
+
+    unsigned major_rev = chip_info.revision / 100;
+    unsigned minor_rev = chip_info.revision % 100;
+    printf("silicon revision v%d.%d, ", major_rev, minor_rev);
+    if(esp_flash_get_size(NULL, &flash_size) != ESP_OK) {
+        printf("Get flash size failed");
+        return;
+    }
+
+    printf("%" PRIu32 "MB %s flash\n", flash_size / (uint32_t)(1024 * 1024),
+           (chip_info.features & CHIP_FEATURE_EMB_FLASH) ? "embedded" : "external");
+
+    printf("Minimum free heap size: %" PRIu32 " bytes\n", esp_get_minimum_free_heap_size());
+#endif
+
+    tag = 0x01;
+    length = 9;
+    memset(value, 0, 32*sizeof(char));
+ 
+    switch(chip_info.model) {
+      case CHIP_ESP32:
+        sprintf(value,"ESP32");
+        break;
+      case CHIP_ESP32S2:
+        sprintf(value,"ESP32-S2");
+        break;
+      case CHIP_ESP32S3:
+        sprintf(value,"ESP32-S3");
+        break;
+      case CHIP_ESP32C3:
+        sprintf(value,"ESP32-C3");
+        break;
+      case CHIP_ESP32C2:
+        sprintf(value,"ESP32-C2");
+        break;
+      case CHIP_ESP32C6:
+        sprintf(value,"ESP32-C6");
+        break;
+      case CHIP_ESP32H2:
+        sprintf(value,"ESP32-H2");
+        break;
+      case CHIP_ESP32P4:
+        sprintf(value,"ESP32-P4");
+        break;
+      case CHIP_POSIX_LINUX:
+      default:
+        sprintf(value,"unknown");
+        break;
+    }
+
+    json_data_t json_data = {
+       .tag = tag,
+       .length = length,
+       .value = NULL
+    };
+    
+    json_data.value = malloc( length*sizeof(char)); 
+    memset(json_data.value, 0, length *sizeof(char));
+    memcpy(json_data.value, &value, length);
+
+    cJSON *root = cJSON_CreateObject();
+    cJSON_AddNumberToObject(root, "tag", json_data.tag);
+    cJSON_AddNumberToObject(root, "length", json_data.length);
+    cJSON_AddStringToObject(root, "value", json_data.value);
+
+    char *json_string = cJSON_Print(root);
+    free(json_data.value);
+    cJSON_Delete(root);
+ 
     memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
-    ws_pkt.payload = (uint8_t*)data;
-    ws_pkt.len = sizeof(4*sizeof(char));
+    ws_pkt.payload = (uint8_t*)json_string;
+    ws_pkt.len = strlen(json_string);
     ws_pkt.type = HTTPD_WS_TYPE_TEXT;
-
     httpd_ws_send_frame_async(hd, fd, &ws_pkt);
 
+    free(json_string);
+
+    json_data.tag = 0x02;
+    json_data.length = 3;
+    memset(value, 0, 32*sizeof(char));
+    sprintf(value,"%d.%d", major_rev, minor_rev);
+
+    json_data.value = malloc( length*sizeof(char)); 
+    memset(json_data.value, 0, length *sizeof(char));
+    memcpy(json_data.value, &value, length);
+
+    root = cJSON_CreateObject();
+    cJSON_AddNumberToObject(root, "tag", json_data.tag);
+    cJSON_AddNumberToObject(root, "length", json_data.length);
+    cJSON_AddStringToObject(root, "value", json_data.value);
+
+    json_string = cJSON_Print(root);
+    free(json_data.value);
+    cJSON_Delete(root);
+ 
+    memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
+    ws_pkt.payload = (uint8_t*)json_string;
+    ws_pkt.len = strlen(json_string);
+    ws_pkt.type = HTTPD_WS_TYPE_TEXT;
+    httpd_ws_send_frame_async(hd, fd, &ws_pkt);
+
+    free(json_string);
+
     free(resp_arg);
+
 }
+
 
 // Get all clients and send async message
 static void ws_server_send_data(httpd_handle_t* server)
@@ -346,7 +464,7 @@ static void ws_server_send_data(httpd_handle_t* server)
                     assert(resp_arg != NULL);
                     resp_arg->hd = *server;
                     resp_arg->fd = sock;
-                    if (httpd_queue_work(resp_arg->hd,send_counter, resp_arg) != ESP_OK) {
+                    if (httpd_queue_work(resp_arg->hd,send_chip_info, resp_arg) != ESP_OK) {
                         ESP_LOGE(TAG, "httpd_queue_work failed!");
                         send_messages = false;
                         break;
