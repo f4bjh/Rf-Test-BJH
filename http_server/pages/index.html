@@ -5,14 +5,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" type="text/css" href="style.css" />
+    <script type = "text/javascript" src="script.js"></script>
     <title>Radio Test Bench</title>
 </head>
 
-<body>
- <!--
-	 This does not work. Websocket fail to open...
-	 <script type="text/javascript" src="script.js"></script>
- -->
+<body onload="startWebSocketConnection()" >
  <h1>Rf-Test-BJH</h1>
 
  <div id="container">
@@ -38,8 +35,8 @@
      </nav>
  </div>
 
-     <div id="message-container"></div>
-
+ <div id="message-container"></div>
+ 
 <!--
 <div class='element-name'>chip model:
      <div class='element-value' id="chip_model"></div>
@@ -47,7 +44,6 @@
  <div class='element-name'>chip revision:
      <div class='element-value' id="chip_revision"></div>
  </div>
--->
 
 <script type="text/javascript">  
 	var socket = new WebSocket("ws://192.168.4.1/ws");
@@ -122,6 +118,7 @@
 
 
 </script>
+-->
 
 <br>
 wich partition has booted<br>

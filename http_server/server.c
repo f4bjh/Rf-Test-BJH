@@ -615,8 +615,8 @@ esp_err_t http_server_init(void)
 	httpd_config_t config = HTTPD_DEFAULT_CONFIG();
 
 	//number of files(html, css, and js) to handle in the http server
-	//fix to 15 to have some margin
-	config.max_uri_handlers = 15;
+	//fix to 20 to have some margin
+	config.max_uri_handlers = 20;
 
 	config.max_open_sockets = max_clients;
 	config.global_user_ctx = keep_alive;
