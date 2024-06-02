@@ -18,8 +18,8 @@ $ idf.py set-target esp32s3
 $ idf.py menuconfig  
 $ idf.py build  
 
-$ ~/esp/esp-idf$ openocd -f board/esp32s3-builtin.cfg  
-$ ~/devel/Rf-Test-BJH$ xtensa-esp32-elf-gdb -x ../gdbinit build/Rf-Test-BJH.elf  
+~/esp/esp-idf$ openocd -f board/esp32s3-builtin.cfg  
+~/devel/Rf-Test-BJH$ xtensa-esp32-elf-gdb -x ../gdbinit build/Rf-Test-BJH.elf  
 $ minicom -D /dev/ttyACM0 
  
 ```
