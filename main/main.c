@@ -8,6 +8,7 @@
 
 #include "http_server.h"
 #include "softap.h"
+#include "data.h"
 
 void app_main(void) {
 	esp_err_t ret = nvs_flash_init();
@@ -20,6 +21,7 @@ void app_main(void) {
 	ESP_ERROR_CHECK(ret);
 	ESP_ERROR_CHECK(softap_init());
 	ESP_ERROR_CHECK(http_server_init());
+	ESP_ERROR_CHECK(data_init());
 
 	/* Mark current app as valid */
 	const esp_partition_t *partition = esp_ota_get_running_partition();
