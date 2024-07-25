@@ -9,10 +9,13 @@
 #include "lwip/sockets.h"
 #include "esp_log.h"
 #include "keep_alive.h"
-#include "esp_chip_info.h"
+//#include "esp_chip_info.h"
 
 #include "cJSON.h"
 #include "http_server.h"
+#include "data.h"
+
+extern QueueHandle_t xQueue;
 
 /*
  * HTTP Server
@@ -309,8 +312,25 @@ static void ws_async_send(void *arg)
     httpd_handle_t hd = resp_arg->hd;
     int fd = resp_arg->fd;
     httpd_ws_frame_t ws_pkt;
+    const TickType_t xTicksToWait = pdMS_TO_TICKS( 100 );
+    char *json_string= malloc( 32*sizeof(char));  //!!! to be refined !!! 
+    BaseType_t xStatus;
 
-    recupérer les données de la queue
+    xStatus = xQueueReceive( xQueue, json_string, xTicksToWait );
+
+    if( xStatus == pdPASS )
+    {
+    /* Data was successfully received from the queue, print out the
+       received value. */
+      ESP_LOGI(TAG, "Received = %s", json_string );
+    }
+    else
+    {
+    /* Data was not received from the queue even after waiting for 
+       100ms. This must be an error as the sending tasks are free 
+       running and will be continuously writing to the queue. */
+      ESP_LOGI(TAG, "Could not receive from the queue.\r\n" );
+    }
 
 
     memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
@@ -335,7 +355,11 @@ static void ws_server_send_data(httpd_handle_t* server)
 #if 0    
 	    vTaskDelay(10000 / portTICK_PERIOD_MS);
 #endif
-	    si la queue a été remplie
+
+//	    
+//si la queue a été remplie
+//
+
 
         if (!*server) { // httpd might not have been created by now
             continue;
