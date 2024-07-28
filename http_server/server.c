@@ -11,6 +11,7 @@
 #include "keep_alive.h"
 //#include "esp_chip_info.h"
 
+#include "main.h"
 #include "cJSON.h"
 #include "http_server.h"
 #include "data.h"
@@ -55,6 +56,8 @@ struct async_resp_arg {
     httpd_handle_t hd;
     int fd;
 };
+
+char *json_string; 
 
 static void send_ping(void *arg)
 {
@@ -312,25 +315,6 @@ static void ws_async_send(void *arg)
     httpd_handle_t hd = resp_arg->hd;
     int fd = resp_arg->fd;
     httpd_ws_frame_t ws_pkt;
-    const TickType_t xTicksToWait = pdMS_TO_TICKS( 100 );
-    char *json_string= malloc( 32*sizeof(char));  //!!! to be refined !!! 
-    BaseType_t xStatus;
-
-    xStatus = xQueueReceive( xQueue, json_string, xTicksToWait );
-
-    if( xStatus == pdPASS )
-    {
-    /* Data was successfully received from the queue, print out the
-       received value. */
-      ESP_LOGI(TAG, "Received = %s", json_string );
-    }
-    else
-    {
-    /* Data was not received from the queue even after waiting for 
-       100ms. This must be an error as the sending tasks are free 
-       running and will be continuously writing to the queue. */
-      ESP_LOGI(TAG, "Could not receive from the queue.\r\n" );
-    }
 
 
     memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
@@ -348,6 +332,10 @@ static void ws_async_send(void *arg)
 static void ws_server_send_data(httpd_handle_t* server)
 {
     bool send_messages = true;
+    BaseType_t xStatus;
+    const TickType_t xTicksToWait = pdMS_TO_TICKS( 10000 );
+
+    json_string= malloc( 32*sizeof(char));
 
     // Send async message to all connected clients that use websocket protocol every 10 seconds
     while (send_messages) {
@@ -356,37 +344,42 @@ static void ws_server_send_data(httpd_handle_t* server)
 	    vTaskDelay(10000 / portTICK_PERIOD_MS);
 #endif
 
-//	    
-//si la queue a été remplie
-//
+	    xStatus = xQueueReceive( xQueue, json_string, xTicksToWait );
 
+	    if( xStatus == pdPASS )
+	    {
+	 
+		/* Data was successfully received from the queue, print out the
+		received value. */
+		ESP_LOGI(TAG, "Received = %s", json_string );
 
-        if (!*server) { // httpd might not have been created by now
-            continue;
-        }
-        size_t clients = max_clients;
-        int    client_fds[max_clients];
-        if (httpd_get_client_list(*server, &clients, client_fds) == ESP_OK) {
-            for (size_t i=0; i < clients; ++i) {
-                int sock = client_fds[i];
-                if (httpd_ws_get_fd_info(*server, sock) == HTTPD_WS_CLIENT_WEBSOCKET) {
-                    ESP_LOGI(TAG, "Active client (fd=%d) -> sending async message", sock);
-                    struct async_resp_arg *resp_arg = malloc(sizeof(struct async_resp_arg));
-                    assert(resp_arg != NULL);
-                    resp_arg->hd = *server;
-                    resp_arg->fd = sock;
-                    if (httpd_queue_work(resp_arg->hd,ws_async_send, resp_arg) != ESP_OK) {
-                        ESP_LOGE(TAG, "httpd_queue_work failed!");
-                        send_messages = false;
-                        break;
-                    }
-                }
-            }
-        } else {
-            ESP_LOGE(TAG, "httpd_get_client_list failed!");
-            return;
-        }
-    }	
+		if (!*server) { // httpd might not have been created by now
+		    continue;
+		}
+		size_t clients = max_clients;
+		int    client_fds[max_clients];
+		if (httpd_get_client_list(*server, &clients, client_fds) == ESP_OK) {
+		    for (size_t i=0; i < clients; ++i) {
+			int sock = client_fds[i];
+			if (httpd_ws_get_fd_info(*server, sock) == HTTPD_WS_CLIENT_WEBSOCKET) {
+			    ESP_LOGI(TAG, "Active client (fd=%d) -> sending async message", sock);
+			    struct async_resp_arg *resp_arg = malloc(sizeof(struct async_resp_arg));
+			    assert(resp_arg != NULL);
+			    resp_arg->hd = *server;
+			    resp_arg->fd = sock;
+			    if (httpd_queue_work(resp_arg->hd,ws_async_send, resp_arg) != ESP_OK) {
+				ESP_LOGE(TAG, "httpd_queue_work failed!");
+				send_messages = false;
+				break;
+			    }
+			}
+		    }
+		} else {
+		    ESP_LOGE(TAG, "httpd_get_client_list failed!");
+		    return;
+		}
+	    }
+    }
 
 }
 
@@ -533,6 +526,7 @@ esp_err_t http_server_init(void)
 	config.global_user_ctx = keep_alive;
 	config.open_fn = wss_open_fd;
 	config.close_fn = wss_close_fd;
+	config.task_priority = tskHTTP_SERVER;
 
 	if (httpd_start(&http_server, &config) == ESP_OK) {
 		httpd_register_uri_handler(http_server, &style_get);
