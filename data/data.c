@@ -10,15 +10,12 @@
 #include "cJSON.h"
 #include "data.h"
 
-static const char* TAG = "data";
-
 QueueHandle_t xQueue;
 
 void get_measurement(void *pvParameters)
 {
 
     json_data_t json_data; 
-    BaseType_t xStatus;
     const TickType_t xDelay = 500 / portTICK_PERIOD_MS;
     TickType_t xLastWakeTime=xTaskGetTickCount();
 
@@ -46,16 +43,8 @@ void get_measurement(void *pvParameters)
 		
 		// Send the value to the queue
 		
-		xStatus = xQueueSendToBack( xQueue, json_string, 0 );
+		xQueueSendToBack( xQueue, json_string, 0 );
 
-		if( xStatus != pdPASS )
-		{
-		    /* The send operation could not complete because the queue was full-
-		       this must be an error as the queue should never contain more than
-		       one item! */
-		    ESP_LOGI(TAG, "Could not send to the queue.\r\n" );
-		}
-		
 	    }
 
             vTaskDelayUntil( &xLastWakeTime, xDelay);
