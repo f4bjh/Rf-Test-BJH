@@ -38,7 +38,7 @@ xQueueSendToFront(queue2, (void*)txbuff , (TickType_t)0 );
 
  while(1){  
 
-   printf("data waiting to be read : %d  available spaces: %d \n",uxQueueMessagesWaiting(queue2),uxQueueSpacesAvailable(queue2));
+   printf("FDEC data waiting to be read : %d  available spaces: %d \n",uxQueueMessagesWaiting(queue2),uxQueueSpacesAvailable(queue2));
 
    vTaskDelay(pdMS_TO_TICKS(1000)); }
 }

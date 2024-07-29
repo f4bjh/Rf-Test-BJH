@@ -3,9 +3,13 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
+#include <esp_ota_ops.h>
+#include <nvs_flash.h>
+
+
 #include "data.h"
 
-
+#if 0
 TaskHandle_t myTask1Handle = NULL;
 TaskHandle_t myTask2Handle = NULL;
 QueueHandle_t queue1;
@@ -59,10 +63,29 @@ printf("got a data from queue!  ===  %s \n",rxbuff); }
    vTaskDelay(pdMS_TO_TICKS(1000));
    }
 }
+#endif
 
 void app_main()
 {
-	ESP_ERROR_CHECK(data_init());
+	esp_err_t ret = nvs_flash_init();
+
+	if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+		ESP_ERROR_CHECK(nvs_flash_erase());
+		ret = nvs_flash_init();
+	}
+
+	ESP_ERROR_CHECK(data_init()); 
+
+	/* Mark current app as valid */
+	const esp_partition_t *partition = esp_ota_get_running_partition();
+	printf("Currently running partition: %s\r\n", partition->label);
+
+	esp_ota_img_states_t ota_state;
+	if (esp_ota_get_state_partition(partition, &ota_state) == ESP_OK) {
+		if (ota_state == ESP_OTA_IMG_PENDING_VERIFY) {
+			esp_ota_mark_app_valid_cancel_rollback();
+		}
+	}
 
 #if 0
     xTaskCreate(task1, "task1", 4096, NULL, 10, &myTask1Handle);
