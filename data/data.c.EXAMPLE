@@ -9,7 +9,6 @@
 TaskHandle_t myTask1Handle = NULL;
 TaskHandle_t myTask2Handle = NULL;
 QueueHandle_t queue1;
-QueueHandle_t xQueue;
 
  void task1(void *arg)
 {
@@ -61,12 +60,10 @@ printf("got a data from queue!  ===  %s \n",rxbuff); }
    }
 }
 
-esp_err_t data_init()
+void data_init()
 {
 
     xTaskCreate(task1, "task1", 4096, NULL, 10, &myTask1Handle);
     xTaskCreate(task2, "task2", 4096, NULL, 10, &myTask2Handle);
  //   xTaskCreatePinnedToCore(task2, "task2", 4096, NULL, 10, &myTask2Handle,1);
- //
-    return ESP_OK;
 }
