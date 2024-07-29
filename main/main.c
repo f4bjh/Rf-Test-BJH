@@ -6,8 +6,10 @@
 #include <esp_ota_ops.h>
 #include <nvs_flash.h>
 
-
+#include "http_server.h"
+#include "softap.h"
 #include "data.h"
+
 
 #if 0
 TaskHandle_t myTask1Handle = NULL;
@@ -64,9 +66,7 @@ printf("got a data from queue!  ===  %s \n",rxbuff); }
    }
 }
 #endif
-
-void app_main()
-{
+void app_main(void) {
 	esp_err_t ret = nvs_flash_init();
 
 	if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
@@ -74,7 +74,10 @@ void app_main()
 		ret = nvs_flash_init();
 	}
 
-	ESP_ERROR_CHECK(data_init()); 
+	//ESP_ERROR_CHECK(ret);
+	ESP_ERROR_CHECK(data_init());
+	//ESP_ERROR_CHECK(softap_init());
+	//ESP_ERROR_CHECK(http_server_init());
 
 	/* Mark current app as valid */
 	const esp_partition_t *partition = esp_ota_get_running_partition();
@@ -87,12 +90,6 @@ void app_main()
 		}
 	}
 
-#if 0
-    xTaskCreate(task1, "task1", 4096, NULL, 10, &myTask1Handle);
-    xTaskCreate(task2, "task2", 4096, NULL, 10, &myTask2Handle);
- //   xTaskCreatePinnedToCore(task2, "task2", 4096, NULL, 10, &myTask2Handle,1);
-
-#endif
-
-    while(1) vTaskDelay(10);
+	while(1) vTaskDelay(10);
 }
+
