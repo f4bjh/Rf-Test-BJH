@@ -1,66 +1,74 @@
-#include <string.h>
 
-#include <freertos/FreeRTOS.h>
-#include <esp_http_server.h>
-#include <freertos/task.h>
-#include <esp_ota_ops.h>
-#include "esp_log.h"
-
-#include "main.h"
-#include "cJSON.h"
+#include <stdio.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/queue.h"
 #include "data.h"
 
+
+TaskHandle_t SenderTaskHandle = NULL;
+TaskHandle_t ReceiverTaskHandle = NULL;
+QueueHandle_t xQueueTest;
 QueueHandle_t xQueue;
 
-void get_measurement(void *pvParameters)
+void SenderTask(void *arg)
 {
 
-    json_data_t json_data; 
-    const TickType_t xDelay = 500 / portTICK_PERIOD_MS;
-    TickType_t xLastWakeTime=xTaskGetTickCount();
+  char txbuff[50];
 
-    while (1) {
+    sprintf(txbuff,"hello world! 1");
+    xQueueSend(xQueueTest, (void*)txbuff , (TickType_t)0 );
 
-	    json_data.value = malloc( 32*sizeof(char)); 
-	    memset(json_data.value, 0, 32*sizeof(char));
+    sprintf(txbuff,"hello world! 2");
+    xQueueSend(xQueueTest, (void*)txbuff , (TickType_t)0 );
 
-	    //here we should add a switch case, base on a queue intertask data
-	    //in wich, we choose wich data should be updated
-	    get_chip_info_model(json_data.value, &json_data.length);
+    sprintf(txbuff,"hello world! 3");
+    xQueueSend(xQueueTest, (void*)txbuff , (TickType_t)0 );
 
-	    if (json_data.length !=0) {
+#if 0
+    sprintf(txbuff,"hello world! 4");
+    xQueueSend(xQueueTest, (void*)txbuff , (TickType_t)0 );
+#endif
 
-		json_data.tag = CHIP_INFO_MODEL_DATA_TAG;//should be the same value as in the switch case
+    while(1){  
 
-		cJSON *root = cJSON_CreateObject();
-		cJSON_AddNumberToObject(root, "tag", json_data.tag);
-		cJSON_AddNumberToObject(root, "length", json_data.length);
-		cJSON_AddStringToObject(root, "value", json_data.value);
+      printf("SenderTask: data sent (to be read=%d, available=%d)\n",uxQueueMessagesWaiting(xQueueTest),uxQueueSpacesAvailable(xQueueTest));
 
-		char *json_string = cJSON_Print(root);
-		free(json_data.value);
-		cJSON_Delete(root);
-		
-		// Send the value to the queue
-		
-		xQueueSendToBack( xQueue, json_string, 0 );
-
-	    }
-
-            vTaskDelayUntil( &xLastWakeTime, xDelay);
-
-     }
+      vTaskDelay(pdMS_TO_TICKS(100)); 
+    }
 }
 
-esp_err_t data_init(void)
+void ReceiverTask(void *arg)
 {
-    //create the Queue communication beetwen task0 (http server) and task1 (data fetch management )
-    //5 is the number of element in the queue
-    //so it is the number of measures that can handled in a time (in 500 ms sampling of get_measurement)
-     xQueue = xQueueCreate( 5, sizeof( json_data_t ) );
+  char rxbuff[50];
 
-    //create task1 on cpu0 get_measurment
-    xTaskCreate( get_measurement, "GetMeasurement", 1000, NULL, tskGET_MEASURMENT, NULL );
+    while(1){ 
 
-    return xQueue == NULL ? ESP_FAIL : ESP_OK;
+      //if(xQueuePeek(xQueueTest, &(rxbuff) , (TickType_t)5 ))
+      //
+
+      if(xQueueReceive(xQueueTest, &(rxbuff) , (TickType_t)5 )) 
+        printf("ReceiverTask: (%p) got a data from queue - %s\n",xQueueTest, rxbuff);
+      else
+	printf("ReceiverTask: (%p) no data in queue found\n", xQueueTest);
+    
+      vTaskDelay(pdMS_TO_TICKS(1000));
+   }
+
+}
+
+esp_err_t data_init()
+{
+    xQueueTest = xQueueCreate(5, sizeof(char[50]));
+    if (xQueueTest == NULL) {
+        printf("Failed to create xQueueTest\n");
+        return ESP_FAIL;
+    }
+
+    xTaskCreate(ReceiverTask, "ReceiverTask", 4096, NULL, 10, &ReceiverTaskHandle);
+    xTaskCreate(SenderTask, "SenderTask", 4096, NULL, 10, &SenderTaskHandle);
+ 
+    //xTaskCreatePinnedToCore(task4, "task4", 4096, NULL, 10, &myTask2Handle,1);
+
+    return ESP_OK;
 }

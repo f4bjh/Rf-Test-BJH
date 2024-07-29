@@ -332,8 +332,9 @@ static void ws_async_send(void *arg)
 static void ws_server_send_data(httpd_handle_t* server)
 {
     bool send_messages = true;
-    BaseType_t xStatus;
+//    BaseType_t xStatus;
     const TickType_t xTicksToWait = pdMS_TO_TICKS( 10000 );
+    char no_data[]="no data";
 
     json_string= malloc( 32*sizeof(char));
 
@@ -344,10 +345,16 @@ static void ws_server_send_data(httpd_handle_t* server)
 	    vTaskDelay(10000 / portTICK_PERIOD_MS);
 #endif
 
-	    xStatus = xQueueReceive( xQueue, json_string, xTicksToWait );
+	    if (xQueue != NULL) 
+		  xQueueReceive( xQueue, json_string, xTicksToWait );
+	    else 
+		  memcpy(json_string, no_data, strlen(no_data) + 1); 
 
-	    if( xStatus == pdPASS )
-	    {
+
+
+
+//	    if( xStatus == pdPASS )
+//	    {
 	 
 		/* Data was successfully received from the queue, print out the
 		received value. */
@@ -378,7 +385,7 @@ static void ws_server_send_data(httpd_handle_t* server)
 		    ESP_LOGE(TAG, "httpd_get_client_list failed!");
 		    return;
 		}
-	    }
+//	    }
     }
 
 }
