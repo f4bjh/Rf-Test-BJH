@@ -62,10 +62,14 @@ printf("got a data from queue!  ===  %s \n",rxbuff); }
 
 void app_main()
 {
+	ESP_ERROR_CHECK(data_init());
 
+#if 0
     xTaskCreate(task1, "task1", 4096, NULL, 10, &myTask1Handle);
     xTaskCreate(task2, "task2", 4096, NULL, 10, &myTask2Handle);
  //   xTaskCreatePinnedToCore(task2, "task2", 4096, NULL, 10, &myTask2Handle,1);
- //
+
+#endif
+
     while(1) vTaskDelay(10);
 }
