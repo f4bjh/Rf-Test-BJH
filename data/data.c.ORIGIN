@@ -57,10 +57,15 @@ esp_err_t data_init(void)
     //create the Queue communication beetwen task0 (http server) and task1 (data fetch management )
     //5 is the number of element in the queue
     //so it is the number of measures that can handled in a time (in 500 ms sampling of get_measurement)
-     xQueue = xQueueCreate( 5, sizeof( json_data_t ) );
+    xQueue = xQueueCreate( 5, sizeof( json_data_t ) );
+    if (xQueue == NULL) {
+        printf("Failed to create xQueue\n");
+        return ESP_FAIL;
+    }
+
 
     //create task1 on cpu0 get_measurment
-    xTaskCreate( get_measurement, "GetMeasurement", 1000, NULL, tskGET_MEASURMENT, NULL );
+    xTaskCreate( get_measurement, "GetMeasurement", 4096, NULL, tskGET_MEASURMENT, NULL );
 
     return xQueue == NULL ? ESP_FAIL : ESP_OK;
 }

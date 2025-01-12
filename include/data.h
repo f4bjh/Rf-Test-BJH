@@ -7,7 +7,7 @@ typedef enum {
 typedef struct json_data_s {
   T_DATA_TAG tag;
   char length;
-  char *value;  
+  char value[32];  
 } json_data_t;
 
 esp_err_t data_init(void);

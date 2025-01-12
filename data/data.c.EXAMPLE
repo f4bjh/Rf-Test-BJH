@@ -6,64 +6,69 @@
 #include "data.h"
 
 
-TaskHandle_t myTask1Handle = NULL;
-TaskHandle_t myTask2Handle = NULL;
-QueueHandle_t queue1;
+TaskHandle_t SenderTaskHandle = NULL;
+TaskHandle_t ReceiverTaskHandle = NULL;
+QueueHandle_t xQueueTest;
+QueueHandle_t xQueue;
 
- void task1(void *arg)
+void SenderTask(void *arg)
 {
 
-char txbuff[50];
+  char txbuff[50];
 
-queue1= xQueueCreate(5, sizeof(txbuff));
+    sprintf(txbuff,"hello world! 1");
+    xQueueSend(xQueueTest, (void*)txbuff , (TickType_t)0 );
 
- if( queue1 == 0 )
- {
-    printf("failed to create queue1= %p \n",queue1); // Failed to create the queue.
+    sprintf(txbuff,"hello world! 2");
+    xQueueSend(xQueueTest, (void*)txbuff , (TickType_t)0 );
 
- }
+    sprintf(txbuff,"hello world! 3");
+    xQueueSend(xQueueTest, (void*)txbuff , (TickType_t)0 );
 
+#if 0
+    sprintf(txbuff,"hello world! 4");
+    xQueueSend(xQueueTest, (void*)txbuff , (TickType_t)0 );
+#endif
 
-sprintf(txbuff,"hello world! 1");
-xQueueSend(queue1, (void*)txbuff , (TickType_t)0 );
+    while(1){  
 
+      printf("SenderTask: data sent (to be read=%d, available=%d)\n",uxQueueMessagesWaiting(xQueueTest),uxQueueSpacesAvailable(xQueueTest));
 
-sprintf(txbuff,"hello world! 2");
-xQueueSend(queue1, (void*)txbuff , (TickType_t)0 );
-
-
-sprintf(txbuff,"hello world! 3");
-xQueueSendToFront(queue1, (void*)txbuff , (TickType_t)0 );
-
- while(1){  
-
-   printf("data waiting to be read : %d  available spaces: %d \n",uxQueueMessagesWaiting(queue1),uxQueueSpacesAvailable(queue1));
-
-   vTaskDelay(pdMS_TO_TICKS(1000)); }
+      vTaskDelay(pdMS_TO_TICKS(100)); 
+    }
 }
 
- void task2(void *arg)
+void ReceiverTask(void *arg)
 {
-char rxbuff[50];
-while(1)
+  char rxbuff[50];
 
-  { 
-//if(xQueuePeek(queue1, &(rxbuff) , (TickType_t)5 ))
-if(xQueueReceive(queue1, &(rxbuff) , (TickType_t)5 ))
-{ 
-printf("got a data from queue!  ===  %s \n",rxbuff); }
+    while(1){ 
 
+      //if(xQueuePeek(xQueueTest, &(rxbuff) , (TickType_t)5 ))
+      //
 
-
-
-   vTaskDelay(pdMS_TO_TICKS(1000));
+      if(xQueueReceive(xQueueTest, &(rxbuff) , (TickType_t)5 )) 
+        printf("ReceiverTask: (%p) got a data from queue - %s\n",xQueueTest, rxbuff);
+      else
+	printf("ReceiverTask: (%p) no data in queue found\n", xQueueTest);
+    
+      vTaskDelay(pdMS_TO_TICKS(1000));
    }
+
 }
 
-void data_init()
+esp_err_t data_init()
 {
+    xQueueTest = xQueueCreate(5, sizeof(char[50]));
+    if (xQueueTest == NULL) {
+        printf("Failed to create xQueueTest\n");
+        return ESP_FAIL;
+    }
 
-    xTaskCreate(task1, "task1", 4096, NULL, 10, &myTask1Handle);
-    xTaskCreate(task2, "task2", 4096, NULL, 10, &myTask2Handle);
- //   xTaskCreatePinnedToCore(task2, "task2", 4096, NULL, 10, &myTask2Handle,1);
+    xTaskCreate(ReceiverTask, "ReceiverTask", 4096, NULL, 10, &ReceiverTaskHandle);
+    xTaskCreate(SenderTask, "SenderTask", 4096, NULL, 10, &SenderTaskHandle);
+ 
+    //xTaskCreatePinnedToCore(task4, "task4", 4096, NULL, 10, &myTask2Handle,1);
+
+    return ESP_OK;
 }

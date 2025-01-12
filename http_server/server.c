@@ -316,11 +316,11 @@ static void ws_async_send(void *arg)
     int fd = resp_arg->fd;
     httpd_ws_frame_t ws_pkt;
 
-
     memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
     ws_pkt.payload = (uint8_t*)json_string;
     ws_pkt.len = strlen(json_string);
     ws_pkt.type = HTTPD_WS_TYPE_TEXT;
+    ESP_LOGI(TAG, "send data to ws client: \n%s\n",ws_pkt.payload);
     httpd_ws_send_frame_async(hd, fd, &ws_pkt);
  
     free(resp_arg);
@@ -332,34 +332,32 @@ static void ws_async_send(void *arg)
 static void ws_server_send_data(httpd_handle_t* server)
 {
     bool send_messages = true;
-//    BaseType_t xStatus;
+    BaseType_t xStatus;
     const TickType_t xTicksToWait = pdMS_TO_TICKS( 10000 );
-    char no_data[]="no data";
+    char no_data[]="no measurement data";
 
-    json_string= malloc( 32*sizeof(char));
+    json_string= malloc( 1024*sizeof(char));
 
     // Send async message to all connected clients that use websocket protocol every 10 seconds
     while (send_messages) {
 
-#if 0    
+//#if 0    
 	    vTaskDelay(10000 / portTICK_PERIOD_MS);
-#endif
+//#endif
 
-	    if (xQueue != NULL) 
-		  xQueueReceive( xQueue, json_string, xTicksToWait );
-	    else 
-		  memcpy(json_string, no_data, strlen(no_data) + 1); 
+	    memcpy(json_string, no_data, strlen(no_data) + 1); 
 
-
-
-
-//	    if( xStatus == pdPASS )
-//	    {
+	    if (xQueue != NULL)
+              xStatus = xQueueReceive(xQueue, json_string , xTicksToWait ); 
+	    else {
+	      ESP_LOGI(TAG,"xQueue not created\n"); 	    
+	      continue;
+	    }
+ 
+	    if( xStatus == pdPASS ) {
 	 
-		/* Data was successfully received from the queue, print out the
-		received value. */
-		ESP_LOGI(TAG, "Received = %s", json_string );
-
+                ESP_LOGI(TAG, "received in xQueue(%p): \n%s\n",xQueue, json_string);
+ 
 		if (!*server) { // httpd might not have been created by now
 		    continue;
 		}
@@ -385,7 +383,10 @@ static void ws_server_send_data(httpd_handle_t* server)
 		    ESP_LOGE(TAG, "httpd_get_client_list failed!");
 		    return;
 		}
-//	    }
+           }
+	   else
+		ESP_LOGI(TAG, "no data in xQueue(%p) found\n", xQueue);
+
     }
 
 }
