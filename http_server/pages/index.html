@@ -78,6 +78,10 @@
 		// Filtrer les données en fonction de la page active
 		switch (pageId) {
 		case '':
+			if (json_data.tag === 00) {
+					chip_model = `chip_model : unable to read chip info<br>`;
+					chip_revision = `chip_revision : unable to read chip info<br>`;
+			}	
 			if (json_data.tag === 01) {
 					chip_model = `chip_model : unknown<br>`;
 					if (json_data.length !== 0) {

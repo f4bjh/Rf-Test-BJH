@@ -14,6 +14,34 @@ static const char* TAG = "data_mgt";
 
 QueueHandle_t xQueue;
 
+void set_json_data (cJSON *root, json_data_t *json_data)
+{
+
+    cJSON_AddNumberToObject(root, "t", json_data->tag);
+    cJSON_AddNumberToObject(root, "l", json_data->length);
+    cJSON_AddStringToObject(root, "v", json_data->value);
+
+}
+
+void set_default_json_string(char **default_json_string)
+{
+
+    json_data_t json_no_data = {
+       .tag = 0,
+       .length = 7,
+       .value = "no data"
+    };
+
+    *default_json_string= malloc( 64*sizeof(char));
+
+    cJSON *root = cJSON_CreateObject();
+    set_json_data(root,&json_no_data);
+
+    *default_json_string = cJSON_Print(root);
+    cJSON_Delete(root);
+
+}
+
 void get_measurement(void *pvParameters)
 {
 
@@ -35,17 +63,15 @@ void get_measurement(void *pvParameters)
 		json_data.tag = CHIP_INFO_MODEL_DATA_TAG;//should be the same value as in the switch case
 
 		cJSON *root = cJSON_CreateObject();
-		cJSON_AddNumberToObject(root, "tag", json_data.tag);
-		cJSON_AddNumberToObject(root, "length", json_data.length);
-		cJSON_AddStringToObject(root, "value", json_data.value);
 
-		char *json_string = cJSON_Print(root);
-		//free(json_data.value);
+		set_json_data(root,&json_data);
+
+		char *json_string_send = cJSON_Print(root);
 		cJSON_Delete(root);
 		
 		// Send the value to the queue
-		ESP_LOGI(TAG, "get_measurement send json: \n%s\n", json_string);
-		xQueueSend( xQueue, json_string, 0 );
+		//ESP_LOGI(TAG, "get_measurement place measures in queue: \n%s\n", json_string_send);
+		xQueueSend( xQueue, json_string_send, 0 );
 
 	    }
 
@@ -83,8 +109,8 @@ esp_err_t data_init(void)
 {
     //create the Queue communication beetwen task0 (http server) and task1 (data fetch management )
     //5 is the number of element in the queue
-    //so it is the number of measures that can handled in a time (in 500 ms sampling of get_measurement)
-    xQueue = xQueueCreate( 5, sizeof( json_data_t ) );
+    //so it is the number of measures (type json_data) that can handled in a time (in 500 ms sampling of get_measurement) + 3 char for "t", "l", and "v"
+    xQueue = xQueueCreate( 5, 3 + sizeof( json_data_t ) ); 
     if (xQueue == NULL) {
         printf("Failed to create xQueue\n");
         return ESP_FAIL;

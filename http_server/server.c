@@ -57,7 +57,7 @@ struct async_resp_arg {
     int fd;
 };
 
-char *json_string; 
+char *json_string_rcv; 
 
 static void send_ping(void *arg)
 {
@@ -317,76 +317,65 @@ static void ws_async_send(void *arg)
     httpd_ws_frame_t ws_pkt;
 
     memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
-    ws_pkt.payload = (uint8_t*)json_string;
-    ws_pkt.len = strlen(json_string);
+    ws_pkt.payload = (uint8_t*)json_string_rcv;
+    ws_pkt.len = strlen(json_string_rcv);
     ws_pkt.type = HTTPD_WS_TYPE_TEXT;
-    ESP_LOGI(TAG, "send data to ws client: \n%s\n",ws_pkt.payload);
+    ESP_LOGI(TAG, "send (%p) %d bytes of data to ws client: \n%s\n",json_string_rcv, ws_pkt.len, ws_pkt.payload);
     httpd_ws_send_frame_async(hd, fd, &ws_pkt);
  
     free(resp_arg);
 
 }
 
-
 // Get all clients and send async message
 static void ws_server_send_data(httpd_handle_t* server)
 {
     bool send_messages = true;
-    BaseType_t xStatus;
     const TickType_t xTicksToWait = pdMS_TO_TICKS( 10000 );
-    char no_data[]="no measurement data";
-
-    json_string= malloc( 1024*sizeof(char));
 
     // Send async message to all connected clients that use websocket protocol every 10 seconds
     while (send_messages) {
 
-//#if 0    
-	    vTaskDelay(10000 / portTICK_PERIOD_MS);
-//#endif
+	vTaskDelay(10000 / portTICK_PERIOD_MS);
 
-	    memcpy(json_string, no_data, strlen(no_data) + 1); 
+	set_default_json_string(&json_string_rcv); 
 
-	    if (xQueue != NULL)
-              xStatus = xQueueReceive(xQueue, json_string , xTicksToWait ); 
-	    else {
-	      ESP_LOGI(TAG,"xQueue not created\n"); 	    
-	      continue;
-	    }
+	if (xQueue != NULL){
+          if(xQueueReceive(xQueue, json_string_rcv , xTicksToWait )) {
+		ESP_LOGI(TAG,"data in xQueue(%p): %d bytes(%p)",xQueue, strlen(json_string_rcv),json_string_rcv);   
+	  	ESP_LOGI(TAG,"%s",json_string_rcv);
+	  }
+	} else {
+	  ESP_LOGI(TAG,"xQueue not created\n"); 	    
+	  continue;
+	}
  
-	    if( xStatus == pdPASS ) {
-	 
-                ESP_LOGI(TAG, "received in xQueue(%p): \n%s\n",xQueue, json_string);
- 
-		if (!*server) { // httpd might not have been created by now
-		    continue;
-		}
-		size_t clients = max_clients;
-		int    client_fds[max_clients];
-		if (httpd_get_client_list(*server, &clients, client_fds) == ESP_OK) {
-		    for (size_t i=0; i < clients; ++i) {
-			int sock = client_fds[i];
-			if (httpd_ws_get_fd_info(*server, sock) == HTTPD_WS_CLIENT_WEBSOCKET) {
-			    ESP_LOGI(TAG, "Active client (fd=%d) -> sending async message", sock);
-			    struct async_resp_arg *resp_arg = malloc(sizeof(struct async_resp_arg));
-			    assert(resp_arg != NULL);
-			    resp_arg->hd = *server;
-			    resp_arg->fd = sock;
-			    if (httpd_queue_work(resp_arg->hd,ws_async_send, resp_arg) != ESP_OK) {
-				ESP_LOGE(TAG, "httpd_queue_work failed!");
-				send_messages = false;
-				break;
-			    }
-			}
+	if (!*server) { // httpd might not have been created by now
+	    continue;
+	}
+	size_t clients = max_clients;
+	int    client_fds[max_clients];
+	if (httpd_get_client_list(*server, &clients, client_fds) == ESP_OK) {
+	    for (size_t i=0; i < clients; ++i) {
+		int sock = client_fds[i];
+		if (httpd_ws_get_fd_info(*server, sock) == HTTPD_WS_CLIENT_WEBSOCKET) {
+		    ESP_LOGI(TAG, "Active client (fd=%d) -> sending async message", sock);
+		    struct async_resp_arg *resp_arg = malloc(sizeof(struct async_resp_arg));
+		    assert(resp_arg != NULL);
+		    resp_arg->hd = *server;
+		    resp_arg->fd = sock;
+		    if (httpd_queue_work(resp_arg->hd,ws_async_send, resp_arg) != ESP_OK) {
+			ESP_LOGE(TAG, "httpd_queue_work failed!");
+			send_messages = false;
+			break;
 		    }
-		} else {
-		    ESP_LOGE(TAG, "httpd_get_client_list failed!");
-		    return;
 		}
-           }
-	   else
-		ESP_LOGI(TAG, "no data in xQueue(%p) found\n", xQueue);
-
+	    }
+	} else {
+	    ESP_LOGE(TAG, "httpd_get_client_list failed!");
+	    return;
+	}
+	free(json_string_rcv);
     }
 
 }
