@@ -57,7 +57,7 @@ struct async_resp_arg {
     int fd;
 };
 
-char *json_string_rcv; 
+//char *json_string_rcv; 
 
 static void send_ping(void *arg)
 {
@@ -315,15 +315,29 @@ static void ws_async_send(void *arg)
     httpd_handle_t hd = resp_arg->hd;
     int fd = resp_arg->fd;
     httpd_ws_frame_t ws_pkt;
+    char *json_string_rcv;
+    const TickType_t xTicksToWait = pdMS_TO_TICKS( 10000 );
 
-    memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
-    ws_pkt.payload = (uint8_t*)json_string_rcv;
-    ws_pkt.len = strlen(json_string_rcv);
-    ws_pkt.type = HTTPD_WS_TYPE_TEXT;
-    ESP_LOGI(TAG, "send (%p) %d bytes of data to ws client: \n%s\n",json_string_rcv, ws_pkt.len, ws_pkt.payload);
-    httpd_ws_send_frame_async(hd, fd, &ws_pkt);
+    if (xQueue != NULL){
+     
+      set_default_json_string(&json_string_rcv); 
+
+      if(xQueueReceive(xQueue, json_string_rcv , xTicksToWait )) {
+
+        memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
+        ws_pkt.payload = (uint8_t*)json_string_rcv;
+        ws_pkt.len = strlen(json_string_rcv);
+        ws_pkt.type = HTTPD_WS_TYPE_TEXT;
+        ESP_LOGI(TAG, "send (%p) %d bytes of data to ws client: \n%s\n",json_string_rcv, ws_pkt.len, ws_pkt.payload);
+        httpd_ws_send_frame_async(hd, fd, &ws_pkt);
  
-    free(resp_arg);
+        free(resp_arg);
+      }
+      free(json_string_rcv);
+
+    } else {
+      ESP_LOGI(TAG,"FATAL : xQueue measurement not created\n"); 	    
+    }
 
 }
 
@@ -331,25 +345,13 @@ static void ws_async_send(void *arg)
 static void ws_server_send_data(httpd_handle_t* server)
 {
     bool send_messages = true;
-    const TickType_t xTicksToWait = pdMS_TO_TICKS( 10000 );
+    //const TickType_t xTicksToWait = pdMS_TO_TICKS( 10000 );
 
     // Send async message to all connected clients that use websocket protocol every 10 seconds
     while (send_messages) {
 
 	vTaskDelay(10000 / portTICK_PERIOD_MS);
 
-	set_default_json_string(&json_string_rcv); 
-
-	if (xQueue != NULL){
-          if(xQueueReceive(xQueue, json_string_rcv , xTicksToWait )) {
-		ESP_LOGI(TAG,"data in xQueue(%p): %d bytes(%p)",xQueue, strlen(json_string_rcv),json_string_rcv);   
-	  	ESP_LOGI(TAG,"%s",json_string_rcv);
-	  }
-	} else {
-	  ESP_LOGI(TAG,"xQueue not created\n"); 	    
-	  continue;
-	}
- 
 	if (!*server) { // httpd might not have been created by now
 	    continue;
 	}
@@ -375,7 +377,6 @@ static void ws_server_send_data(httpd_handle_t* server)
 	    ESP_LOGE(TAG, "httpd_get_client_list failed!");
 	    return;
 	}
-	free(json_string_rcv);
     }
 
 }
