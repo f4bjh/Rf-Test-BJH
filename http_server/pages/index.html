@@ -76,20 +76,20 @@
 		const pageId = url.split('/').pop(); // Supposons que l'ID de la page est le dernier segment de l'URL
 
 		// Filtrer les données en fonction de la page active
+		chip_model = `unknown<br>`;
+  	        chip_revision = `unknown<br>`;
 		switch (pageId) {
 		case '':
 			if (json_data.t === 00) {
-					chip_model = `chip_model : unable to read chip info<br>`;
-					chip_revision = `chip_revision : unable to read chip info<br>`;
+					chip_model = `unable to read chip info<br>`;
+					chip_revision = `unable to read chip info<br>`;
 			}	
 			if (json_data.t === 01) {
-					chip_model = `chip_model : unknown<br>`;
 					if (json_data.l !== 0) {
 						chip_model = `${json_data.v}`;
 					}
 	      		}
 			if (json_data.t === 02) {
-					chip_revision = `chip_revision : unknown<br>`;
 					if (json_data.l !== 0) {
 						chip_revision = `${json_data.v}`;
 					}

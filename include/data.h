@@ -12,4 +12,5 @@ typedef struct json_data_s {
 
 void set_default_json_string(char **default_json_string);
 esp_err_t data_init(void);
-void get_chip_info_model(char *data, char *length);
+void get_chip_info_model(char *data);
+void get_chip_info_revision(char *data);

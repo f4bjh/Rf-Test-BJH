@@ -9,7 +9,6 @@
 #include "lwip/sockets.h"
 #include "esp_log.h"
 #include "keep_alive.h"
-//#include "esp_chip_info.h"
 
 #include "main.h"
 #include "cJSON.h"
@@ -56,8 +55,6 @@ struct async_resp_arg {
     httpd_handle_t hd;
     int fd;
 };
-
-//char *json_string_rcv; 
 
 static void send_ping(void *arg)
 {
@@ -315,14 +312,14 @@ static void ws_async_send(void *arg)
     httpd_handle_t hd = resp_arg->hd;
     int fd = resp_arg->fd;
     httpd_ws_frame_t ws_pkt;
-    char *json_string_rcv;
-    const TickType_t xTicksToWait = pdMS_TO_TICKS( 10000 );
-
+    char json_string_rcv[5 * ((1 + 9 + 9 + 42 + 1) *sizeof(char))];
+    const TickType_t xTicksToWait = pdMS_TO_TICKS( 100 ); //this function is called every 500ms once a websocket connection is established
+							  // wait 100ms for a msg in the Queue
+							  // else, return
+							  
     if (xQueue != NULL){
      
-      set_default_json_string(&json_string_rcv); 
-
-      if(xQueueReceive(xQueue, json_string_rcv , xTicksToWait )) {
+      if(xQueueReceive(xQueue, json_string_rcv , xTicksToWait ) == pdTRUE) {
 
         memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
         ws_pkt.payload = (uint8_t*)json_string_rcv;
@@ -331,13 +328,14 @@ static void ws_async_send(void *arg)
         ESP_LOGI(TAG, "send (%p) %d bytes of data to ws client: \n%s\n",json_string_rcv, ws_pkt.len, ws_pkt.payload);
         httpd_ws_send_frame_async(hd, fd, &ws_pkt);
  
-        free(resp_arg);
       }
-      free(json_string_rcv);
 
     } else {
       ESP_LOGI(TAG,"FATAL : xQueue measurement not created\n"); 	    
     }
+
+    assert(resp_arg!=NULL);
+    free(resp_arg);
 
 }
 
@@ -350,7 +348,7 @@ static void ws_server_send_data(httpd_handle_t* server)
     // Send async message to all connected clients that use websocket protocol every 10 seconds
     while (send_messages) {
 
-	vTaskDelay(10000 / portTICK_PERIOD_MS);
+	vTaskDelay(1000 / portTICK_PERIOD_MS);
 
 	if (!*server) { // httpd might not have been created by now
 	    continue;

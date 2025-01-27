@@ -23,44 +23,45 @@ void set_json_data (cJSON *root, json_data_t *json_data)
 
 }
 
-void set_default_json_string(char **default_json_string)
-{
-
-    json_data_t json_no_data = {
-       .tag = 0,
-       .length = 7,
-       .value = "no data"
-    };
-
-    *default_json_string= malloc( 64*sizeof(char));
-
-    cJSON *root = cJSON_CreateObject();
-    set_json_data(root,&json_no_data);
-
-    *default_json_string = cJSON_Print(root);
-    cJSON_Delete(root);
-
-}
-
 void get_measurement(void *pvParameters)
 {
 
     json_data_t json_data; 
-    const TickType_t xDelay = 500 / portTICK_PERIOD_MS;
+    const TickType_t xDelay = 500 / portTICK_PERIOD_MS; //pdMS_TO_TICKS( 500ms );
     TickType_t xLastWakeTime=xTaskGetTickCount();
 
     while (1) {
 
-	    //json_data.value = malloc( 32*sizeof(char)); 
 	    memset(json_data.value, 0, 32*sizeof(char));
 
 	    //here we should add a switch case, base on a queue intertask data
 	    //in wich, we choose wich data should be updated
-	    get_chip_info_model(json_data.value, &json_data.length);
+	    get_chip_info_model(json_data.value);
+	    json_data.length=strlen(json_data.value);
 
 	    if (json_data.length !=0) {
 
 		json_data.tag = CHIP_INFO_MODEL_DATA_TAG;//should be the same value as in the switch case
+
+		cJSON *root = cJSON_CreateObject();
+
+		set_json_data(root,&json_data);
+
+		char *json_string_send = cJSON_Print(root);
+		cJSON_Delete(root);
+		
+		// Send the value to the queue
+		//ESP_LOGI(TAG, "get_measurement place measures in queue: \n%s\n", json_string_send);
+		xQueueSend( xQueue, json_string_send, 0 );
+
+	    }
+
+	    get_chip_info_revision(json_data.value);
+            json_data.length=strlen(json_data.value);
+	    
+	    if (json_data.length !=0) {
+
+		json_data.tag = CHIP_INFO_REVISION_DATA_TAG;//should be the same value as in the switch case
 
 		cJSON *root = cJSON_CreateObject();
 
