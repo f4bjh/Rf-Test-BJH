@@ -109,8 +109,13 @@ esp_err_t data_init(void)
 {
     //create the Queue communication beetwen task0 (http server) and task1 (data fetch management )
     //5 is the number of element in the queue
-    //so it is the number of measures (type json_data) that can handled in a time (in 500 ms sampling of get_measurement) + 3 char for "t", "l", and "v"
-    xQueue = xQueueCreate( 5, 3 + sizeof( json_data_t ) ); 
+    //so it is the number of measures (type json_data) that can handled in a time (in 500 ms sampling of get_measurement) 
+    // + 1 char for {
+    // + 3 char for \n\t\" + 1 char for "t" + 5 char for \":\t<tag_value>,
+    // + 3 char for \n\t\" + 1 char for "l" + 5 char for \":\t<length_value>,
+    // + 3 char for \n\t\" + 1 char for "v" + (4+32+2) char for \":\t\"<string_value[32]>\"\n
+    // + 1 char for }
+    xQueue = xQueueCreate( 5, (1 + 9 + 9 + 42 + 1) * sizeof( char ) ); 
     if (xQueue == NULL) {
         printf("Failed to create xQueue\n");
         return ESP_FAIL;
