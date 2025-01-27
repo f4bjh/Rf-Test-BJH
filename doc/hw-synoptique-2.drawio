@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2025-01-27T16:03:11.241Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36" etag="cURSV1TaWDP0i39abwTT" version="24.4.4" type="device">
+<mxfile host="app.diagrams.net" modified="2025-01-27T16:09:08.913Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36" etag="fVwFEvc_0ClWUOLhe7WI" version="24.4.4" type="device">
   <diagram name="Page-1" id="gDf9zseBwsDJ5p1qlzxx">
     <mxGraphModel dx="1728" dy="950" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
@@ -68,7 +68,7 @@
           <mxGeometry x="10" y="15.555555555555555" width="60" height="23.333333333333332" as="geometry" />
         </mxCell>
         <mxCell id="w8vvWGGkFElnzvA0du0P-27" value="&lt;i&gt;wifi&lt;/i&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
-          <mxGeometry x="747" y="555" width="60" height="30" as="geometry" />
+          <mxGeometry x="214" y="580" width="60" height="30" as="geometry" />
         </mxCell>
         <mxCell id="w8vvWGGkFElnzvA0du0P-31" value="Rf-Test-BJH" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="684" y="410" width="70" height="30" as="geometry" />
@@ -190,7 +190,7 @@
         <mxCell id="w8vvWGGkFElnzvA0du0P-52" value="&lt;div style=&quot;&quot;&gt;&lt;u style=&quot;background-color: initial;&quot;&gt;&lt;b&gt;RF powermeter :&amp;nbsp;&lt;/b&gt;&lt;/u&gt;&lt;/div&gt;&lt;div style=&quot;text-align: center;&quot;&gt;&lt;u style=&quot;background-color: initial;&quot;&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/u&gt;&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;Expected characteristics :&amp;nbsp;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;- Pin = [-70dBm; 10dBm]&lt;/div&gt;&lt;div&gt;- Pout step = 0,1dB&lt;/div&gt;&lt;div&gt;- Frequency = 0-5GHz&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;TBD :&amp;nbsp;&lt;/div&gt;&lt;div&gt;- need RF front-end ?&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="360" y="800" width="230" height="170" as="geometry" />
         </mxCell>
-        <mxCell id="w8vvWGGkFElnzvA0du0P-53" value="&lt;div style=&quot;&quot;&gt;&lt;u style=&quot;background-color: initial;&quot;&gt;&lt;b&gt;ESP32 :&amp;nbsp;&lt;/b&gt;&lt;/u&gt;&lt;/div&gt;&lt;div style=&quot;text-align: center;&quot;&gt;&lt;u style=&quot;background-color: initial;&quot;&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/u&gt;&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;Expected characteristics :&amp;nbsp;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;- web server&lt;/div&gt;&lt;div&gt;- very low measurement latency&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+        <mxCell id="w8vvWGGkFElnzvA0du0P-53" value="&lt;div style=&quot;&quot;&gt;&lt;u style=&quot;background-color: initial;&quot;&gt;&lt;b&gt;ESP32 :&amp;nbsp;&lt;/b&gt;&lt;/u&gt;&lt;/div&gt;&lt;div style=&quot;text-align: center;&quot;&gt;&lt;u style=&quot;background-color: initial;&quot;&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/u&gt;&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;Expected characteristics :&amp;nbsp;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;- web server&lt;/div&gt;&lt;div&gt;- very low measurement laten&lt;span style=&quot;background-color: initial;&quot;&gt;cy&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;- integrated ADC : 12 bits&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="530" y="790" width="230" height="170" as="geometry" />
         </mxCell>
         <mxCell id="w8vvWGGkFElnzvA0du0P-54" value="&lt;div style=&quot;&quot;&gt;&lt;u style=&quot;background-color: initial;&quot;&gt;&lt;b&gt;Power supply :&amp;nbsp;&lt;/b&gt;&lt;/u&gt;&lt;/div&gt;&lt;div style=&quot;text-align: center;&quot;&gt;&lt;u style=&quot;background-color: initial;&quot;&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/u&gt;&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;Expected characteristics :&amp;nbsp;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;- input voltage : 220V/50z&lt;/div&gt;&lt;div&gt;-low consumption (TBD)&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
@@ -297,12 +297,6 @@
         </mxCell>
         <mxCell id="GlcShB_20lAepsoM1b_u-21" value="UART" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
           <mxGeometry x="454" y="220" width="60" height="30" as="geometry" />
-        </mxCell>
-        <mxCell id="GlcShB_20lAepsoM1b_u-22" value="" style="endArrow=none;html=1;rounded=0;" edge="1" parent="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="330" y="450" as="sourcePoint" />
-            <mxPoint x="380" y="400" as="targetPoint" />
-          </mxGeometry>
         </mxCell>
         <mxCell id="GlcShB_20lAepsoM1b_u-24" value="" style="endArrow=none;html=1;rounded=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="GlcShB_20lAepsoM1b_u-25" target="GlcShB_20lAepsoM1b_u-21">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
