@@ -348,7 +348,7 @@ static void ws_server_send_data(httpd_handle_t* server)
     // Send async message to all connected clients that use websocket protocol every 10 seconds
     while (send_messages) {
 
-	vTaskDelay(1000 / portTICK_PERIOD_MS);
+	vTaskDelay(100 / portTICK_PERIOD_MS);
 
 	if (!*server) { // httpd might not have been created by now
 	    continue;
