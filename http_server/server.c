@@ -312,7 +312,7 @@ static void ws_async_send(void *arg)
     httpd_handle_t hd = resp_arg->hd;
     int fd = resp_arg->fd;
     httpd_ws_frame_t ws_pkt;
-    char json_string_rcv[5 * ((1 + 9 + 9 + 42 + 1) *sizeof(char))];
+    char json_string_rcv[JSON_STRING_SIZE_OF_MEASUREMENTS *sizeof(char)];
     const TickType_t xTicksToWait = pdMS_TO_TICKS( 100 ); //this function is called every 500ms once a websocket connection is established
 							  // wait 100ms for a msg in the Queue
 							  // else, return
