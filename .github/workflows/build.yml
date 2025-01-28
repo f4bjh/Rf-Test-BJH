@@ -35,6 +35,6 @@ jobs:
     - name: Store Artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: ufo-esp32.bin 
+        name: Rf-Test-BJH.bin 
         path: |
-          build/ufo-esp32.bin
+          build/Rf-Test-BJH.bin
