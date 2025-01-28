@@ -25,6 +25,7 @@ jobs:
       uses: espressif/esp-idf-ci-action@main
       with:
         esp_idf_version: v5.3.2
+        target: esp32s3
         path: '.'
         
     - name: List build artefacts
