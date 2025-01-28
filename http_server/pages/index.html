@@ -51,6 +51,9 @@
 
 <script type="text/javascript">  
 	var socket = new WebSocket("ws://192.168.4.1/ws");
+	// Déclarer des variables globales pour stocker le chip model et le chip revision
+	let chip_model = `unknown<br>`;
+	let chip_revision = `unknown<br>`;
 
 	socket.onopen = function () {
 		socket.send("Hello Server!");
@@ -76,8 +79,6 @@
 		const pageId = url.split('/').pop(); // Supposons que l'ID de la page est le dernier segment de l'URL
 
 		// Filtrer les données en fonction de la page active
-		chip_model = `unknown<br>`;
-  	        chip_revision = `unknown<br>`;
 		switch (pageId) {
 		case '':
 			if (json_data.t === 00) {
