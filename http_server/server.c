@@ -316,29 +316,7 @@ static void ws_async_send(void *arg)
 
     esp_task_wdt_status(NULL);
 
-#if 0    
-    const TickType_t xTicksToWait = pdMS_TO_TICKS( 100 ); //this function is called every 500ms once a websocket connection is established
-							  // wait 100ms for a msg in the Queue
-							  // else, return
-    json_data_t json_no_data = {
-       .tag = 0,
-       .length = 7,
-       .value = "no data"
-    };						  
-#endif
-
     if (xQueue != NULL){
-
-#if 0	    
-      if(xQueueReceive(xQueue, json_string_rcv , 0 ) == pdFALSE) {
-	cJSON *root = cJSON_CreateObject();
-
-	set_json_data(root,&json_no_data);
-
-        json_string_rcv= cJSON_Print(root);
-        cJSON_Delete(root);
-      }
-#endif
 
       if(xQueueReceive(xQueue, json_string_rcv , 0 ) == pdTRUE) {
         memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
