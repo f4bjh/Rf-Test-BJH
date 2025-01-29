@@ -326,11 +326,16 @@ static void ws_async_send(void *arg)
         ESP_LOGI(TAG, "ws_async_send : send (%p) %d bytes of data to ws client", json_string_rcv, ws_pkt.len);
         ESP_LOGV(TAG, "ws_async_send : data to sent from queue (%p) is :",xQueue);
 	ESP_LOGV(TAG, "%s",ws_pkt.payload);
-        httpd_ws_send_frame_async(hd, fd, &ws_pkt);
+        esp_err_t err = httpd_ws_send_frame_async(hd, fd, &ws_pkt);
+
+	if (err != ESP_OK) {
+    		ESP_LOGE(TAG, "ws_async_send: failed to send WebSocket message: %s", esp_err_to_name(err));
+	}
+
       } else
 	ESP_LOGI(TAG, "ws_async_send : no data found in queue (%p)", xQueue);
     } else {
-      ESP_LOGE(TAG,"FATAL : xQueue measurement not created\n"); 	    
+      ESP_LOGE(TAG,"ws_async_send: xQueue measurement not created\n"); 	    
     }
 
     assert(resp_arg!=NULL);
