@@ -52,9 +52,9 @@
 <script type="text/javascript">  
 	var socket = new WebSocket("ws://192.168.4.1/ws");
 	// Déclarer des variables globales pour stocker le chip model et le chip revision
-	let chip_model = `unknown<br>`;
-	let chip_revision = `unknown<br>`;
-	let counter =  `unknown<br>`;
+	let chip_model = `unknown`;
+	let chip_revision = `unknown`;
+	let counter =  `unknown`;
 
 	socket.onopen = function () {
 		socket.send("Hello Server!");
@@ -66,9 +66,9 @@
 		const json_data = JSON.parse(event.data);
 
 		// Afficher le tag hexadécimal dans la console
-		console.log(`Tag hexadécimal : ${json_data.t}`);
-		console.log(`length : ${json_data.l}`);
-
+		console.log(`t : ${json_data.t}`);
+		console.log(`l : ${json_data.l}`);
+		console.log(`v : ${json_data.v}`);
 
 		// Récupérer l'élément HTML avec l'identifiant "message-container" de la page actuelle
 		const messageContainer = document.getElementById('message-container');
@@ -83,8 +83,8 @@
 		switch (pageId) {
 		case '':
 			if (json_data.t === 00) {
-					chip_model = `unable to read chip info<br>`;
-					chip_revision = `unable to read chip info<br>`;
+					chip_model = `unable to read chip info`;
+					chip_revision = `unable to read chip info`;
 			}	
 			if (json_data.t === 01) {
 					if (json_data.l !== 0) {
