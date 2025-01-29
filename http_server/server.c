@@ -341,11 +341,14 @@ static void ws_async_send(void *arg)
         ws_pkt.payload = (uint8_t*)json_string_rcv;
         ws_pkt.len = strlen(json_string_rcv);
         ws_pkt.type = HTTPD_WS_TYPE_TEXT;
-        ESP_LOGI(TAG, "send (%p) %d bytes of data to ws client: \n%s\n",json_string_rcv, ws_pkt.len, ws_pkt.payload);
+        ESP_LOGI(TAG, "ws_async_send : send (%p) %d bytes of data to ws client", json_string_rcv, ws_pkt.len);
+        ESP_LOGV(TAG, "ws_async_send : data to sent from queue (%p) is :",xQueue);
+	ESP_LOGV(TAG, "%s",ws_pkt.payload);
         httpd_ws_send_frame_async(hd, fd, &ws_pkt);
-      }
+      } else
+	ESP_LOGI(TAG, "ws_async_send : no data found in queue (%p)", xQueue);
     } else {
-      ESP_LOGI(TAG,"FATAL : xQueue measurement not created\n"); 	    
+      ESP_LOGE(TAG,"FATAL : xQueue measurement not created\n"); 	    
     }
 
     assert(resp_arg!=NULL);

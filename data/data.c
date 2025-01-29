@@ -42,6 +42,7 @@ void get_measurement(void *pvParameters)
 
 	    switch(data_to_send) {
  	      case DATA_TO_SEND_IS_CHIP_NAME:
+		ESP_LOGV("TAG", "get_measurement: get DATA_TO_SEND_IS_CHIP_NAME(%d)",data_to_send);
 		get_chip_info_model(json_data.value);
   	        json_data.length=strlen(json_data.value);
 
@@ -55,9 +56,9 @@ void get_measurement(void *pvParameters)
 		  json_string_send = cJSON_Print(root);
 		  cJSON_Delete(root);
 		}
-		data_to_send++;
 	        break;
 	      case DATA_TO_SEND_IS_CHIP_VERSION:
+		ESP_LOGV("TAG", "get_measurement: get DATA_TO_SEND_IS_CHIP_VERSION(%d)",data_to_send);
 	        get_chip_info_revision(json_data.value);
                 json_data.length=strlen(json_data.value);
 	    
@@ -71,10 +72,10 @@ void get_measurement(void *pvParameters)
 		  json_string_send = cJSON_Print(root);
 		  cJSON_Delete(root);
 		}
-		data_to_send++;
 	        break;
 	      case DATA_TO_SEND_IS_COUNTER:
 	      default:
+		ESP_LOGV("TAG", "get_measurement: get DATA_TO_SEND_IS_COUNTER(%d)",data_to_send);
 		sprintf(json_data.value,"%d", counter);
 		json_data.length=strlen(json_data.value);
 	        if (json_data.length !=0) {
@@ -88,7 +89,6 @@ void get_measurement(void *pvParameters)
 		  cJSON_Delete(root);
 		}
 		counter++;
-		data_to_send = DATA_TO_SEND_IS_COUNTER;
 		break;
             }
 
@@ -132,14 +132,19 @@ void get_measurement(void *pvParameters)
 
 
   	   // Send the value to the queue
-	   ESP_LOGI(TAG, "get_measurement place measures in queue: \n%s\n", json_string_send);
+	   ESP_LOGI(TAG, "get_measurement: place measures(%d) in queue (%p)", data_to_send, xQueue);
+	   ESP_LOGV(TAG, "%s",json_string_send);
 	   //xQueueSend( xQueue, json_string_send, 0 );
 	   while( (xQueueSend( xQueue, json_string_send, xDelay ) == errQUEUE_FULL) && (retries <5)) {
 	     retries++;
 	   }
 
 	   if (retries == 5) 
-  	     ESP_LOGI(TAG, "get_measurement failed to place measures(%d) in queue(%p) : retries = %d", data_to_send--, xQueue,retries);
+  	     ESP_LOGI(TAG, "get_measurement: failed to place measures(%d) in queue(%p) : retries = %d", data_to_send--, xQueue,retries);
+	   else
+	     ESP_LOGI(TAG, "get_measurement: succeed to place measures(%d) - retries=%d", data_to_send, retries);
+
+	   data_to_send = data_to_send == DATA_TO_SEND_IS_COUNTER ? DATA_TO_SEND_IS_COUNTER : data_to_send+1;
 
 
 	    //}
