@@ -9,6 +9,7 @@
 #include "lwip/sockets.h"
 #include "esp_log.h"
 #include "keep_alive.h"
+#include "esp_task_wdt.h"
 
 #include "main.h"
 #include "http_server.h"
@@ -312,6 +313,9 @@ static void ws_async_send(void *arg)
     int fd = resp_arg->fd;
     httpd_ws_frame_t ws_pkt;
     char json_string_rcv[JSON_STRING_SIZE_OF_MEASUREMENTS *sizeof(char)];
+
+    esp_task_wdt_status(NULL);
+
 #if 0    
     const TickType_t xTicksToWait = pdMS_TO_TICKS( 100 ); //this function is called every 500ms once a websocket connection is established
 							  // wait 100ms for a msg in the Queue
@@ -361,6 +365,8 @@ static void ws_server_send_data(httpd_handle_t* server)
 {
     bool send_messages = true;
     //const TickType_t xTicksToWait = pdMS_TO_TICKS( 10000 );
+    
+    esp_task_wdt_add(NULL);
 
     // Send async message to all connected clients that use websocket protocol every 10 seconds
     while (send_messages) {
