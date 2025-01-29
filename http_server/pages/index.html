@@ -54,6 +54,7 @@
 	// Déclarer des variables globales pour stocker le chip model et le chip revision
 	let chip_model = `unknown<br>`;
 	let chip_revision = `unknown<br>`;
+	let counter =  `unknown<br>`;
 
 	socket.onopen = function () {
 		socket.send("Hello Server!");
@@ -95,12 +96,15 @@
 						chip_revision = `${json_data.v}`;
 					}
 			}
+			if (json_data.t === 03) {
+					if (json_data.l !== 0) {
+						counter = `${json_data.v}`;
+					}
+			}
 
-//			messageContainer.innerHTML = `chip model : ${chip_model}<br>chip revision : ${chip_revision}<br>`;
 			messageContainer.innerHTML = `chip model : ${chip_model}<br>`;
                         messageContainer.innerHTML += `chip revision : ${chip_revision}<br>`;
-
-
+			messageContainer.innerHTML += `counter = ${counter}<br>`;
 			break;
 		case 'frequencymeter':
 			if (json_data.t === '03' || json_data.t === '07') {

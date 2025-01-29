@@ -7,7 +7,6 @@
 #include "esp_log.h"
 
 #include "main.h"
-#include "cJSON.h"
 #include "data.h"
 
 static const char* TAG = "data_mgt";
@@ -27,13 +26,73 @@ void get_measurement(void *pvParameters)
 {
 
     json_data_t json_data; 
-    const TickType_t xDelay = 500 / portTICK_PERIOD_MS; //pdMS_TO_TICKS( 500ms );
-    TickType_t xLastWakeTime=xTaskGetTickCount();
+    const TickType_t xDelay = HTTP_SERVER_WAKE_UP_TICK / portTICK_PERIOD_MS;
+    //TickType_t xLastWakeTime=xTaskGetTickCount();
+    uint8_t retries = 0;
+    int counter=0;
+    T_DATA_TO_SEND data_to_send = DATA_TO_SEND_IS_CHIP_NAME;
+    char *json_string_send=NULL;
+    cJSON *root;
 
     while (1) {
+	    
+	    retries = 0;
 
 	    memset(json_data.value, 0, 32*sizeof(char));
 
+	    switch(data_to_send) {
+ 	      case DATA_TO_SEND_IS_CHIP_NAME:
+		get_chip_info_model(json_data.value);
+  	        json_data.length=strlen(json_data.value);
+
+	        if (json_data.length !=0) {
+
+		  json_data.tag = CHIP_INFO_MODEL_DATA_TAG;//should be the same value as in the switch case
+		  root = cJSON_CreateObject();
+		  
+		  set_json_data(root,&json_data);
+
+		  json_string_send = cJSON_Print(root);
+		  cJSON_Delete(root);
+		}
+		data_to_send++;
+	        break;
+	      case DATA_TO_SEND_IS_CHIP_VERSION:
+	        get_chip_info_revision(json_data.value);
+                json_data.length=strlen(json_data.value);
+	    
+	        if (json_data.length !=0) {
+
+		  json_data.tag = CHIP_INFO_REVISION_DATA_TAG;//should be the same value as in the switch case
+		  root = cJSON_CreateObject();
+
+		  set_json_data(root,&json_data);
+
+		  json_string_send = cJSON_Print(root);
+		  cJSON_Delete(root);
+		}
+		data_to_send++;
+	        break;
+	      case DATA_TO_SEND_IS_COUNTER:
+	      default:
+		sprintf(json_data.value,"%d", counter);
+		json_data.length=strlen(json_data.value);
+	        if (json_data.length !=0) {
+
+		  json_data.tag = COUNTER_VALUE_TAG;//should be the same value as in the switch case
+		  root = cJSON_CreateObject();
+
+		  set_json_data(root,&json_data);
+
+		  json_string_send = cJSON_Print(root);
+		  cJSON_Delete(root);
+		}
+		counter++;
+		data_to_send = DATA_TO_SEND_IS_COUNTER;
+		break;
+            }
+
+#if 0
 	    //here we should add a switch case, base on a queue intertask data
 	    //in wich, we choose wich data should be updated
 	    get_chip_info_model(json_data.value);
@@ -69,18 +128,24 @@ void get_measurement(void *pvParameters)
 
 		char *json_string_send = cJSON_Print(root);
 		cJSON_Delete(root);
-		
-		// Send the value to the queue
-		//ESP_LOGI(TAG, "get_measurement place measures in queue: \n%s\n", json_string_send);
-		xQueueSend( xQueue, json_string_send, 0 );
+#endif
 
-	    }
 
-            vTaskDelayUntil( &xLastWakeTime, xDelay);
+  	   // Send the value to the queue
+	   ESP_LOGI(TAG, "get_measurement place measures in queue: \n%s\n", json_string_send);
+	   //xQueueSend( xQueue, json_string_send, 0 );
+	   while( (xQueueSend( xQueue, json_string_send, xDelay ) == errQUEUE_FULL) && (retries <5)) {
+	     retries++;
+	   }
+
+	   if (retries == 5) 
+  	     ESP_LOGI(TAG, "get_measurement failed to place measures(%d) in queue(%p) : retries = %d", data_to_send--, xQueue,retries);
+
+
+	    //}
+            //vTaskDelayUntil( &xLastWakeTime, xDelay);
 
      }
-
-//TODO add a counter to send in the queue (in same issue)
 
 }
 
