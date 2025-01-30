@@ -92,45 +92,6 @@ void get_measurement(void *pvParameters)
 		break;
             }
 
-#if 0
-	    //here we should add a switch case, base on a queue intertask data
-	    //in wich, we choose wich data should be updated
-	    get_chip_info_model(json_data.value);
-	    json_data.length=strlen(json_data.value);
-
-	    if (json_data.length !=0) {
-
-		json_data.tag = CHIP_INFO_MODEL_DATA_TAG;//should be the same value as in the switch case
-
-		cJSON *root = cJSON_CreateObject();
-
-		set_json_data(root,&json_data);
-
-		char *json_string_send = cJSON_Print(root);
-		cJSON_Delete(root);
-		
-		// Send the value to the queue
-		//ESP_LOGI(TAG, "get_measurement place measures in queue: \n%s\n", json_string_send);
-		xQueueSend( xQueue, json_string_send, 0 );
-
-	    }
-
-	    get_chip_info_revision(json_data.value);
-            json_data.length=strlen(json_data.value);
-	    
-	    if (json_data.length !=0) {
-
-		json_data.tag = CHIP_INFO_REVISION_DATA_TAG;//should be the same value as in the switch case
-
-		cJSON *root = cJSON_CreateObject();
-
-		set_json_data(root,&json_data);
-
-		char *json_string_send = cJSON_Print(root);
-		cJSON_Delete(root);
-#endif
-
-
   	   // Send the value to the queue
 	   ESP_LOGI(TAG, "get_measurement: place measures(%d) in queue (%p)", data_to_send, xQueue);
 	   ESP_LOGV(TAG, "%s",json_string_send);
