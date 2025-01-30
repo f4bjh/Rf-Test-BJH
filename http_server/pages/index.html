@@ -51,6 +51,10 @@
 
 <script type="text/javascript">  
 	var socket = new WebSocket("ws://192.168.4.1/ws");
+	// Déclarer des variables globales pour stocker le chip model et le chip revision
+	let chip_model = `unknown`;
+	let chip_revision = `unknown`;
+	let counter =  `unknown`;
 
 	socket.onopen = function () {
 		socket.send("Hello Server!");
@@ -62,9 +66,9 @@
 		const json_data = JSON.parse(event.data);
 
 		// Afficher le tag hexadécimal dans la console
-		console.log(`Tag hexadécimal : ${json_data.tag}`);
-		console.log(`length : ${json_data.length}`);
-
+		console.log(`t : ${json_data.t}`);
+		console.log(`l : ${json_data.l}`);
+		console.log(`v : ${json_data.v}`);
 
 		// Récupérer l'élément HTML avec l'identifiant "message-container" de la page actuelle
 		const messageContainer = document.getElementById('message-container');
@@ -78,33 +82,38 @@
 		// Filtrer les données en fonction de la page active
 		switch (pageId) {
 		case '':
-			if (json_data.tag === 01) {
-					chip_model = `chip_model : unknown<br>`;
-					if (json_data.length !== 0) {
-						chip_model = `${json_data.value}`;
+			if (json_data.t === 00) {
+					chip_model = `unable to read chip info`;
+					chip_revision = `unable to read chip info`;
+			}	
+			if (json_data.t === 01) {
+					if (json_data.l !== 0) {
+						chip_model = `${json_data.v}`;
 					}
 	      		}
-			if (json_data.tag === 02) {
-					chip_revision = `chip_revision : unknown<br>`;
-					if (json_data.length !== 0) {
-						chip_revision = `${json_data.value}`;
+			if (json_data.t === 02) {
+					if (json_data.l !== 0) {
+						chip_revision = `${json_data.v}`;
+					}
+			}
+			if (json_data.t === 03) {
+					if (json_data.l !== 0) {
+						counter = `${json_data.v}`;
 					}
 			}
 
-//			messageContainer.innerHTML = `chip model : ${chip_model}<br>chip revision : ${chip_revision}<br>`;
 			messageContainer.innerHTML = `chip model : ${chip_model}<br>`;
                         messageContainer.innerHTML += `chip revision : ${chip_revision}<br>`;
-
-
+			messageContainer.innerHTML += `counter = ${counter}<br>`;
 			break;
 		case 'frequencymeter':
-			if (json_data.tag === '03' || json_data.tag === '07') {
-				messageContainer.innerHTML += `Valeur champ ${json_data.tag} : ${json_data.value}<br>`;
+			if (json_data.t === '03' || json_data.t === '07') {
+				messageContainer.innerHTML += `Valeur champ ${json_data.t} : ${json_data.v}<br>`;
 	      		}
 			break;
 		case 'powermeter':
-		       if (json_data.tag === '46' || json_data.tag === 'AB') {
-				messageContainer.innerHTML += `Valeur champ ${json_data.tag} : ${json_data.value}<br>`;
+		       if (json_data.t === '46' || json_data.t === 'AB') {
+				messageContainer.innerHTML += `Valeur champ ${json_data.t} : ${json_data.v}<br>`;
 			}
 			break;
         	}

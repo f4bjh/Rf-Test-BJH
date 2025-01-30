@@ -9,10 +9,13 @@
 #include "lwip/sockets.h"
 #include "esp_log.h"
 #include "keep_alive.h"
-#include "esp_chip_info.h"
+#include "esp_task_wdt.h"
 
-#include "cJSON.h"
+#include "main.h"
 #include "http_server.h"
+#include "data.h"
+
+extern QueueHandle_t xQueue;
 
 /*
  * HTTP Server
@@ -302,180 +305,83 @@ static esp_err_t ws_handler(httpd_req_t *req)
     return ESP_OK;
 }
 
-typedef struct json_data_s {
-  char tag;
-  char length;
-  char *value;  
-} json_data_t;
 
-static void send_chip_info(void *arg)
+static void ws_async_send(void *arg)
 {
-    char tag;
-    char length;    
-    char value[32];
     struct async_resp_arg *resp_arg = arg;
     httpd_handle_t hd = resp_arg->hd;
     int fd = resp_arg->fd;
     httpd_ws_frame_t ws_pkt;
+    char json_string_rcv[JSON_STRING_SIZE_OF_MEASUREMENTS *sizeof(char)];
 
-    esp_chip_info_t chip_info;
-    //uint32_t flash_size;
-    esp_chip_info(&chip_info);
+    esp_task_wdt_status(NULL);
 
-    unsigned major_rev = chip_info.revision / 100;
-    unsigned minor_rev = chip_info.revision % 100;
+    if (xQueue != NULL){
 
-#if 0
-    printf("This is %s chip with %d CPU core(s), %s%s%s%s, ",
-           CONFIG_IDF_TARGET,
-           chip_info.cores,
-           (chip_info.features & CHIP_FEATURE_WIFI_BGN) ? "WiFi/" : "",
-           (chip_info.features & CHIP_FEATURE_BT) ? "BT" : "",
-           (chip_info.features & CHIP_FEATURE_BLE) ? "BLE" : "",
-           (chip_info.features & CHIP_FEATURE_IEEE802154) ? ", 802.15.4 (Zigbee/Thread)" : "");
+      if(xQueueReceive(xQueue, json_string_rcv , 0 ) == pdTRUE) {
+        memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
+        ws_pkt.payload = (uint8_t*)json_string_rcv;
+        ws_pkt.len = strlen(json_string_rcv);
+        ws_pkt.type = HTTPD_WS_TYPE_TEXT;
+        ESP_LOGI(TAG, "ws_async_send : send (%p) %d bytes of data to ws client", json_string_rcv, ws_pkt.len);
+        ESP_LOGV(TAG, "ws_async_send : data to sent from queue (%p) is :",xQueue);
+	ESP_LOGV(TAG, "%s",ws_pkt.payload);
+        esp_err_t err = httpd_ws_send_frame_async(hd, fd, &ws_pkt);
 
-    unsigned major_rev = chip_info.revision / 100;
-    unsigned minor_rev = chip_info.revision % 100;
-    printf("silicon revision v%d.%d, ", major_rev, minor_rev);
-    if(esp_flash_get_size(NULL, &flash_size) != ESP_OK) {
-        printf("Get flash size failed");
-        return;
+	if (err != ESP_OK) {
+    		ESP_LOGE(TAG, "ws_async_send: failed to send WebSocket message: %s", esp_err_to_name(err));
+	}
+
+      } else
+	ESP_LOGI(TAG, "ws_async_send : no data found in queue (%p)", xQueue);
+    } else {
+      ESP_LOGE(TAG,"ws_async_send: xQueue measurement not created\n"); 	    
     }
 
-    printf("%" PRIu32 "MB %s flash\n", flash_size / (uint32_t)(1024 * 1024),
-           (chip_info.features & CHIP_FEATURE_EMB_FLASH) ? "embedded" : "external");
-
-    printf("Minimum free heap size: %" PRIu32 " bytes\n", esp_get_minimum_free_heap_size());
-#endif
-
-    tag = 0x01;
-    length = 9;
-    memset(value, 0, 32*sizeof(char));
- 
-    switch(chip_info.model) {
-      case CHIP_ESP32:
-        sprintf(value,"ESP32");
-        break;
-      case CHIP_ESP32S2:
-        sprintf(value,"ESP32-S2");
-        break;
-      case CHIP_ESP32S3:
-        sprintf(value,"ESP32-S3");
-        break;
-      case CHIP_ESP32C3:
-        sprintf(value,"ESP32-C3");
-        break;
-      case CHIP_ESP32C2:
-        sprintf(value,"ESP32-C2");
-        break;
-      case CHIP_ESP32C6:
-        sprintf(value,"ESP32-C6");
-        break;
-      case CHIP_ESP32H2:
-        sprintf(value,"ESP32-H2");
-        break;
-      case CHIP_ESP32P4:
-        sprintf(value,"ESP32-P4");
-        break;
-      case CHIP_POSIX_LINUX:
-      default:
-        sprintf(value,"unknown");
-        break;
-    }
-
-    json_data_t json_data = {
-       .tag = tag,
-       .length = length,
-       .value = NULL
-    };
-    
-    json_data.value = malloc( length*sizeof(char)); 
-    memset(json_data.value, 0, length *sizeof(char));
-    memcpy(json_data.value, &value, length);
-
-    cJSON *root = cJSON_CreateObject();
-    cJSON_AddNumberToObject(root, "tag", json_data.tag);
-    cJSON_AddNumberToObject(root, "length", json_data.length);
-    cJSON_AddStringToObject(root, "value", json_data.value);
-
-    char *json_string = cJSON_Print(root);
-    free(json_data.value);
-    cJSON_Delete(root);
- 
-    memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
-    ws_pkt.payload = (uint8_t*)json_string;
-    ws_pkt.len = strlen(json_string);
-    ws_pkt.type = HTTPD_WS_TYPE_TEXT;
-    httpd_ws_send_frame_async(hd, fd, &ws_pkt);
-
-    free(json_string);
-
-    json_data.tag = 0x02;
-    json_data.length = 3;
-    memset(value, 0, 32*sizeof(char));
-    sprintf(value,"%d.%d", major_rev, minor_rev);
-
-    json_data.value = malloc( length*sizeof(char)); 
-    memset(json_data.value, 0, length *sizeof(char));
-    memcpy(json_data.value, &value, length);
-
-    root = cJSON_CreateObject();
-    cJSON_AddNumberToObject(root, "tag", json_data.tag);
-    cJSON_AddNumberToObject(root, "length", json_data.length);
-    cJSON_AddStringToObject(root, "value", json_data.value);
-
-    json_string = cJSON_Print(root);
-    free(json_data.value);
-    cJSON_Delete(root);
- 
-    memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
-    ws_pkt.payload = (uint8_t*)json_string;
-    ws_pkt.len = strlen(json_string);
-    ws_pkt.type = HTTPD_WS_TYPE_TEXT;
-    httpd_ws_send_frame_async(hd, fd, &ws_pkt);
-
-    free(json_string);
-
+    assert(resp_arg!=NULL);
     free(resp_arg);
 
 }
-
 
 // Get all clients and send async message
 static void ws_server_send_data(httpd_handle_t* server)
 {
     bool send_messages = true;
+    //const TickType_t xTicksToWait = pdMS_TO_TICKS( 10000 );
+    
+    esp_task_wdt_add(NULL);
 
     // Send async message to all connected clients that use websocket protocol every 10 seconds
     while (send_messages) {
-        vTaskDelay(10000 / portTICK_PERIOD_MS);
 
-        if (!*server) { // httpd might not have been created by now
-            continue;
-        }
-        size_t clients = max_clients;
-        int    client_fds[max_clients];
-        if (httpd_get_client_list(*server, &clients, client_fds) == ESP_OK) {
-            for (size_t i=0; i < clients; ++i) {
-                int sock = client_fds[i];
-                if (httpd_ws_get_fd_info(*server, sock) == HTTPD_WS_CLIENT_WEBSOCKET) {
-                    ESP_LOGI(TAG, "Active client (fd=%d) -> sending async message", sock);
-                    struct async_resp_arg *resp_arg = malloc(sizeof(struct async_resp_arg));
-                    assert(resp_arg != NULL);
-                    resp_arg->hd = *server;
-                    resp_arg->fd = sock;
-                    if (httpd_queue_work(resp_arg->hd,send_chip_info, resp_arg) != ESP_OK) {
-                        ESP_LOGE(TAG, "httpd_queue_work failed!");
-                        send_messages = false;
-                        break;
-                    }
-                }
-            }
-        } else {
-            ESP_LOGE(TAG, "httpd_get_client_list failed!");
-            return;
-        }
-    }	
+	vTaskDelay(HTTP_SERVER_WAKE_UP_TICK / portTICK_PERIOD_MS);
+
+	if (!*server) { // httpd might not have been created by now
+	    continue;
+	}
+	size_t clients = max_clients;
+	int    client_fds[max_clients];
+	if (httpd_get_client_list(*server, &clients, client_fds) == ESP_OK) {
+	    for (size_t i=0; i < clients; ++i) {
+		int sock = client_fds[i];
+		if (httpd_ws_get_fd_info(*server, sock) == HTTPD_WS_CLIENT_WEBSOCKET) {
+		    ESP_LOGI(TAG, "Active client (fd=%d) -> sending async message", sock);
+		    struct async_resp_arg *resp_arg = malloc(sizeof(struct async_resp_arg));
+		    assert(resp_arg != NULL);
+		    resp_arg->hd = *server;
+		    resp_arg->fd = sock;
+		    if (httpd_queue_work(resp_arg->hd,ws_async_send, resp_arg) != ESP_OK) {
+			ESP_LOGE(TAG, "httpd_queue_work failed!");
+			send_messages = false;
+			break;
+		    }
+		}
+	    }
+	} else {
+	    ESP_LOGE(TAG, "httpd_get_client_list failed!");
+	    return;
+	}
+    }
 
 }
 
@@ -622,6 +528,7 @@ esp_err_t http_server_init(void)
 	config.global_user_ctx = keep_alive;
 	config.open_fn = wss_open_fd;
 	config.close_fn = wss_close_fd;
+	config.task_priority = tskHTTP_SERVER;
 
 	if (httpd_start(&http_server, &config) == ESP_OK) {
 		httpd_register_uri_handler(http_server, &style_get);

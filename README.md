@@ -10,19 +10,62 @@ Based on ESP32 hardware
 
 
 - trics and tips 
+
+```
+$ . $HOME/esp/esp-idf/export.sh
 ```
 
-$ . $HOME/esp/esp-idf/export.sh
-
+the very 1st time, when creating a new projet  
+```
 $ idf.py set-target esp32s3    
 $ idf.py menuconfig  
-$ idf.py build  
 
+```
+
+build and flash :  
+```
+$ idf.py build  
+$ idf.py -p /dev/ttyACM0 flash monitor
+```
+
+with minicom:  
+```
+$ minicom -D /dev/ttyACM0 
+``` 
+
+- gdb
+
+```
 ~/esp/esp-idf$ openocd -f board/esp32s3-builtin.cfg  
 ~/devel/Rf-Test-BJH$ xtensa-esp32-elf-gdb -x ../gdbinit build/Rf-Test-BJH.elf  
-$ minicom -D /dev/ttyACM0 
- 
 ```
+
+reset and halt at start in gdb:  
+```
+(gdb) monitor reset halt
+``` 
+
+print string:  
+```
+(gdb) printf "%s", pointer_to_string
+```
+
+- menuconfig
+
+```
+$ idf.py menuconfig  
+
+```
+
+
+Set log level verbosity  
+
+
+`component config -> log output`
+default log verbosity = <choose level>  
+maximum log verbosity = same as default  
+
+
 
 - troubleshooting
 
@@ -48,6 +91,18 @@ except ModuleNotFoundError:
     from common_test_methods import get_env_config_variable
 ```
 
-cas d'erreur 2 :  
+cas d'erreur 3 :  
 `ModuleNotFoundError: No module named 'websocket'`
 solution : `$ python3 -m pip install websocket-client`
+
+cas d'erreur 4: openocd
+`Error: esp_usb_jtag: could not find or open device!`
+solution : plug the USB cable to the other USB oprt of ESP32 board (JATG)
+
+cas d'erreur 5: web pages are not updated after compilation
+strange behavior of the compilator so far. Need to clean the project :  
+```
+$ idf.py clean
+$ idf.py build
+```
+
