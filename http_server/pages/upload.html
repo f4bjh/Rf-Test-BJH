@@ -83,19 +83,14 @@
   <h2>fw update</h2>
 
 
-		<div class='dl'>
-			<label for="otafile">Firmware file:</label>
-			<input type="file" id="otafile" name="otafile" />
-		</div>
-		<div class='dl'>
-			<button id="upload" type="button" onclick="startUpload()">Upload</button>
-		</div>
- <!--
-		<div class='dl'>
-			<button id="Reboot" type="button" onclick="requestReboot()">Reboot</button>
-		</div>
- -->
- <br><br><button id="reboot" type="button" onclick="requestReboot()">Reboot</button>
+  <div>
+	<label for="otafile">Firmware file:</label>
+	<input type="file" id="otafile" name="otafile" />
+	<button id="upload" type="button" onclick="startUpload()">Upload</button>
+  </div>
+  <div id="progress"></div>
+  <button id="reboot" type="button" onclick="requestReboot()">Reboot</button>
+<br><br>
  
 
 <div id="progress"></div>
