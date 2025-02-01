@@ -43,6 +43,12 @@
 					xhr.send(file);
 				}
 			}
+			function requestReboot() {
+				var xhr = new XMLHttpRequest();
+				xhr.open("POST", "/reboot", true);
+				xhr.send(); // Envoie la requête
+			}	
+
 		</script>
 	
 	
@@ -84,7 +90,15 @@
 		<div class='dl'>
 			<button id="upload" type="button" onclick="startUpload()">Upload</button>
 		</div>
-		<div id="progress"></div>
+ <!--
+		<div class='dl'>
+			<button id="Reboot" type="button" onclick="requestReboot()">Reboot</button>
+		</div>
+ -->
+ <br><br><button id="reboot" type="button" onclick="requestReboot()">Reboot</button>
+ 
+
+<div id="progress"></div>
  <footer>
    <p class='bas_de_page'>F4BJH - return to <a href="/">Home</a></p>
  </footer>

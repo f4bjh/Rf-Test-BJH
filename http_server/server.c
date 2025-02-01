@@ -188,6 +188,8 @@ esp_err_t update_post_handler(httpd_req_t *req)
 	int remaining = req->content_len;
 
 	const esp_partition_t *ota_partition = esp_ota_get_next_update_partition(NULL);
+	ESP_LOGI(TAG,"Received fw update request - download into partition: %s", ota_partition->label);
+	
 
 	if (!ota_partition) {
 	 ESP_LOGE(TAG, "no ota partition found");
@@ -224,9 +226,17 @@ esp_err_t update_post_handler(httpd_req_t *req)
 			return ESP_FAIL;
 	}
 
-	httpd_resp_sendstr(req, "Firmware update complete, rebooting now!\n");
-
+	//httpd_resp_sendstr(req, "Firmware update complete.\n");
+	ESP_LOGI(TAG,"Firmware update complete");
 	vTaskDelay(500 / portTICK_PERIOD_MS);
+	return ESP_OK;
+}
+
+
+esp_err_t reboot_post_handler(httpd_req_t *req)
+{
+			
+	ESP_LOGI(TAG,"Reboot requested!!!");
 	esp_restart();
 
 	return ESP_OK;
@@ -502,6 +512,13 @@ httpd_uri_t update_post = {
 	.user_ctx = NULL
 };
 
+httpd_uri_t reboot_post = {
+	.uri	  = "/reboot",
+	.method   = HTTP_POST,
+	.handler  = reboot_post_handler,
+	.user_ctx = NULL
+};
+
 httpd_uri_t ws = {
         .uri        = "/ws",
         .method     = HTTP_GET,
@@ -525,8 +542,8 @@ esp_err_t http_server_init(void)
 	httpd_config_t config = HTTPD_DEFAULT_CONFIG();
 
 	//number of files(html, css, and js) to handle in the http server
-	//fix to 20 to have some margin
-	config.max_uri_handlers = 20;
+	//fix to 255 to have some margin
+	config.max_uri_handlers = 255;
 
 	config.max_open_sockets = max_clients;
 	config.global_user_ctx = keep_alive;
@@ -549,6 +566,7 @@ esp_err_t http_server_init(void)
 		httpd_register_uri_handler(http_server, &upload_get);
 		httpd_register_uri_handler(http_server, &wifi_get);
 		httpd_register_uri_handler(http_server, &update_post);
+		httpd_register_uri_handler(http_server, &reboot_post);
 		httpd_register_uri_handler(http_server, &ws);
 		wss_keep_alive_set_user_ctx(keep_alive, http_server);
 
