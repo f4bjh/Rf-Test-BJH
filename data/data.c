@@ -73,6 +73,23 @@ void get_measurement(void *pvParameters)
 		  cJSON_Delete(root);
 		}
 	        break;
+	      case DATA_TO_SEND_IS_CURRENT_PARTITION:
+		ESP_LOGV(TAG,"get_measurment : get DATA_TO_SEND_IS_CURRENT_PARTITION(%d)",data_to_send);
+		const esp_partition_t *partition = esp_ota_get_running_partition();
+		sprintf(json_data.value,"%s", partition->label);
+		json_data.length=strlen(json_data.value);
+		ESP_LOGI(TAG, "Currently running partition: %s", json_data.value);
+		if (json_data.length !=0) {
+
+		  json_data.tag = CURRENT_PARTITION_NAME_TAG;//should be the same value as in the switch case
+		  root = cJSON_CreateObject();
+
+		  set_json_data(root,&json_data);
+
+		  json_string_send = cJSON_Print(root);
+		  cJSON_Delete(root);
+		}
+		break;
 	      case DATA_TO_SEND_IS_COUNTER:
 	      default:
 		ESP_LOGV("TAG", "get_measurement: get DATA_TO_SEND_IS_COUNTER(%d)",data_to_send);

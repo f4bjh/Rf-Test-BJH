@@ -1,6 +1,7 @@
-let chip_model = '';
-let chip_revision = '';
+let chip_model = `unknown`;
+let chip_revision = `unknown`;
 let counter =  `unknown`;
+let current_partition =  `unknown`;
 
 socket = new WebSocket("ws://192.168.4.1/ws");
 
@@ -53,7 +54,7 @@ socket.addEventListener('message', (event) => {
 				chip_revision = `${json_data.v}`;
 			}
 		}
-		if (json_data.t === 0x03) {
+		if (json_data.t === 0x04) {
 			if (json_data.l !== 0) {
 				counter = `${json_data.v}`;
 			}
@@ -62,6 +63,14 @@ socket.addEventListener('message', (event) => {
 		messageContainer.innerHTML = `chip model : ${chip_model}<br>`;
                 messageContainer.innerHTML += `chip revision : ${chip_revision}<br>`;
 		messageContainer.innerHTML += `counter = ${counter}<br>`;
+		break;
+	case 'upload':
+		if (json_data.t === 0x03) {
+			if (json_data.l !== 0) {
+				current_partition = `${json_data.v}`;
+			}
+	      	}
+		messageContainer.innerHTML = `current partition : ${current_partition}<br>`;
 		break;
 	case 'frequencymeter':
 		if (json_data.t === 0x03 || json_data.t === 0x07) {
