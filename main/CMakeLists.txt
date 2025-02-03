@@ -14,7 +14,7 @@ idf_component_register(
 	EMBED_TXTFILES ../http_server/pages/jquery.gauge.min.js
 	EMBED_TXTFILES ../http_server/pages/jquery.min.js
 	EMBED_TXTFILES ../http_server/pages/powermeter.html
-	EMBED_TXTFILES ../http_server/pages/script.js
+	EMBED_FILES ../http_server/pages/script.js
 	EMBED_TXTFILES ../http_server/pages/style.css
 	EMBED_TXTFILES ../http_server/pages/upload.html
 	EMBED_TXTFILES ../http_server/pages/wifi.html
