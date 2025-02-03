@@ -1,9 +1,53 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <title>Hello World in JavaScript</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <!--    <script type = "text/javascript" src="script.js"></script> -->
+    <title>Radio Test Bench</title>
 </head>
+
 <body>
-    <script src="script.js"></script>
+ <h1>Rf-Test-BJH</h1>
+
+ <div id="container">
+     <nav>
+         <ul>
+             <li><a href="/">Home</a></li>
+             <li><a href="#measures">Measures</a>
+                 <!-- First Tier Drop Down -->
+                 <ul>
+                     <li><a href="generator.html">RF Generator</a></li>
+                     <li><a href="frequencymeter.html">Frequencymeter</a></li>
+                     <li><a href="powermeter.html">Power-meter</a></li>
+                 </ul>
+             </li>
+             <li><a href="#">Settings</a>
+                 <ul>
+                     <li><a href="upload.html">Upload fw</a></li>
+                     <li><a href="wifi.html">Wifi</a></li>
+                 </ul>
+             </li>
+             <li><a href="about.html">About</a></li>
+         </ul>
+     </nav>
+ </div>
+
+ <div id="message-container"></div>
+ 
+<br>
+wich partition has booted<br>
+
+ota_0 -> fw version : <br>
+ota_0 -> build date : <br>
+idem ota_1 <br>
+
+ <footer>
+   <p class='bas_de_page'>F4BJH</p>
+ </footer>
+ <script src="script.js"></script>
 </body>
+
 </html>
