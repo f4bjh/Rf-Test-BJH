@@ -42,7 +42,7 @@ extern const uint8_t jquery_min_js_end[] asm("_binary_jquery_min_js_end");
 extern const uint8_t powermeter_html_start[] asm("_binary_powermeter_html_start");
 extern const uint8_t powermeter_html_end[] asm("_binary_powermeter_html_end");
 extern const uint8_t script_js_start[] asm("_binary_script_js_start");
-extern const uint8_t script_js_end[] asm("_binary_script_js_end");
+//extern const uint8_t script_js_end[] asm("_binary_script_js_end");
 extern const uint8_t upload_html_start[] asm("_binary_upload_html_start");
 extern const uint8_t upload_html_end[] asm("_binary_upload_html_end");
 extern const uint8_t wifi_html_start[] asm("_binary_wifi_html_start");
@@ -152,8 +152,15 @@ esp_err_t jquery_min_js_get_handler(httpd_req_t *req)
 
 esp_err_t script_js_get_handler(httpd_req_t *req)
 {
+#if 0
+	char *buffer = "console.log('hello');";
+	char *buf_end = buffer + strlen(buffer);
+#endif
 	httpd_resp_set_type(req, "text/javascript");
-	httpd_resp_send(req, (const char *) script_js_start, script_js_end - script_js_start);
+	//httpd_resp_send(req, (const char *) buffer, buf_end - buffer);
+	ESP_LOGI(TAG,"FDEC %s", script_js_start);
+	uint8_t *script_js_end = script_js_start + strlen((const char *)script_js_start);
+	httpd_resp_send(req, (const char *)script_js_start, script_js_start - script_js_end);
 	return ESP_OK;
 }
 
