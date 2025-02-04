@@ -4,6 +4,8 @@ idf_component_register(
 	SRCS "../http_server/keep_alive.c"
 	SRCS "../http_server/server.c"
 	SRCS "../cJSON/cJSON.c"
+	SRCS "../data/chip_info.c"
+	SRCS "../data/data.c"
 	INCLUDE_DIRS "../include"
 	EMBED_FILES ../http_server/pages/about.html
 	EMBED_FILES ../http_server/pages/frequencymeter.html
