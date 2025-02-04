@@ -1,6 +1,8 @@
-let chip_model = '';
-let chip_revision = '';
+let chip_model = `unknown`;
+let chip_revision = `unknown`;
 let counter =  `unknown`;
+let current_partition =  `unknown`;
+let next_partition =  `unknown`;
 
 socket = new WebSocket("ws://192.168.4.1/ws");
 
@@ -28,8 +30,11 @@ socket.addEventListener('message', (event) => {
 	console.log(`v : ${json_data.v}`);
 
 	// Récupérer l'élément HTML avec l'identifiant "message-container" de la page actuelle
-	const messageContainer = document.getElementById('message-container');
-		
+	const ChipInfo = document.getElementById('chip-information');
+	const PartitionInfo = document.getElementById('partition-info');
+	const current_part_info = document.getElementById('current-part-info');
+	const next_part_info = document.getElementById('next-part-info');
+			
 	// Récupérer l'URL de la page actuelle
 	const url = window.location.href;
 
@@ -55,20 +60,70 @@ socket.addEventListener('message', (event) => {
 		}
 		if (json_data.t === 0x03) {
 			if (json_data.l !== 0) {
+				current_partition = `${json_data.v}`;
+			}
+	      	}
+		if (json_data.t === 0x04) {
+			if (json_data.l !== 0) {
+				next_partition = `${json_data.v}`;
+			}
+	      	}
+		if (json_data.t === 0x05) {
+			if (json_data.l !== 0) {
 				counter = `${json_data.v}`;
 			}
 		}
+		if (json_data.t === 0x06) {
+			if (json_data.l !== 0) {
+				current_part_version = `${json_data.v}`;
+			}
+	      	}
+		if (json_data.t === 0x07) {
+			if (json_data.l !== 0) {
+				current_part_build_date = `${json_data.v}`;
+			}
+	      	}
+		if (json_data.t === 0x08) {
+			if (json_data.l !== 0) {
+				next_part_version = `${json_data.v}`;
+			}
+	      	}
+		if (json_data.t === 0x09) {
+			if (json_data.l !== 0) {
+				next_part_build_date = `${json_data.v}`;
+			}
+	      	}
 
-		messageContainer.innerHTML = `chip model : ${chip_model}<br>`;
-                messageContainer.innerHTML += `chip revision : ${chip_revision}<br>`;
-		messageContainer.innerHTML += `counter = ${counter}<br>`;
+		ChipInfo.innerHTML = `chip model : ${chip_model}<br>`;
+                ChipInfo.innerHTML += `chip revision : ${chip_revision}<br>`;
+		ChipInfo.innerHTML += `counter = ${counter}<br>`;
+
+		PartitionInfo.innerHTML =  `current partition : ${current_partition}<br>`;
+		PartitionInfo.innerHTML += `next partition    : ${next_partition}<br>`;
+
+		current_part_info.innerHTML = `${current_partition} : ${current_part_version} / ${current_part_build_date}<br>`;
+		next_part_info.innerHTML = `${next_partition}  : ${next_part_version} / ${next_part_build_date}<br>`;
 		break;
-	case 'frequencymeter':
+	case 'upload.html':
+		if (json_data.t === 0x03) {
+			if (json_data.l !== 0) {
+				current_partition = `${json_data.v}`;
+			}
+	      	}
+		if (json_data.t === 0x04) {
+			if (json_data.l !== 0) {
+				next_partition = `${json_data.v}`;
+			}
+	      	}
+		PartitionInfo.innerHTML =  `current partition : ${current_partition}<br>`;
+		PartitionInfo.innerHTML += `next partition    : ${next_partition}<br>`;
+		break;
+	case 'frequencymeter.html':
 		if (json_data.t === 0x03 || json_data.t === 0x07) {
 			messageContainer.innerHTML += `Valeur champ ${json_data.t} : ${json_data.v}<br>`;
 	    		}
 		break;
-	case 'powermeter':
+	case 'powermeter.html':
 	       if (json_data.t === 0x46 || json_data.t === 0xAB) {
 			messageContainer.innerHTML += `Valeur champ ${json_data.t} : ${json_data.v}<br>`;
 		}
