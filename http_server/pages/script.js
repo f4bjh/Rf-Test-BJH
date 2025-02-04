@@ -32,7 +32,9 @@ socket.addEventListener('message', (event) => {
 	// Récupérer l'élément HTML avec l'identifiant "message-container" de la page actuelle
 	const ChipInfo = document.getElementById('chip-information');
 	const PartitionInfo = document.getElementById('partition-info');
-		
+	const current_part_info = document.getElementById('current-part-info');
+	const next_part_info = document.getElementById('next-part-info');
+			
 	// Récupérer l'URL de la page actuelle
 	const url = window.location.href;
 
@@ -71,14 +73,24 @@ socket.addEventListener('message', (event) => {
 				counter = `${json_data.v}`;
 			}
 		}
-		if (json_data.t === 0x03) {
+		if (json_data.t === 0x06) {
 			if (json_data.l !== 0) {
-				current_partition = `${json_data.v}`;
+				current_part_version = `${json_data.v}`;
 			}
 	      	}
-		if (json_data.t === 0x04) {
+		if (json_data.t === 0x07) {
 			if (json_data.l !== 0) {
-				next_partition = `${json_data.v}`;
+				current_part_build_date = `${json_data.v}`;
+			}
+	      	}
+		if (json_data.t === 0x08) {
+			if (json_data.l !== 0) {
+				next_part_version = `${json_data.v}`;
+			}
+	      	}
+		if (json_data.t === 0x09) {
+			if (json_data.l !== 0) {
+				next_part_build_date = `${json_data.v}`;
 			}
 	      	}
 
@@ -89,7 +101,8 @@ socket.addEventListener('message', (event) => {
 		PartitionInfo.innerHTML =  `current partition : ${current_partition}<br>`;
 		PartitionInfo.innerHTML += `next partition    : ${next_partition}<br>`;
 
-
+		current_part_info.innerHTML = `${current_partition} : ${current_part_version} / ${current_part_build_date}<br>`;
+		next_part_info.innerHTML = `${next_partition}  : ${next_part_version} / ${next_part_build_date}<br>`;
 		break;
 	case 'upload.html':
 		if (json_data.t === 0x03) {

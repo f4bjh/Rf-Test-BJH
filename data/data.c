@@ -33,6 +33,7 @@ void get_measurement(void *pvParameters)
     T_DATA_TO_SEND data_to_send = DATA_TO_SEND_IS_CHIP_NAME;
     char *json_string_send=NULL;
     cJSON *root;
+    esp_app_desc_t app_desc;
     const esp_partition_t *partition; 
 
     while (1) {
@@ -108,23 +109,74 @@ void get_measurement(void *pvParameters)
 		  cJSON_Delete(root);
 		}
 		break;
+	      case DATA_TO_SEND_IS_CURRENT_PART_VERSION:
+		ESP_LOGV(TAG,"get_measurment : DATA_TO_SEND_IS_CURRENT_PART_VERSION(%d)",data_to_send);
+		partition = esp_ota_get_running_partition();
+		esp_ota_get_partition_description(partition, &app_desc);
+		sprintf(json_data.value,"%s", app_desc.version);
+		json_data.length=strlen(json_data.value);
+		if (json_data.length !=0) {
 
-#if 0
+		  json_data.tag = CURRENT_PART_VERSION_TAG;//should be the same value as in the switch case
+		  root = cJSON_CreateObject();
 
-	const esp_partition_t *partition = esp_ota_get_running_partition();
-	ESP_LOGI(TAG, "Currently running partition: %s", partition->label);
-	ret = esp_ota_get_partition_description(partition, &app_desc);
-	ESP_ERROR_CHECK(ret);
-	ESP_LOGI(TAG,"Magic word=%08X",(unsigned int)app_desc.magic_word);     
-	ESP_LOGI(TAG,"Secure version=%08X",(unsigned int)app_desc.secure_version);    
-	ESP_LOGI(TAG,"Application version=%s",app_desc.version);
-	ESP_LOGI(TAG,"Project name=%s",app_desc.project_name);
-	ESP_LOGI(TAG,"Compile time=%s",app_desc.time);
-	ESP_LOGI(TAG,"Compile date=%s",app_desc.date);
-	ESP_LOGI(TAG,"Version IDF=%s",app_desc.idf_ver);
-#endif
+		  set_json_data(root,&json_data);
 
+		  json_string_send = cJSON_Print(root);
+		  cJSON_Delete(root);
+		}
+		break;
+	      case DATA_TO_SEND_IS_CURRENT_PART_BUILD_DATE:
+		ESP_LOGV(TAG,"get_measurment : DATA_TO_SEND_IS_CURRENT_PART_BUILD_DATE(%d)",data_to_send);
+		partition = esp_ota_get_running_partition();
+		esp_ota_get_partition_description(partition, &app_desc);
+		sprintf(json_data.value,"%s - %s", app_desc.date, app_desc.time);
+		json_data.length=strlen(json_data.value);
+		if (json_data.length !=0) {
 
+		  json_data.tag = CURRENT_PART_BUILD_DATE_TAG;//should be the same value as in the switch case
+		  root = cJSON_CreateObject();
+
+		  set_json_data(root,&json_data);
+
+		  json_string_send = cJSON_Print(root);
+		  cJSON_Delete(root);
+		}
+		break;
+	      case DATA_TO_SEND_IS_NEXT_PART_VERSION:
+		ESP_LOGV(TAG,"get_measurment : DATA_TO_SEND_IS_NEXT_PART_VERSION(%d)",data_to_send);
+		partition = esp_ota_get_next_update_partition(NULL);
+		esp_ota_get_partition_description(partition, &app_desc);
+		sprintf(json_data.value,"%s", app_desc.version);
+		json_data.length=strlen(json_data.value);
+		if (json_data.length !=0) {
+
+		  json_data.tag = NEXT_PART_VERSION_TAG;//should be the same value as in the switch case
+		  root = cJSON_CreateObject();
+
+		  set_json_data(root,&json_data);
+
+		  json_string_send = cJSON_Print(root);
+		  cJSON_Delete(root);
+		}
+		break;
+	      case DATA_TO_SEND_IS_NEXT_PART_BUILD_DATE:
+		ESP_LOGV(TAG,"get_measurment : DATA_TO_SEND_IS_NEXT_PART_BUILD_DATE(%d)",data_to_send);
+		partition = esp_ota_get_next_update_partition(NULL);
+		esp_ota_get_partition_description(partition, &app_desc);
+		sprintf(json_data.value,"%s - %s", app_desc.date, app_desc.time);
+		json_data.length=strlen(json_data.value);
+		if (json_data.length !=0) {
+
+		  json_data.tag = NEXT_PART_BUILD_DATE_TAG;//should be the same value as in the switch case
+		  root = cJSON_CreateObject();
+
+		  set_json_data(root,&json_data);
+
+		  json_string_send = cJSON_Print(root);
+		  cJSON_Delete(root);
+		}
+		break;
 	      case DATA_TO_SEND_IS_COUNTER:
 	      default:
 		ESP_LOGV("TAG", "get_measurement: get DATA_TO_SEND_IS_COUNTER(%d)",data_to_send);
@@ -157,7 +209,7 @@ void get_measurement(void *pvParameters)
 	   else
 	     ESP_LOGI(TAG, "get_measurement: succeed to place measures(%d) - retries=%d", data_to_send, retries);
 
-	   data_to_send = data_to_send == DATA_TO_SEND_IS_COUNTER ? DATA_TO_SEND_IS_CHIP_NAME : data_to_send+1;
+	   data_to_send = data_to_send == DATA_TO_SEND_IS_LAST-1 ? DATA_TO_SEND_IS_CHIP_NAME : data_to_send+1;
 
 
 	    //}
