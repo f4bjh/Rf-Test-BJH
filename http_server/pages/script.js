@@ -64,7 +64,7 @@ socket.addEventListener('message', (event) => {
                 messageContainer.innerHTML += `chip revision : ${chip_revision}<br>`;
 		messageContainer.innerHTML += `counter = ${counter}<br>`;
 		break;
-	case 'upload':
+	case 'upload.html':
 		if (json_data.t === 0x03) {
 			if (json_data.l !== 0) {
 				current_partition = `${json_data.v}`;
@@ -72,12 +72,12 @@ socket.addEventListener('message', (event) => {
 	      	}
 		messageContainer.innerHTML = `current partition : ${current_partition}<br>`;
 		break;
-	case 'frequencymeter':
+	case 'frequencymeter.html':
 		if (json_data.t === 0x03 || json_data.t === 0x07) {
 			messageContainer.innerHTML += `Valeur champ ${json_data.t} : ${json_data.v}<br>`;
 	    		}
 		break;
-	case 'powermeter':
+	case 'powermeter.html':
 	       if (json_data.t === 0x46 || json_data.t === 0xAB) {
 			messageContainer.innerHTML += `Valeur champ ${json_data.t} : ${json_data.v}<br>`;
 		}
