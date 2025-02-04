@@ -314,7 +314,9 @@ static void ws_async_send(void *arg)
     httpd_ws_frame_t ws_pkt;
     char json_string_rcv[JSON_STRING_SIZE_OF_MEASUREMENTS *sizeof(char)];
 
+#ifndef DISABLE_WDT_TASK
     esp_task_wdt_status(NULL);
+#endif
 
     if (xQueue != NULL){
 
@@ -348,8 +350,10 @@ static void ws_server_send_data(httpd_handle_t* server)
 {
     bool send_messages = true;
     //const TickType_t xTicksToWait = pdMS_TO_TICKS( 10000 );
-    
+   
+#ifndef DISABLE_WDT_TASK
     esp_task_wdt_add(NULL);
+#endif
 
     // Send async message to all connected clients that use websocket protocol every 10 seconds
     while (send_messages) {
