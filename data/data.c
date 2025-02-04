@@ -122,7 +122,7 @@ void get_measurement(void *pvParameters)
 	   else
 	     ESP_LOGI(TAG, "get_measurement: succeed to place measures(%d) - retries=%d", data_to_send, retries);
 
-	   data_to_send = data_to_send == DATA_TO_SEND_IS_COUNTER ? DATA_TO_SEND_IS_COUNTER : data_to_send+1;
+	   data_to_send = data_to_send == DATA_TO_SEND_IS_COUNTER ? DATA_TO_SEND_IS_CHIP_NAME : data_to_send+1;
 
 
 	    //}
