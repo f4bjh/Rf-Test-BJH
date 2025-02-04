@@ -220,14 +220,14 @@ esp_err_t update_post_handler(httpd_req_t *req)
 		remaining -= recv_len;
 	}
 
-	// Validate and switch to new OTA image and reboot
-	if (esp_ota_end(ota_handle) != ESP_OK || esp_ota_set_boot_partition(ota_partition) != ESP_OK) {
-			httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Validation / Activation Error");
+	// Validate new OTA image
+	if (esp_ota_end(ota_handle) != ESP_OK) {
+			httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Validation new OTA image  Error");
 			return ESP_FAIL;
 	}
 
 	//httpd_resp_sendstr(req, "Firmware update complete.\n");
-	ESP_LOGI(TAG,"Firmware update complete");
+	ESP_LOGI(TAG,"Firmware update complete on %s", ota_partition->label);
 	vTaskDelay(500 / portTICK_PERIOD_MS);
 	return ESP_OK;
 }
@@ -235,8 +235,13 @@ esp_err_t update_post_handler(httpd_req_t *req)
 
 esp_err_t reboot_post_handler(httpd_req_t *req)
 {
-			
-	ESP_LOGI(TAG,"Reboot requested!!!");
+	const esp_partition_t *ota_partition = esp_ota_get_next_update_partition(NULL);
+	if (esp_ota_set_boot_partition(ota_partition) != ESP_OK) {
+		httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to set boot partition to next");
+		return ESP_FAIL;
+	}
+
+	ESP_LOGI(TAG,"Reboot requested to %s!!!", ota_partition->label);
 	esp_restart();
 
 	return ESP_OK;
