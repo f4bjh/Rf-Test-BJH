@@ -5,14 +5,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" type="text/css" href="style.css" />
+    <script type = "text/javascript" src="script.js"></script>
     <title>Radio Test Bench</title>
 </head>
 
 <body>
- <!--
-	 This does not work. Websocket fail to open...
-	 <script type="text/javascript" src="script.js"></script>
- -->
  <h1>Rf-Test-BJH</h1>
 
  <div id="container">
@@ -38,100 +35,8 @@
      </nav>
  </div>
 
-     <div id="message-container"></div>
-
-<!--
-<div class='element-name'>chip model:
-     <div class='element-value' id="chip_model"></div>
- </div>
- <div class='element-name'>chip revision:
-     <div class='element-value' id="chip_revision"></div>
- </div>
--->
-
-<script type="text/javascript">  
-	var socket = new WebSocket("ws://192.168.4.1/ws");
-	// Déclarer des variables globales pour stocker le chip model et le chip revision
-	let chip_model = `unknown`;
-	let chip_revision = `unknown`;
-	let counter =  `unknown`;
-
-	socket.onopen = function () {
-		socket.send("Hello Server!");
-	};
-
-	// Gérer les messages reçus du serveur
-	//socket.onmessage = function (message) {
-	socket.addEventListener('message', (event) => {
-		const json_data = JSON.parse(event.data);
-
-		// Afficher le tag hexadécimal dans la console
-		console.log(`t : ${json_data.t}`);
-		console.log(`l : ${json_data.l}`);
-		console.log(`v : ${json_data.v}`);
-
-		// Récupérer l'élément HTML avec l'identifiant "message-container" de la page actuelle
-		const messageContainer = document.getElementById('message-container');
-		
-		// Récupérer l'URL de la page actuelle
-		const url = window.location.href;
-
-		// Extraire le paramètre d'identification de la page
-		const pageId = url.split('/').pop(); // Supposons que l'ID de la page est le dernier segment de l'URL
-
-		// Filtrer les données en fonction de la page active
-		switch (pageId) {
-		case '':
-			if (json_data.t === 00) {
-					chip_model = `unable to read chip info`;
-					chip_revision = `unable to read chip info`;
-			}	
-			if (json_data.t === 01) {
-					if (json_data.l !== 0) {
-						chip_model = `${json_data.v}`;
-					}
-	      		}
-			if (json_data.t === 02) {
-					if (json_data.l !== 0) {
-						chip_revision = `${json_data.v}`;
-					}
-			}
-			if (json_data.t === 03) {
-					if (json_data.l !== 0) {
-						counter = `${json_data.v}`;
-					}
-			}
-
-			messageContainer.innerHTML = `chip model : ${chip_model}<br>`;
-                        messageContainer.innerHTML += `chip revision : ${chip_revision}<br>`;
-			messageContainer.innerHTML += `counter = ${counter}<br>`;
-			break;
-		case 'frequencymeter':
-			if (json_data.t === '03' || json_data.t === '07') {
-				messageContainer.innerHTML += `Valeur champ ${json_data.t} : ${json_data.v}<br>`;
-	      		}
-			break;
-		case 'powermeter':
-		       if (json_data.t === '46' || json_data.t === 'AB') {
-				messageContainer.innerHTML += `Valeur champ ${json_data.t} : ${json_data.v}<br>`;
-			}
-			break;
-        	}
-	});
-
-	// Gérer les erreurs de connexion
-	socket.addEventListener('error', (event) => {
-		console.error('Erreur de connexion WebSocket : ', event);
-	});
-
-	// Gérer la fermeture de la connexion
-	socket.addEventListener('close', (event) => {
-		console.log('Connexion WebSocket fermée');
-	});
-
-
-</script>
-
+ <div id="message-container"></div>
+ 
 <br>
 wich partition has booted<br>
 
@@ -142,6 +47,7 @@ idem ota_1 <br>
  <footer>
    <p class='bas_de_page'>F4BJH</p>
  </footer>
+ <!-- <script src="script.js"></script> -->
 </body>
 
 </html>
