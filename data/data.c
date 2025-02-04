@@ -33,6 +33,7 @@ void get_measurement(void *pvParameters)
     T_DATA_TO_SEND data_to_send = DATA_TO_SEND_IS_CHIP_NAME;
     char *json_string_send=NULL;
     cJSON *root;
+    const esp_partition_t *partition; 
 
     while (1) {
 	    
@@ -75,7 +76,7 @@ void get_measurement(void *pvParameters)
 	        break;
 	      case DATA_TO_SEND_IS_CURRENT_PARTITION:
 		ESP_LOGV(TAG,"get_measurment : get DATA_TO_SEND_IS_CURRENT_PARTITION(%d)",data_to_send);
-		const esp_partition_t *partition = esp_ota_get_running_partition();
+		partition = esp_ota_get_running_partition();
 		sprintf(json_data.value,"%s", partition->label);
 		json_data.length=strlen(json_data.value);
 		ESP_LOGI(TAG, "Currently running partition: %s", json_data.value);
@@ -90,6 +91,40 @@ void get_measurement(void *pvParameters)
 		  cJSON_Delete(root);
 		}
 		break;
+	      case DATA_TO_SEND_IS_NEXT_PARTITION:
+		ESP_LOGV(TAG,"get_measurment : get DATA_TO_SEND_IS_NEXT_PARTITION(%d)",data_to_send);
+		partition = esp_ota_get_next_update_partition(NULL);
+		sprintf(json_data.value,"%s", partition->label);
+		json_data.length=strlen(json_data.value);
+		ESP_LOGI(TAG, "Next partition: %s", json_data.value);
+		if (json_data.length !=0) {
+
+		  json_data.tag = NEXT_PARTITION_TAG;//should be the same value as in the switch case
+		  root = cJSON_CreateObject();
+
+		  set_json_data(root,&json_data);
+
+		  json_string_send = cJSON_Print(root);
+		  cJSON_Delete(root);
+		}
+		break;
+
+#if 0
+
+	const esp_partition_t *partition = esp_ota_get_running_partition();
+	ESP_LOGI(TAG, "Currently running partition: %s", partition->label);
+	ret = esp_ota_get_partition_description(partition, &app_desc);
+	ESP_ERROR_CHECK(ret);
+	ESP_LOGI(TAG,"Magic word=%08X",(unsigned int)app_desc.magic_word);     
+	ESP_LOGI(TAG,"Secure version=%08X",(unsigned int)app_desc.secure_version);    
+	ESP_LOGI(TAG,"Application version=%s",app_desc.version);
+	ESP_LOGI(TAG,"Project name=%s",app_desc.project_name);
+	ESP_LOGI(TAG,"Compile time=%s",app_desc.time);
+	ESP_LOGI(TAG,"Compile date=%s",app_desc.date);
+	ESP_LOGI(TAG,"Version IDF=%s",app_desc.idf_ver);
+#endif
+
+
 	      case DATA_TO_SEND_IS_COUNTER:
 	      default:
 		ESP_LOGV("TAG", "get_measurement: get DATA_TO_SEND_IS_COUNTER(%d)",data_to_send);

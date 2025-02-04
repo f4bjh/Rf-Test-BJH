@@ -2,6 +2,7 @@ let chip_model = `unknown`;
 let chip_revision = `unknown`;
 let counter =  `unknown`;
 let current_partition =  `unknown`;
+let next_partition =  `unknown`;
 
 socket = new WebSocket("ws://192.168.4.1/ws");
 
@@ -54,7 +55,7 @@ socket.addEventListener('message', (event) => {
 				chip_revision = `${json_data.v}`;
 			}
 		}
-		if (json_data.t === 0x04) {
+		if (json_data.t === 0x05) {
 			if (json_data.l !== 0) {
 				counter = `${json_data.v}`;
 			}
@@ -70,7 +71,13 @@ socket.addEventListener('message', (event) => {
 				current_partition = `${json_data.v}`;
 			}
 	      	}
-		messageContainer.innerHTML = `current partition : ${current_partition}<br>`;
+		if (json_data.t === 0x04) {
+			if (json_data.l !== 0) {
+				next_partition = `${json_data.v}`;
+			}
+	      	}
+		messageContainer.innerHTML =  `current partition : ${current_partition}<br>`;
+		messageContainer.innerHTML += `next partition    : ${next_partition}<br>`;
 		break;
 	case 'frequencymeter.html':
 		if (json_data.t === 0x03 || json_data.t === 0x07) {
