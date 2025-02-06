@@ -27,7 +27,7 @@ jobs:
         esp_idf_version: v5.4
         target: esp32s3
         path: '.'
-        command:  esp-idf.py partition-table 
+        idf_args: build partition-table 
         
     - name: Build analysis
       run: |
