@@ -40,6 +40,11 @@ $ idf.py build
 $ idf.py -p /dev/ttyACM0 flash monitor
 ```
 
+make clean : 
+```
+$ idf.py fullclean
+```
+
 with minicom:  
 ```
 $ minicom -D /dev/ttyACM0 
