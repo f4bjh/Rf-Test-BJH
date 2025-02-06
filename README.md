@@ -22,6 +22,18 @@ $ idf.py menuconfig
 
 ```
 
+update esp-idf environnement to a release:  
+```
+~/esp/esp-idf$  git fetch origin
+~/esp/esp-idf$  git tag -l
+~/esp/esp-idf$  git checkout tags/v5.4
+~/esp/esp-idf$  git submodule update --init --recursive
+~/esp/esp-idf$  ./install.sh esp32s3
+~/devel/Rf-Test-BJH$  . $HOME/esp/esp-idf/export.sh
+```
+
+
+
 build and flash :  
 ```
 $ idf.py build  
