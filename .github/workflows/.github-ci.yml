@@ -28,9 +28,12 @@ jobs:
         target: esp32s3
         path: '.'
         
-    - name: List build artefacts
+    - name: Build analysis
       run: |
+        echo "List build artefacts"
         ls -l build/
+        echo "print partition table"
+        esp-idf.py partition-table
     
     - name: Store Artifacts
       uses: actions/upload-artifact@v4
