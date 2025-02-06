@@ -27,13 +27,12 @@ jobs:
         esp_idf_version: v5.4
         target: esp32s3
         path: '.'
+        command:  esp-idf.py partition-table 
         
     - name: Build analysis
       run: |
         echo "List build artefacts"
         ls -l build/
-        echo "print partition table"
-        esp-idf.py partition-table
     
     - name: Store Artifacts
       uses: actions/upload-artifact@v4
