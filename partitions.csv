@@ -1,0 +1,8 @@
+# ESP-IDF Partition Table
+# Name,   Type, SubType, Offset,  Size, Flags
+nvs,      data, nvs,     0x9000,  24k
+otadata,  data, ota,     0xF000,  8k
+phy_init, data, phy,     0x11000,  4k
+factory,  app,  factory, 0x12000,  4M
+ota_0,    app,  ota_0,   0x412000, 4M
+ota_1,    app,  ota_1,   0x812000, 4M
