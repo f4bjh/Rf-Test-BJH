@@ -14,6 +14,7 @@
 #include "driver/i2c_master.h"
 #include "esp_lvgl_port.h"
 #include "lvgl.h"
+#include "lcd.h"
 
 #if CONFIG_EXAMPLE_LCD_CONTROLLER_SH1107
 #include "esp_lcd_sh1107.h"
@@ -29,8 +30,8 @@ static const char *TAG = "example";
 //////////////////// Please update the following configuration according to your LCD spec //////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define EXAMPLE_LCD_PIXEL_CLOCK_HZ    (400 * 1000)
-#define EXAMPLE_PIN_NUM_SDA           3
-#define EXAMPLE_PIN_NUM_SCL           4
+#define EXAMPLE_PIN_NUM_SDA           8
+#define EXAMPLE_PIN_NUM_SCL           9
 #define EXAMPLE_PIN_NUM_RST           -1
 #define EXAMPLE_I2C_HW_ADDR           0x3C
 
@@ -48,7 +49,7 @@ static const char *TAG = "example";
 
 extern void example_lvgl_demo_ui(lv_disp_t *disp);
 
-void app_main(void)
+void lcd_init(void)
 {
     ESP_LOGI(TAG, "Initialize I2C bus");
     i2c_master_bus_handle_t i2c_bus = NULL;

@@ -11,8 +11,15 @@ void example_lvgl_demo_ui(lv_disp_t *disp)
     lv_obj_t *scr = lv_disp_get_scr_act(disp);
     lv_obj_t *label = lv_label_create(scr);
     lv_label_set_long_mode(label, LV_LABEL_LONG_SCROLL_CIRCULAR); /* Circular scroll */
-    lv_label_set_text(label, "Hello Espressif, Hello LVGL.");
+    lv_label_set_text(label, "salut jules");
     /* Size of the screen (if you use rotation 90 or 270, please set disp->driver->ver_res) */
     lv_obj_set_width(label, disp->driver->hor_res);
     lv_obj_align(label, LV_ALIGN_TOP_MID, 0, 0);
+
+    lv_obj_t *label2 = lv_label_create(scr);
+    lv_label_set_long_mode(label2, LV_LABEL_LONG_SCROLL_CIRCULAR); /* Circular scroll */
+    lv_label_set_text(label2, "c'est Papa");
+    lv_obj_set_width(label2, disp->driver->hor_res);
+    lv_obj_set_pos(label2, 30,30);
+
 }

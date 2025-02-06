@@ -10,6 +10,7 @@
 #include "http_server.h"
 #include "softap.h"
 #include "data.h"
+#include "lcd.h"
 
 static const char* TAG = "main";
 
@@ -35,6 +36,7 @@ void app_main(void) {
 	ESP_LOGI(TAG,"Compile date=%s",app_desc.date);
 	ESP_LOGI(TAG,"Version IDF=%s",app_desc.idf_ver);
 
+	lcd_init();
 	ESP_ERROR_CHECK(data_init());
 	ESP_ERROR_CHECK(softap_init());
 	ESP_ERROR_CHECK(http_server_init());
