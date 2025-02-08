@@ -11,7 +11,7 @@
 #define KEEP_ALIVE_CONFIG_DEFAULT() \
     { \
     .max_clients = 10,                      \
-    .task_stack_size = 2048,                \
+    .task_stack_size = 4096,                \
     .task_prio = tskIDLE_PRIORITY+1,        \
     .keep_alive_period_ms = 5000,           \
     .not_alive_after_ms = 10000,            \
