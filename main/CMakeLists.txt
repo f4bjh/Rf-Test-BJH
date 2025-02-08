@@ -6,6 +6,8 @@ idf_component_register(
 	SRCS "../cJSON/cJSON.c"
 	SRCS "../data/chip_info.c"
 	SRCS "../data/data.c"
+	SRCS "../lcd/lcd.c"
+	SRCS "../lcd/lvgl.c"
 	INCLUDE_DIRS "../include"
 	EMBED_FILES ../http_server/pages/about.html
 	EMBED_FILES ../http_server/pages/frequencymeter.html

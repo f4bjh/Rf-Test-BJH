@@ -32,7 +32,10 @@ update esp-idf environnement to a release:
 ~/devel/Rf-Test-BJH$  . $HOME/esp/esp-idf/export.sh
 ```
 
-
+generate a savec version of sdkconfig  
+```
+$ idf.py save-defconfig
+```
 
 build and flash :  
 ```

@@ -10,6 +10,7 @@
 #include "http_server.h"
 #include "softap.h"
 #include "data.h"
+#include "lcd.h"
 
 static const char* TAG = "main";
 
@@ -37,8 +38,10 @@ void app_main(void) {
 
 	ESP_ERROR_CHECK(data_init());
 	ESP_ERROR_CHECK(softap_init());
-	ESP_ERROR_CHECK(http_server_init());
+	lcd_init();
 
+	ESP_ERROR_CHECK(http_server_init());
+	
 	esp_ota_img_states_t ota_state;
 	if (esp_ota_get_state_partition(partition, &ota_state) == ESP_OK) {
 		if (ota_state == ESP_OTA_IMG_PENDING_VERIFY) {
