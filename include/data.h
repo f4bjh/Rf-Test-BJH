@@ -1,7 +1,7 @@
 #include "cJSON.h"
 
 //number of element in the queue that content json measurment value
-#define NB_OF_MEASUREMENT_IN_QUEUE  1
+#define NB_OF_MEASUREMENT_IN_QUEUE  10
 
 // Json string content of one measurment is : 
 // + 1 char for {
