@@ -48,6 +48,11 @@ make clean :
 $ idf.py fullclean
 ```
 
+erasing flash : 
+```
+$ esptool.py --chip esp32s3 -p  /dev/ttyACM0 erase_flash
+```
+
 with minicom:  
 ```
 $ minicom -D /dev/ttyACM0 
