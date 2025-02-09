@@ -81,7 +81,7 @@ bool client_not_alive_cb(wss_keep_alive_t h, int fd)
 
 bool check_client_alive_cb(wss_keep_alive_t h, int fd)
 {
-    ESP_LOGI(TAG, "Checking if client (fd=%d) is alive", fd);
+    ESP_LOGI(TAG, "Checking if client (fd=%d) is alive - send ping", fd);
     struct async_resp_arg *resp_arg = malloc(sizeof(struct async_resp_arg));
     assert(resp_arg != NULL);
     resp_arg->hd = wss_keep_alive_get_user_ctx(h);
@@ -286,7 +286,7 @@ static esp_err_t ws_handler(httpd_req_t *req)
  
     // If it was a PONG, update the keep-alive
     if (ws_pkt.type == HTTPD_WS_TYPE_PONG) {
-        ESP_LOGD(TAG, "Received PONG message");
+        ESP_LOGI(TAG, "Received PONG message");
         free(buf);
 	
 	return wss_keep_alive_client_is_active(httpd_get_global_user_ctx(req->handle),

@@ -140,7 +140,7 @@ static void keep_alive_task(void* arg)
                 for (int i=0; i<keep_alive_storage->max_clients; ++i) {
                     if (keep_alive_storage->clients[i].type == CLIENT_ACTIVE) {
                         if (keep_alive_storage->clients[i].last_seen + keep_alive_storage->keep_alive_period_ms <= _tick_get_ms()) {
-                            ESP_LOGD(TAG, "Haven't seen the client (fd=%d) for a while", keep_alive_storage->clients[i].fd);
+                            ESP_LOGI(TAG, "Now is %lld, and haven't seen the client (fd=%d) for a while (last seen at %lld)",  _tick_get_ms(), keep_alive_storage->clients[i].fd, keep_alive_storage->clients[i].last_seen );
                             if (keep_alive_storage->clients[i].last_seen + keep_alive_storage->not_alive_after_ms <= _tick_get_ms()) {
                                 ESP_LOGE(TAG, "Client (fd=%d) not alive!",  keep_alive_storage->clients[i].fd);
                                 keep_alive_storage->client_not_alive_cb(keep_alive_storage, keep_alive_storage->clients[i].fd);

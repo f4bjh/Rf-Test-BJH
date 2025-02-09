@@ -216,7 +216,7 @@ void get_measurement(void *pvParameters)
 	   }
 	   		   
 	   data_to_send = data_to_send == DATA_TO_SEND_IS_LAST-1 ? DATA_TO_SEND_IS_CHIP_NAME : data_to_send+1;
-
+	   ESP_LOGI(TAG, "get_measurement : next measure is %d", data_to_send);
 
      }
 
