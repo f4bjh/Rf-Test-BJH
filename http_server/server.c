@@ -236,7 +236,6 @@ esp_err_t update_post_handler(httpd_req_t *req)
 
 	//httpd_resp_sendstr(req, "Firmware update complete.\n");
 	ESP_LOGI(TAG,"Firmware update complete on %s", ota_partition->label);
-	vTaskDelay(500 / portTICK_PERIOD_MS);
 	return ESP_OK;
 }
 
