@@ -93,9 +93,9 @@ static bool remove_client(wss_keep_alive_t h, int sockfd)
 }
 static bool add_new_client(wss_keep_alive_t h,int sockfd)
 {
-    for (int i=0; i<h->max_clients; ++i) {
+	for (int i=0; i<h->max_clients; ++i) {
         if (h->clients[i].type == NO_CLIENT) {
-            h->clients[i].type = CLIENT_ACTIVE;
+       	    h->clients[i].type = CLIENT_ACTIVE;
             h->clients[i].fd = sockfd;
             h->clients[i].last_seen = _tick_get_ms();
             return true; // success
@@ -114,7 +114,7 @@ static void keep_alive_task(void* arg)
                 get_max_delay(keep_alive_storage) / portTICK_PERIOD_MS) == pdTRUE) {
             switch (client_action.type) {
                 case CLIENT_FD_ADD:
-                    if (!add_new_client(keep_alive_storage, client_action.fd)) {
+		    if (!add_new_client(keep_alive_storage, client_action.fd)) {
                         ESP_LOGE(TAG, "Cannot add new client");
                     }
                     break;
@@ -127,6 +127,8 @@ static void keep_alive_task(void* arg)
                     if (!update_client(keep_alive_storage, client_action.fd, client_action.last_seen)) {
                         ESP_LOGE(TAG, "Cannot find client fd:%d", client_action.fd);
                     }
+		    keep_alive_storage->keep_alive_period_ms = KEEP_ALIVE_PERIOD_MS;
+		    keep_alive_storage->not_alive_after_ms = NOT_ALIVE_AFTER_MS;
                     break;
                 case STOP_TASK:
                     run_task = false;
@@ -145,7 +147,10 @@ static void keep_alive_task(void* arg)
                                 ESP_LOGE(TAG, "Client (fd=%d) not alive!",  keep_alive_storage->clients[i].fd);
                                 keep_alive_storage->client_not_alive_cb(keep_alive_storage, keep_alive_storage->clients[i].fd);
                             } else {
-                                keep_alive_storage->check_client_alive_cb(keep_alive_storage, keep_alive_storage->clients[i].fd);
+                                if (!(keep_alive_storage->check_client_alive_cb(keep_alive_storage, keep_alive_storage->clients[i].fd))) {
+					ESP_LOGI(TAG,"check_client_alive_cb failed on fd=%d", keep_alive_storage->clients[i].fd);
+					wss_keep_alive_remove_client(keep_alive_storage, keep_alive_storage->clients[i].fd);
+				}
                             }
                         }
                     }

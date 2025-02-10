@@ -56,6 +56,8 @@ struct async_resp_arg {
     int fd;
 };
 
+static httpd_handle_t http_server = NULL;
+
 static void send_ping(void *arg)
 {
     struct async_resp_arg *resp_arg = arg;
@@ -81,6 +83,9 @@ bool client_not_alive_cb(wss_keep_alive_t h, int fd)
 
 bool check_client_alive_cb(wss_keep_alive_t h, int fd)
 {
+
+  if (httpd_ws_get_fd_info(http_server, fd) == HTTPD_WS_CLIENT_WEBSOCKET) {
+
     ESP_LOGI(TAG, "Checking if client (fd=%d) is alive - send ping", fd);
     struct async_resp_arg *resp_arg = malloc(sizeof(struct async_resp_arg));
     assert(resp_arg != NULL);
@@ -90,8 +95,12 @@ bool check_client_alive_cb(wss_keep_alive_t h, int fd)
     if (httpd_queue_work(resp_arg->hd, send_ping, resp_arg) == ESP_OK){ 
         return true;
     }
+  } else {
+    ESP_LOGI(TAG, "Client (fd=%d) is not a ws client", fd);
+  }
 
-    return false;
+  return false;
+    
 }
 
 esp_err_t style_get_handler(httpd_req_t *req)
@@ -189,7 +198,6 @@ esp_err_t update_post_handler(httpd_req_t *req)
 
 	const esp_partition_t *ota_partition = esp_ota_get_next_update_partition(NULL);
 	ESP_LOGI(TAG,"Received fw update request - download into partition: %s", ota_partition->label);
-	
 
 	if (!ota_partition) {
 	 ESP_LOGE(TAG, "no ota partition found");
@@ -532,7 +540,7 @@ httpd_uri_t ws = {
 
 esp_err_t http_server_init(void)
 {
-	static httpd_handle_t http_server = NULL;
+	//static httpd_handle_t http_server = NULL;
 
 	// Prepare keep-alive engine
 	wss_keep_alive_config_t keep_alive_config = KEEP_ALIVE_CONFIG_DEFAULT();

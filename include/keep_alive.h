@@ -8,13 +8,18 @@
 */
 #pragma once
 
+#define KEEP_ALIVE_PERIOD_MS_1ST_TIME 500
+#define NOT_ALIVE_AFTER_MS_1ST_TIME 600 
+#define KEEP_ALIVE_PERIOD_MS 5000
+#define NOT_ALIVE_AFTER_MS 6000
+
 #define KEEP_ALIVE_CONFIG_DEFAULT() \
     { \
     .max_clients = 10,                      \
     .task_stack_size = 4096,                \
     .task_prio = tskKEEP_ALIVE,        \
-    .keep_alive_period_ms = 5000,           \
-    .not_alive_after_ms = 10000,            \
+    .keep_alive_period_ms = KEEP_ALIVE_PERIOD_MS_1ST_TIME,           \
+    .not_alive_after_ms = NOT_ALIVE_AFTER_MS_1ST_TIME,            \
 }
 
 struct wss_keep_alive_storage;
