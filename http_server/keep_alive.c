@@ -44,6 +44,7 @@ typedef struct wss_keep_alive_storage {
 typedef struct wss_keep_alive_storage* wss_keep_alive_t;
 
 static const char *TAG = "wss_keep_alive";
+TaskHandle_t xHandle_keep_alive;
 
 static uint64_t _tick_get_ms(void)
 {
@@ -180,7 +181,7 @@ wss_keep_alive_t wss_keep_alive_start(wss_keep_alive_config_t *config)
     keep_alive_storage->user_ctx = config->user_ctx;
     keep_alive_storage->q =  xQueueCreate(queue_size, sizeof(client_fd_action_t));
     if (xTaskCreate(keep_alive_task, "keep_alive_task", config->task_stack_size,
-                    keep_alive_storage, config->task_prio, NULL) != pdTRUE) {
+                    keep_alive_storage, config->task_prio, &xHandle_keep_alive) != pdTRUE) {
         wss_keep_alive_stop(keep_alive_storage);
         return false;
     }

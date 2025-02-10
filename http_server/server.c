@@ -51,6 +51,8 @@ extern const uint8_t upload_html_end[] asm("_binary_upload_html_end");
 extern const uint8_t wifi_html_start[] asm("_binary_wifi_html_start");
 extern const uint8_t wifi_html_end[] asm("_binary_wifi_html_end");
 
+extern TaskHandle_t xHandle_keep_alive;
+
 struct async_resp_arg {
     httpd_handle_t hd;
     int fd;
@@ -199,6 +201,8 @@ esp_err_t update_post_handler(httpd_req_t *req)
 	const esp_partition_t *ota_partition = esp_ota_get_next_update_partition(NULL);
 	ESP_LOGI(TAG,"Received fw update request - download into partition: %s", ota_partition->label);
 
+       	vTaskSuspend( xHandle_keep_alive );
+
 	if (!ota_partition) {
 	 ESP_LOGE(TAG, "no ota partition found");
 	 return ESP_ERR_NOT_FOUND;
@@ -236,6 +240,8 @@ esp_err_t update_post_handler(httpd_req_t *req)
 
 	//httpd_resp_sendstr(req, "Firmware update complete.\n");
 	ESP_LOGI(TAG,"Firmware update complete on %s", ota_partition->label);
+	vTaskResume (xHandle_keep_alive);
+	
 	return ESP_OK;
 }
 
