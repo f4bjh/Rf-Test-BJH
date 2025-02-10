@@ -249,8 +249,12 @@ esp_err_t reboot_post_handler(httpd_req_t *req)
 
 static esp_err_t ws_handler(httpd_req_t *req)
 {
+    
+    ESP_LOGI(TAG, "ws_handler: httpd_handle_t=%p, sockfd=%d, client_info:%d", req->handle,
+                 httpd_req_to_sockfd(req), httpd_ws_get_fd_info(req->handle, httpd_req_to_sockfd(req)));
+
     if (req->method == HTTP_GET) {
-        ESP_LOGI(TAG, "Handshake done, the new connection was opened");
+        ESP_LOGI(TAG, "Handshake done, new connection opened (fd=%d)", httpd_req_to_sockfd(req));
         return ESP_OK;
     }
     httpd_ws_frame_t ws_pkt;
@@ -264,7 +268,7 @@ static esp_err_t ws_handler(httpd_req_t *req)
         ESP_LOGE(TAG, "httpd_ws_recv_frame failed to get frame len with %d", ret);
         return ret;
     }
-    ESP_LOGI(TAG, "frame len is %d", ws_pkt.len);
+    
     if (ws_pkt.len) {
         /* ws_pkt.len + 1 is for NULL termination as we are expecting a string */
         buf = calloc(1, ws_pkt.len + 1);
@@ -282,11 +286,9 @@ static esp_err_t ws_handler(httpd_req_t *req)
         }
     }
 
-    ESP_LOGI(TAG, "type is 0x%02x", ws_pkt.type);
- 
     // If it was a PONG, update the keep-alive
     if (ws_pkt.type == HTTPD_WS_TYPE_PONG) {
-        ESP_LOGI(TAG, "Received PONG message");
+        ESP_LOGI(TAG, "Received PONG message (fd=%d) - update the keep-alive",httpd_req_to_sockfd(req));
         free(buf);
 	
 	return wss_keep_alive_client_is_active(httpd_get_global_user_ctx(req->handle),
@@ -295,8 +297,8 @@ static esp_err_t ws_handler(httpd_req_t *req)
     // If it was a TEXT message, just echo it back
     } else if (ws_pkt.type == HTTPD_WS_TYPE_TEXT || ws_pkt.type == HTTPD_WS_TYPE_PING || ws_pkt.type == HTTPD_WS_TYPE_CLOSE) {
         if (ws_pkt.type == HTTPD_WS_TYPE_TEXT) {
-            ESP_LOGI(TAG, "Received packet with message: %s", ws_pkt.payload);
-        } else if (ws_pkt.type == HTTPD_WS_TYPE_PING) {
+            ESP_LOGI(TAG, "Received packet with message (fd=%d): %s",httpd_req_to_sockfd(req), ws_pkt.payload);
+	} else if (ws_pkt.type == HTTPD_WS_TYPE_PING) {
             // Response PONG packet to peer
             ESP_LOGI(TAG, "Got a WS PING frame, Replying PONG");
             ws_pkt.type = HTTPD_WS_TYPE_PONG;
@@ -304,20 +306,15 @@ static esp_err_t ws_handler(httpd_req_t *req)
             // Response CLOSE packet with no payload to peer
             ws_pkt.len = 0;
             ws_pkt.payload = NULL;
-        }
+	}
         
 	ret = httpd_ws_send_frame(req, &ws_pkt);
         if (ret != ESP_OK) {
             ESP_LOGE(TAG, "httpd_ws_send_frame failed with %d", ret);
         }
-        
-	ESP_LOGI(TAG, "ws_handler: httpd_handle_t=%p, sockfd=%d, client_info:%d", req->handle,
-                 httpd_req_to_sockfd(req), httpd_ws_get_fd_info(req->handle, httpd_req_to_sockfd(req)));
-        free(buf);
-        return ret;
     }
     free(buf);
-    return ESP_OK;
+    return ret;
 }
 
 
@@ -340,19 +337,19 @@ static void ws_async_send(void *arg)
         ws_pkt.payload = (uint8_t*)json_string_rcv;
         ws_pkt.len = strlen(json_string_rcv);
         ws_pkt.type = HTTPD_WS_TYPE_TEXT;
-        ESP_LOGI(TAG, "ws_async_send : send (%p) %d bytes of data to ws client", json_string_rcv, ws_pkt.len);
-        ESP_LOGV(TAG, "ws_async_send : data to sent from queue (%p) is :",xQueue);
+        ESP_LOGI(TAG, "send async (%p) %d bytes of data to ws client (fd=%d)", json_string_rcv, ws_pkt.len, fd);
+        ESP_LOGV(TAG, "data to sent from queue (%p) is :",xQueue);
 	ESP_LOGV(TAG, "%s",ws_pkt.payload);
         esp_err_t err = httpd_ws_send_frame_async(hd, fd, &ws_pkt);
 
 	if (err != ESP_OK) {
-    		ESP_LOGE(TAG, "ws_async_send: failed to send WebSocket message: %s", esp_err_to_name(err));
+    		ESP_LOGE(TAG, "failed to send WebSocket message: %s", esp_err_to_name(err));
 	}
 
       } else
-	ESP_LOGI(TAG, "ws_async_send : no data found in queue (%p)", xQueue);
+	ESP_LOGI(TAG, "no data found in queue (%p)", xQueue);
     } else {
-      ESP_LOGE(TAG,"ws_async_send: xQueue measurement not created\n"); 	    
+      ESP_LOGE(TAG,"xQueue measurement not created\n"); 	    
     }
 
     assert(resp_arg!=NULL);
@@ -384,7 +381,7 @@ static void ws_server_send_data(httpd_handle_t* server)
 	    for (size_t i=0; i < clients; ++i) {
 		int sock = client_fds[i];
 		if (httpd_ws_get_fd_info(*server, sock) == HTTPD_WS_CLIENT_WEBSOCKET) {
-		    ESP_LOGI(TAG, "Active client (fd=%d) -> sending async message", sock);
+		    ESP_LOGV(TAG, "sending async message to active client (fd=%d)", sock);
 		    struct async_resp_arg *resp_arg = malloc(sizeof(struct async_resp_arg));
 		    assert(resp_arg != NULL);
 		    resp_arg->hd = *server;
