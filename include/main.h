@@ -1,6 +1,8 @@
 #define DISABLE_WDT_TASK
 
-#define tskHTTP_SERVER tskIDLE_PRIORITY+5   //surcharge esp_http_server.h
+//#define tskKEEP_ALIVE  tskIDLE_PRIORITY+1
+#define tskHTTP_SERVER tskIDLE_PRIORITY+1  
 #define tskGET_MEASURMENT tskHTTP_SERVER+1
+#define tskKEEP_ALIVE  tskGET_MEASURMENT+1
 
 #define HTTP_SERVER_WAKE_UP_TICK 250 

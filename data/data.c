@@ -80,7 +80,7 @@ void get_measurement(void *pvParameters)
 		partition = esp_ota_get_running_partition();
 		sprintf(json_data.value,"%s", partition->label);
 		json_data.length=strlen(json_data.value);
-		ESP_LOGI(TAG, "Currently running partition: %s", json_data.value);
+		ESP_LOGV(TAG, "Currently running partition: %s", json_data.value);
 		if (json_data.length !=0) {
 
 		  json_data.tag = CURRENT_PARTITION_NAME_TAG;//should be the same value as in the switch case
@@ -97,7 +97,7 @@ void get_measurement(void *pvParameters)
 		partition = esp_ota_get_next_update_partition(NULL);
 		sprintf(json_data.value,"%s", partition->label);
 		json_data.length=strlen(json_data.value);
-		ESP_LOGI(TAG, "Next partition: %s", json_data.value);
+		ESP_LOGV(TAG, "Next partition: %s", json_data.value);
 		if (json_data.length !=0) {
 
 		  json_data.tag = NEXT_PARTITION_TAG;//should be the same value as in the switch case
@@ -196,24 +196,27 @@ void get_measurement(void *pvParameters)
 		break;
             }
 
-  	   // Send the value to the queue
-	   ESP_LOGI(TAG, "get_measurement: place measures(%d) in queue (%p)", data_to_send, xQueue);
-	   ESP_LOGV(TAG, "%s",json_string_send);
-	   //xQueueSend( xQueue, json_string_send, 0 );
-	   while( (xQueueSend( xQueue, json_string_send, xDelay ) == errQUEUE_FULL) && (retries <5)) {
-	     retries++;
+	   if (json_data.length !=0) {
+
+	  	   // Send the value to the queue
+		   ESP_LOGI(TAG, "get_measurement: place measures(%d) in queue (%p)", data_to_send, xQueue);
+		   ESP_LOGV(TAG, "%s",json_string_send);
+		   //xQueueSend( xQueue, json_string_send, 0 );
+		   while( (xQueueSend( xQueue, json_string_send, xDelay ) == errQUEUE_FULL) && (retries <5)) {
+		     retries++;
+		   }
+
+		   if (retries == 5) 
+	  	     ESP_LOGI(TAG, "get_measurement: failed to place measures(%d) in queue(%p) : retries = %d", data_to_send--, xQueue,retries);
+		   else
+		     ESP_LOGI(TAG, "get_measurement: succeed to place measures(%d) - retries=%d", data_to_send, retries);
+
+           }else {
+	     ESP_LOGI(TAG, "get_measurement: measures(%d) has not data", data_to_send);
 	   }
-
-	   if (retries == 5) 
-  	     ESP_LOGI(TAG, "get_measurement: failed to place measures(%d) in queue(%p) : retries = %d", data_to_send--, xQueue,retries);
-	   else
-	     ESP_LOGI(TAG, "get_measurement: succeed to place measures(%d) - retries=%d", data_to_send, retries);
-
+	   		   
 	   data_to_send = data_to_send == DATA_TO_SEND_IS_LAST-1 ? DATA_TO_SEND_IS_CHIP_NAME : data_to_send+1;
-
-
-	    //}
-            //vTaskDelayUntil( &xLastWakeTime, xDelay);
+	   ESP_LOGV(TAG, "get_measurement : next measure is %d", data_to_send);
 
      }
 
