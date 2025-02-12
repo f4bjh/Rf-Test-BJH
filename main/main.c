@@ -8,7 +8,7 @@
 #include "esp_log.h"
 
 #include "http_server.h"
-#include "softap.h"
+#include "wifi.h"
 #include "data.h"
 #include "lcd.h"
 
@@ -37,7 +37,7 @@ void app_main(void) {
 	ESP_LOGI(TAG,"Version IDF=%s",app_desc.idf_ver);
 
 	ESP_ERROR_CHECK(data_init());
-	ESP_ERROR_CHECK(softap_init());
+	wifi_init();
 	lcd_init();
 
 	ESP_ERROR_CHECK(http_server_init());
