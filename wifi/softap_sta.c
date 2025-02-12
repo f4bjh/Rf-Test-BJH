@@ -215,16 +215,13 @@ void wifi_init(void)
     ESP_LOGI(TAG_AP, "ESP_WIFI_MODE_AP");
     esp_netif_t *esp_netif_ap = wifi_init_softap();
 
-#if 0
     /* Initialize STA */
     ESP_LOGI(TAG_STA, "ESP_WIFI_MODE_STA");
     esp_netif_t *esp_netif_sta = wifi_init_sta();
-#endif
 
     /* Start WiFi */
     ESP_ERROR_CHECK(esp_wifi_start() );
 
-#if 0
     /*
      * Wait until either the connection is established (WIFI_CONNECTED_BIT) or
      * connection failed for the maximum number of re-tries (WIFI_FAIL_BIT).
@@ -240,11 +237,11 @@ void wifi_init(void)
      * hence we can test which event actually happened. */
     if (bits & WIFI_CONNECTED_BIT) {
         ESP_LOGI(TAG_STA, "connected to ap SSID:%s password:%s",
-                 EXAMPLE_ESP_WIFI_STA_SSID, EXAMPLE_ESP_WIFI_STA_PASSWD);
+                 ssid, password);
         softap_set_dns_addr(esp_netif_ap,esp_netif_sta);
     } else if (bits & WIFI_FAIL_BIT) {
         ESP_LOGI(TAG_STA, "Failed to connect to SSID:%s, password:%s",
-                 EXAMPLE_ESP_WIFI_STA_SSID, EXAMPLE_ESP_WIFI_STA_PASSWD);
+                 ssid,password);
     } else {
         ESP_LOGE(TAG_STA, "UNEXPECTED EVENT");
         return;
@@ -257,5 +254,4 @@ void wifi_init(void)
     if (esp_netif_napt_enable(esp_netif_ap) != ESP_OK) {
         ESP_LOGE(TAG_STA, "NAPT not enabled on the netif: %p", esp_netif_ap);
     }
-#endif
 }
