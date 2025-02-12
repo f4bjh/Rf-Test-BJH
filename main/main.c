@@ -7,12 +7,18 @@
 #include <nvs_flash.h>
 #include "esp_log.h"
 
+#include "main.h"
 #include "http_server.h"
 #include "wifi.h"
 #include "data.h"
 #include "lcd.h"
 
 static const char* TAG = "main";
+
+char ssid[] = EXAMPLE_ESP_WIFI_STA_SSID;
+char password[] = EXAMPLE_ESP_WIFI_STA_PASSWD;
+
+bool wifi_credentials_set=false;
 
 void app_main(void) {
 	esp_err_t ret = nvs_flash_init();

@@ -40,8 +40,6 @@
 */
 
 /* STA Configuration */
-#define EXAMPLE_ESP_WIFI_STA_SSID           "Rf-Test-BJH AP"
-#define EXAMPLE_ESP_WIFI_STA_PASSWD         "test"
 #define EXAMPLE_ESP_MAXIMUM_RETRY           5
 
 #if CONFIG_ESP_WIFI_AUTH_OPEN
@@ -75,6 +73,9 @@
 
 static const char *TAG_AP = "WiFi SoftAP";
 static const char *TAG_STA = "WiFi Sta";
+
+extern char ssid[]; 
+extern char password[]; 
 
 static int s_retry_num = 0;
 
@@ -141,8 +142,8 @@ esp_netif_t *wifi_init_sta(void)
 
     wifi_config_t wifi_sta_config = {
         .sta = {
-            .ssid = EXAMPLE_ESP_WIFI_STA_SSID,
-            .password = EXAMPLE_ESP_WIFI_STA_PASSWD,
+            .ssid = "",
+            .password = "",
             .scan_method = WIFI_ALL_CHANNEL_SCAN,
             .failure_retry_cnt = EXAMPLE_ESP_MAXIMUM_RETRY,
             /* Authmode threshold resets to WPA2 as default if password matches WPA2 standards (password len => 8).
@@ -154,6 +155,9 @@ esp_netif_t *wifi_init_sta(void)
             .sae_pwe_h2e = WPA3_SAE_PWE_BOTH,
         },
     };
+
+    strcpy((char*)wifi_sta_config.sta.ssid, (const char*)ssid);
+    strcpy((char*)wifi_sta_config.sta.password, (const char*)password);
 
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_sta_config) );
 

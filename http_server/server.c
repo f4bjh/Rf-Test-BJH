@@ -10,6 +10,7 @@
 #include "esp_log.h"
 #include "keep_alive.h"
 #include "esp_task_wdt.h"
+#include <nvs_flash.h>
 
 #include "main.h"
 #include "http_server.h"
@@ -50,6 +51,8 @@ extern const uint8_t upload_html_start[] asm("_binary_upload_html_start");
 extern const uint8_t upload_html_end[] asm("_binary_upload_html_end");
 extern const uint8_t wifi_html_start[] asm("_binary_wifi_html_start");
 extern const uint8_t wifi_html_end[] asm("_binary_wifi_html_end");
+
+extern bool wifi_credentials_set;
 
 extern TaskHandle_t xHandle_keep_alive;
 
@@ -429,6 +432,66 @@ void wss_close_fd(httpd_handle_t hd, int sockfd)
     close(sockfd);
 }
 
+// HTTP request handler for setting Wi-Fi credentials
+static esp_err_t set_wifi_post_handler(httpd_req_t *req)
+{
+
+    char buf[1024];
+    int ret, remaining = req->content_len;
+    char ssid[32]= {0};
+    char password[64] = {0};
+
+    while (remaining > 0) {
+        // Read the data for the request
+        if ((ret = httpd_req_recv(req, buf, MIN(remaining, sizeof(buf)))) <= 0) {
+            if (ret == HTTPD_SOCK_ERR_TIMEOUT) {
+                httpd_resp_send_408(req);
+            }
+            return ESP_FAIL;
+        }
+
+        // Process the received data
+
+	char *ptr = buf;
+        httpd_query_key_value(ptr, "ssid", ssid, 32);
+        httpd_query_key_value(ptr, "password", password, 64);
+
+	// Set Wi-Fi credentials
+        wifi_credentials_set = true;
+        nvs_handle_t my_handle;
+        esp_err_t err = nvs_open("storage", NVS_READWRITE, &my_handle);
+        if (err != ESP_OK) {
+            ESP_LOGE(TAG, "Error (%s) opening NVS handle!\n", esp_err_to_name(err));
+        } else {
+            err = nvs_set_str(my_handle, "ssid", ssid);
+            if (err != ESP_OK) {
+                ESP_LOGE(TAG, "Error (%s) writing!\n", esp_err_to_name(err));
+            }
+            err = nvs_set_str(my_handle, "password", password);
+            if (err != ESP_OK) {
+                ESP_LOGE(TAG, "Error (%s) writing!\n", esp_err_to_name(err));
+            }
+#if 0
+		err = nvs_set_str(my_handle, "wifi_credentials_set", wifi_credentials_set);
+                if (err != ESP_OK) {
+                    ESP_LOGE(TAG, "Error (%s) writing!\n", esp_err_to_name(err));
+                }
+#endif		
+
+            nvs_close(my_handle);
+	    httpd_resp_send(req, "Wi-Fi credentials set successfully", HTTPD_RESP_USE_STRLEN);
+
+        }
+        remaining -= ret;
+    }
+
+    // Send a response back to the client
+    const char *resp_str = "POST request received";
+    httpd_resp_send(req, resp_str, HTTPD_RESP_USE_STRLEN);
+
+    return ESP_OK;
+}
+
 httpd_uri_t style_get = {
 	.uri	  = "/style.css",
 	.method   = HTTP_GET,
@@ -543,6 +606,14 @@ httpd_uri_t ws = {
         .handle_ws_control_frames = true
 };
 
+// HTTP server URI handler structure
+httpd_uri_t set_wifi_uri_handler = {
+    .uri       = "/set_wifi",
+    .method    = HTTP_POST,
+    .handler   = set_wifi_post_handler,
+    .user_ctx  = NULL
+};
+
 esp_err_t http_server_init(void)
 {
 	//static httpd_handle_t http_server = NULL;
@@ -583,6 +654,7 @@ esp_err_t http_server_init(void)
 		httpd_register_uri_handler(http_server, &update_post);
 		httpd_register_uri_handler(http_server, &reboot_post);
 		httpd_register_uri_handler(http_server, &ws);
+		httpd_register_uri_handler(http_server, &set_wifi_uri_handler);
 		wss_keep_alive_set_user_ctx(keep_alive, http_server);
 
 	}

@@ -5,4 +5,7 @@
 #define tskGET_MEASURMENT tskHTTP_SERVER+1
 #define tskKEEP_ALIVE  tskGET_MEASURMENT+1
 
-#define HTTP_SERVER_WAKE_UP_TICK 250 
+#define HTTP_SERVER_WAKE_UP_TICK 250
+
+#define EXAMPLE_ESP_WIFI_STA_SSID           "Rf-Test-BJH"
+#define EXAMPLE_ESP_WIFI_STA_PASSWD         "test"
