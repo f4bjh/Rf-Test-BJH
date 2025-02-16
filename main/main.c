@@ -17,8 +17,7 @@ static const char* TAG = "main";
 
 char ssid[] = EXAMPLE_ESP_WIFI_STA_SSID;
 char password[] = EXAMPLE_ESP_WIFI_STA_PASSWD;
-
-bool wifi_credentials_set=false;
+bool wifi_credentials_set=true;
 
 void app_main(void) {
 	esp_err_t ret = nvs_flash_init();
