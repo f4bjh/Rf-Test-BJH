@@ -139,7 +139,11 @@ esp_netif_t *wifi_init_softap(void)
 /* Initialize wifi station */
 esp_netif_t *wifi_init_sta(void)
 {
+    char *hostname;
     esp_netif_t *esp_netif_sta = esp_netif_create_default_wifi_sta();
+
+    // Set the hostname for the network interface
+    esp_netif_set_hostname(esp_netif_sta, CONFIG_LWIP_LOCAL_HOSTNAME);
 
     wifi_config_t wifi_sta_config = {
         .sta = {
@@ -163,7 +167,7 @@ esp_netif_t *wifi_init_sta(void)
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_sta_config) );
 
     ESP_LOGI(TAG_STA, "wifi_init_sta finished.");
-
+    
     return esp_netif_sta;
 }
 
@@ -181,6 +185,7 @@ void softap_set_dns_addr(esp_netif_t *esp_netif_ap,esp_netif_t *esp_netif_sta)
 void wifi_init(void)
 {
    esp_netif_t *esp_netif_ap, *esp_netif_sta ;
+   char *hostname;
 
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
@@ -230,7 +235,10 @@ void wifi_init(void)
       esp_netif_sta = wifi_init_sta();
     
       /* Start WiFi */
+     
       ESP_ERROR_CHECK(esp_wifi_start() );
+      esp_netif_get_hostname(esp_netif_sta, (const char**)&hostname);
+      ESP_LOGI(TAG_AP, "hostname: %s", hostname);
 
       /*
        * Wait until either the connection is established (WIFI_CONNECTED_BIT) or
