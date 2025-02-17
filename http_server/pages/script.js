@@ -4,7 +4,8 @@ let counter =  `unknown`;
 let current_partition =  `unknown`;
 let next_partition =  `unknown`;
 
-socket = new WebSocket("ws://Rf-Test-BJH/ws");
+  var serverIp = window.location.hostname;
+  socket = new WebSocket("ws://" + serverIp + "/ws");
 
 socket.onopen = function () {
 	socket.send("Hello Server!");
