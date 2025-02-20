@@ -6,6 +6,7 @@
 #include <esp_ota_ops.h>
 #include <nvs_flash.h>
 #include "esp_log.h"
+#include <string.h>
 
 #include "main.h"
 #include "http_server.h"
@@ -17,7 +18,7 @@ static const char* TAG = "main";
 
 char ssid[] = EXAMPLE_ESP_WIFI_STA_SSID;
 char password[] = EXAMPLE_ESP_WIFI_STA_PASSWD;
-bool wifi_credentials_set=true;
+bool wifi_credentials_set=false;
 
 void app_main(void) {
 	esp_err_t ret = nvs_flash_init();
@@ -59,9 +60,11 @@ void app_main(void) {
 
 	ESP_LOGI(TAG,"F4BJH %d 0x%01x",wifi_credentials_set_u8, wifi_credentials_set_u8);
 
-	if (wifi_credentials_set)
+	if (wifi_credentials_set) {
+	  strcpy((char*)ssid, (const char*)wifi_ssid);
+          strcpy((char*)password, (const char*)wifi_password);
   	  ESP_LOGI(TAG,"F4BJH2 %d %s %s",wifi_credentials_set, wifi_ssid,wifi_password);
-	else
+	} else
 	  ESP_LOGI(TAG,"F4BJH3 wifi credentials not set");
 
 	nvs_close(handle);
