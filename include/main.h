@@ -10,3 +10,6 @@
 #define WIFI_CREDENTIAL_SET_IN_FLASH 0
 #define WIFI_CREDENTIAL_NOT_SET_IN_FLASH 1
 
+#define NVS_KEY_SSID "wifissid"
+#define NVS_KEY_PASSWORD "wifipassword"
+#define NVS_KEY_WIFI_SET_CREDENTIAL "wifiset"

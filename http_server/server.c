@@ -628,17 +628,17 @@ static esp_err_t set_wifi_post_handler(httpd_req_t *req)
         if (err != ESP_OK) {
             ESP_LOGE(TAG, "Error (%s) opening NVS handle!\n", esp_err_to_name(err));
         } else {
-            err = nvs_set_str(my_handle, "ssid", ssid);
+            err = nvs_set_str(my_handle, NVS_KEY_SSID, ssid);
             if (err != ESP_OK) {
-                ESP_LOGE(TAG, "Error (%s) writing!\n", esp_err_to_name(err));
+                ESP_LOGE(TAG, "Error (%s) writing ssid\n", esp_err_to_name(err));
             }
-            err = nvs_set_str(my_handle, "password", password);
+            err = nvs_set_str(my_handle, NVS_KEY_PASSWORD, password);
             if (err != ESP_OK) {
-                ESP_LOGE(TAG, "Error (%s) writing!\n", esp_err_to_name(err));
+                ESP_LOGE(TAG, "Error (%s) writing password\n", esp_err_to_name(err));
             }
-	    err = nvs_set_u8(my_handle, "wifi_credentials_set", wifi_credentials_set);
+	    err = nvs_set_u8(my_handle, NVS_KEY_WIFI_SET_CREDENTIAL, wifi_credentials_set);
             if (err != ESP_OK) {
-                ESP_LOGE(TAG, "Error (%s) writing!\n", esp_err_to_name(err));
+                ESP_LOGE(TAG, "Error (%s) writing wifi_credentials_set\n", esp_err_to_name(err));
             }
 
             nvs_close(my_handle);
