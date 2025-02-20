@@ -11,6 +11,7 @@
 #include "keep_alive.h"
 #include "esp_task_wdt.h"
 #include <nvs_flash.h>
+#include "esp_check.h"
 
 #include "main.h"
 #include "http_server.h"
@@ -432,18 +433,165 @@ void wss_close_fd(httpd_handle_t hd, int sockfd)
     close(sockfd);
 }
 
+
+
+void ngx_unescape_uri(u_char **dst, u_char **src, size_t size, unsigned int type)
+{
+    u_char  *d, *s, ch, c, decoded;
+    enum {
+        sw_usual = 0,
+        sw_quoted,
+        sw_quoted_second
+    } state;
+
+    d = *dst;
+    s = *src;
+
+    state = 0;
+    decoded = 0;
+
+    while (size--) {
+
+        ch = *s++;
+
+        switch (state) {
+        case sw_usual:
+            if (ch == '?'
+                    && (type & (NGX_UNESCAPE_URI | NGX_UNESCAPE_REDIRECT))) {
+                *d++ = ch;
+                goto done;
+            }
+
+            if (ch == '%') {
+                state = sw_quoted;
+                break;
+            }
+
+            *d++ = ch;
+            break;
+
+        case sw_quoted:
+
+            if (ch >= '0' && ch <= '9') {
+                decoded = (u_char) (ch - '0');
+                state = sw_quoted_second;
+                break;
+            }
+
+            c = (u_char) (ch | 0x20);
+            if (c >= 'a' && c <= 'f') {
+                decoded = (u_char) (c - 'a' + 10);
+                state = sw_quoted_second;
+                break;
+            }
+
+            /* the invalid quoted character */
+
+            state = sw_usual;
+
+            *d++ = ch;
+
+            break;
+
+        case sw_quoted_second:
+
+            state = sw_usual;
+
+            if (ch >= '0' && ch <= '9') {
+                ch = (u_char) ((decoded << 4) + (ch - '0'));
+
+                if (type & NGX_UNESCAPE_REDIRECT) {
+                    if (ch > '%' && ch < 0x7f) {
+                        *d++ = ch;
+                        break;
+                    }
+
+                    *d++ = '%'; *d++ = *(s - 2); *d++ = *(s - 1);
+
+                    break;
+                }
+
+                *d++ = ch;
+
+                break;
+            }
+
+            c = (u_char) (ch | 0x20);
+            if (c >= 'a' && c <= 'f') {
+                ch = (u_char) ((decoded << 4) + (c - 'a') + 10);
+
+                if (type & NGX_UNESCAPE_URI) {
+                    if (ch == '?') {
+                        *d++ = ch;
+                        goto done;
+                    }
+
+                    *d++ = ch;
+                    break;
+                }
+
+                if (type & NGX_UNESCAPE_REDIRECT) {
+                    if (ch == '?') {
+                        *d++ = ch;
+                        goto done;
+                    }
+
+                    if (ch > '%' && ch < 0x7f) {
+                        *d++ = ch;
+                        break;
+                    }
+
+                    *d++ = '%'; *d++ = *(s - 2); *d++ = *(s - 1);
+                    break;
+                }
+
+                *d++ = ch;
+
+                break;
+            }
+
+            /* the invalid quoted character */
+
+            break;
+        }
+    }
+
+done:
+
+    *dst = d;
+    *src = s;
+}
+
+void example_uri_decode(char *dest, const char *src, size_t len)
+{
+    if (!src || !dest) {
+        return;
+    }
+
+    unsigned char *src_ptr = (unsigned char *)src;
+    unsigned char *dst_ptr = (unsigned char *)dest;
+    ngx_unescape_uri(&dst_ptr, &src_ptr, len, NGX_UNESCAPE_URI);
+}
+
 // HTTP request handler for setting Wi-Fi credentials
 static esp_err_t set_wifi_post_handler(httpd_req_t *req)
 {
 
-    char buf[1024];
-    int ret, remaining = req->content_len;
+    char buf[128];
+    int ret;
+    char param[EXAMPLE_HTTP_QUERY_KEY_MAX_LEN] = {0};
     char ssid[32]= {0};
     char password[64] = {0};
+    size_t buf_len = req->content_len;
+    char *ptr;
 
-    while (remaining > 0) {
+	if (buf_len>128) {
+            httpd_resp_send(req, "Invalid Wi-Fi credentials", HTTPD_RESP_USE_STRLEN);
+	    return ESP_FAIL;
+	}
+
         // Read the data for the request
-        if ((ret = httpd_req_recv(req, buf, MIN(remaining, sizeof(buf)))) <= 0) {
+        if ((ret = httpd_req_recv(req, buf, buf_len)) <= 0) {
             if (ret == HTTPD_SOCK_ERR_TIMEOUT) {
                 httpd_resp_send_408(req);
             }
@@ -452,9 +600,30 @@ static esp_err_t set_wifi_post_handler(httpd_req_t *req)
 
         // Process the received data
 
-	char *ptr = buf;
-        httpd_query_key_value(ptr, "ssid", ssid, 32);
-        httpd_query_key_value(ptr, "password", password, 64);
+	ptr = malloc((buf_len+1) * sizeof(char));
+	strncpy(ptr,buf,buf_len);
+	ptr[buf_len]='\0';
+
+        //httpd_query_key_value(ptr, "ssid", ssid, 32);
+	httpd_query_key_value(ptr, "ssid", param, 32); 
+        example_uri_decode(ssid, param, strnlen(param, EXAMPLE_HTTP_QUERY_KEY_MAX_LEN));
+        ESP_LOGI(TAG, "Decoded ssid => %s", ssid);
+
+	httpd_query_key_value(ptr, "password", param, 64); 
+        example_uri_decode(password, param, strnlen(param, EXAMPLE_HTTP_QUERY_KEY_MAX_LEN));
+        ESP_LOGI(TAG, "Decoded password parameter => %s", password);
+	
+	free(ptr);
+
+ 	if (strlen(ssid)>32) {
+            httpd_resp_send(req, "Invalid ssid", HTTPD_RESP_USE_STRLEN);
+	    return ESP_FAIL;
+	}
+	if (strlen(password)>64) {
+            httpd_resp_send(req, "Invalid password", HTTPD_RESP_USE_STRLEN);
+	    return ESP_FAIL;
+	}
+
 
 	// Set Wi-Fi credentials
         wifi_credentials_set = true;
@@ -482,12 +651,9 @@ static esp_err_t set_wifi_post_handler(httpd_req_t *req)
 	    httpd_resp_send(req, "Wi-Fi credentials set successfully", HTTPD_RESP_USE_STRLEN);
 
         }
-        remaining -= ret;
-    }
 
     // Send a response back to the client
-    const char *resp_str = "POST request received";
-    httpd_resp_send(req, resp_str, HTTPD_RESP_USE_STRLEN);
+    httpd_resp_send(req, "Wi-Fi credentials set successfully", HTTPD_RESP_USE_STRLEN);
 
     return ESP_OK;
 }
