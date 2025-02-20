@@ -58,14 +58,12 @@ void app_main(void) {
 	ret = nvs_get_u8(handle, NVS_KEY_WIFI_SET_CREDENTIAL, &wifi_credentials_set_u8);
 	wifi_credentials_set = wifi_credentials_set_u8 == WIFI_CREDENTIAL_SET_IN_FLASH;
 
-	ESP_LOGI(TAG,"F4BJH %d 0x%01x",wifi_credentials_set_u8, wifi_credentials_set_u8);
-
 	if (wifi_credentials_set) {
 	  strcpy((char*)ssid, (const char*)wifi_ssid);
           strcpy((char*)password, (const char*)wifi_password);
-  	  ESP_LOGI(TAG,"F4BJH2 %d %s %s",wifi_credentials_set, wifi_ssid,wifi_password);
+  	  ESP_LOGI(TAG,"wifi credentials set");
 	} else
-	  ESP_LOGI(TAG,"F4BJH3 wifi credentials not set");
+	  ESP_LOGI(TAG,"wifi credentials not set");
 
 	nvs_close(handle);
 
