@@ -21,9 +21,9 @@ void example_lvgl_demo_ui(lv_disp_t *disp)
     esp_netif_t* netif = NULL;
 
     //for Wifi station
-    //netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");    
+    netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");    
     //fir Wifi AP
-    netif = esp_netif_get_handle_from_ifkey("WIFI_AP_DEF");
+    //netif = esp_netif_get_handle_from_ifkey("WIFI_AP_DEF");
     esp_netif_get_ip_info(netif,&ip_info);
     ESP_LOGI(TAG, "ip : "IPSTR ,IP2STR(&ip_info.ip));
 

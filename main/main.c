@@ -6,13 +6,19 @@
 #include <esp_ota_ops.h>
 #include <nvs_flash.h>
 #include "esp_log.h"
+#include <string.h>
 
+#include "main.h"
 #include "http_server.h"
-#include "softap.h"
+#include "wifi.h"
 #include "data.h"
 #include "lcd.h"
 
 static const char* TAG = "main";
+
+char ssid[] = EXAMPLE_ESP_WIFI_STA_SSID;
+char password[] = EXAMPLE_ESP_WIFI_STA_PASSWD;
+bool wifi_credentials_set=false;
 
 void app_main(void) {
 	esp_err_t ret = nvs_flash_init();
@@ -36,8 +42,35 @@ void app_main(void) {
 	ESP_LOGI(TAG,"Compile date=%s",app_desc.date);
 	ESP_LOGI(TAG,"Version IDF=%s",app_desc.idf_ver);
 
+	nvs_handle_t handle;
+	ret = nvs_open("storage", NVS_READWRITE, &handle);
+	ESP_ERROR_CHECK(ret);
+
+	char wifi_ssid[32];
+	size_t wifi_ssid_len = sizeof(wifi_ssid);
+	ret = nvs_get_str(handle, NVS_KEY_SSID, wifi_ssid, &wifi_ssid_len);
+
+	char wifi_password[64];
+	size_t wifi_password_len = sizeof(wifi_password);
+	ret = nvs_get_str(handle, NVS_KEY_PASSWORD, wifi_password, &wifi_password_len);
+
+	uint8_t wifi_credentials_set_u8;
+	ret = nvs_get_u8(handle, NVS_KEY_WIFI_SET_CREDENTIAL, &wifi_credentials_set_u8);
+	wifi_credentials_set = wifi_credentials_set_u8 == WIFI_CREDENTIAL_SET_IN_FLASH;
+
+	ESP_LOGI(TAG,"F4BJH %d 0x%01x",wifi_credentials_set_u8, wifi_credentials_set_u8);
+
+	if (wifi_credentials_set) {
+	  strcpy((char*)ssid, (const char*)wifi_ssid);
+          strcpy((char*)password, (const char*)wifi_password);
+  	  ESP_LOGI(TAG,"F4BJH2 %d %s %s",wifi_credentials_set, wifi_ssid,wifi_password);
+	} else
+	  ESP_LOGI(TAG,"F4BJH3 wifi credentials not set");
+
+	nvs_close(handle);
+
 	ESP_ERROR_CHECK(data_init());
-	ESP_ERROR_CHECK(softap_init());
+	wifi_init();
 	lcd_init();
 
 	ESP_ERROR_CHECK(http_server_init());
