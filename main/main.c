@@ -41,6 +41,31 @@ void app_main(void) {
 	ESP_LOGI(TAG,"Compile date=%s",app_desc.date);
 	ESP_LOGI(TAG,"Version IDF=%s",app_desc.idf_ver);
 
+	nvs_handle_t handle;
+	ret = nvs_open("storage", NVS_READWRITE, &handle);
+	ESP_ERROR_CHECK(ret);
+
+	char wifi_ssid[32];
+	size_t wifi_ssid_len = sizeof(wifi_ssid);
+	ret = nvs_get_str(handle, "ssid", wifi_ssid, &wifi_ssid_len);
+
+	char wifi_password[64];
+	size_t wifi_password_len = sizeof(wifi_password);
+	ret = nvs_get_str(handle, "password", wifi_password, &wifi_password_len);
+
+	uint8_t wifi_credentials_set_u8;
+	ret = nvs_get_u8(handle, "wifi_credentials_set", &wifi_credentials_set_u8);
+	wifi_credentials_set = wifi_credentials_set_u8 == WIFI_CREDENTIAL_SET_IN_FLASH;
+
+	ESP_LOGI(TAG,"F4BJH %d 0x%01x",wifi_credentials_set_u8, wifi_credentials_set_u8);
+
+	if (wifi_credentials_set)
+  	  ESP_LOGI(TAG,"F4BJH2 %d %s %s",wifi_credentials_set, wifi_ssid,wifi_password);
+	else
+	  ESP_LOGI(TAG,"F4BJH3 wifi credentials not set");
+
+	nvs_close(handle);
+
 	ESP_ERROR_CHECK(data_init());
 	wifi_init();
 	lcd_init();

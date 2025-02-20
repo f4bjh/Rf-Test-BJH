@@ -53,8 +53,6 @@ extern const uint8_t upload_html_end[] asm("_binary_upload_html_end");
 extern const uint8_t wifi_html_start[] asm("_binary_wifi_html_start");
 extern const uint8_t wifi_html_end[] asm("_binary_wifi_html_end");
 
-extern bool wifi_credentials_set;
-
 extern TaskHandle_t xHandle_keep_alive;
 
 struct async_resp_arg {
@@ -582,6 +580,7 @@ static esp_err_t set_wifi_post_handler(httpd_req_t *req)
     char param[EXAMPLE_HTTP_QUERY_KEY_MAX_LEN] = {0};
     char ssid[32]= {0};
     char password[64] = {0};
+    uint8_t wifi_credentials_set = WIFI_CREDENTIAL_NOT_SET_IN_FLASH;
     size_t buf_len = req->content_len;
     char *ptr;
 
@@ -604,14 +603,11 @@ static esp_err_t set_wifi_post_handler(httpd_req_t *req)
 	strncpy(ptr,buf,buf_len);
 	ptr[buf_len]='\0';
 
-        //httpd_query_key_value(ptr, "ssid", ssid, 32);
 	httpd_query_key_value(ptr, "ssid", param, 32); 
         example_uri_decode(ssid, param, strnlen(param, EXAMPLE_HTTP_QUERY_KEY_MAX_LEN));
-        ESP_LOGI(TAG, "Decoded ssid => %s", ssid);
 
 	httpd_query_key_value(ptr, "password", param, 64); 
         example_uri_decode(password, param, strnlen(param, EXAMPLE_HTTP_QUERY_KEY_MAX_LEN));
-        ESP_LOGI(TAG, "Decoded password parameter => %s", password);
 	
 	free(ptr);
 
@@ -626,7 +622,7 @@ static esp_err_t set_wifi_post_handler(httpd_req_t *req)
 
 
 	// Set Wi-Fi credentials
-        wifi_credentials_set = true;
+        wifi_credentials_set = WIFI_CREDENTIAL_SET_IN_FLASH;
         nvs_handle_t my_handle;
         esp_err_t err = nvs_open("storage", NVS_READWRITE, &my_handle);
         if (err != ESP_OK) {
@@ -640,22 +636,21 @@ static esp_err_t set_wifi_post_handler(httpd_req_t *req)
             if (err != ESP_OK) {
                 ESP_LOGE(TAG, "Error (%s) writing!\n", esp_err_to_name(err));
             }
-#if 0
-		err = nvs_set_str(my_handle, "wifi_credentials_set", wifi_credentials_set);
-                if (err != ESP_OK) {
-                    ESP_LOGE(TAG, "Error (%s) writing!\n", esp_err_to_name(err));
-                }
-#endif		
+	    err = nvs_set_u8(my_handle, "wifi_credentials_set", wifi_credentials_set);
+            if (err != ESP_OK) {
+                ESP_LOGE(TAG, "Error (%s) writing!\n", esp_err_to_name(err));
+            }
 
             nvs_close(my_handle);
-	    httpd_resp_send(req, "Wi-Fi credentials set successfully", HTTPD_RESP_USE_STRLEN);
 
         }
+       
+       	if (err != ESP_OK) 
+	  httpd_resp_send(req, "Wi-Fi credentials set unsuccessfully in flash", HTTPD_RESP_USE_STRLEN);
+	else
+	  httpd_resp_send(req, "Wi-Fi credentials set successfully", HTTPD_RESP_USE_STRLEN);
 
-    // Send a response back to the client
-    httpd_resp_send(req, "Wi-Fi credentials set successfully", HTTPD_RESP_USE_STRLEN);
-
-    return ESP_OK;
+        return err; 
 }
 
 httpd_uri_t style_get = {
