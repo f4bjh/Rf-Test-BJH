@@ -217,6 +217,7 @@ esp_err_t wss_keep_alive_client_is_active(wss_keep_alive_t h, int fd)
 {
     client_fd_action_t client_fd_action = { .fd = fd, .type = CLIENT_UPDATE,
                                             .last_seen = _tick_get_ms()};
+    ESP_LOGV(TAG," update the keep-alive(%d) last_seen=%lld", client_fd_action.fd, client_fd_action.last_seen);
     if (xQueueSendToBack(h->q, &client_fd_action, 0) == pdTRUE) {
         return ESP_OK;
     }

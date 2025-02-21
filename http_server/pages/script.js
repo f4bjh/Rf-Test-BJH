@@ -3,11 +3,17 @@ let chip_revision = `unknown`;
 let counter =  `unknown`;
 let current_partition =  `unknown`;
 let next_partition =  `unknown`;
+let current_part_version = `unknown`;
+let current_part_build_date = `unknown`;
+let next_part_version = `unknown`;
+let next_part_build_date = `unknown`;
 
-  var serverIp = window.location.hostname;
-  socket = new WebSocket("ws://" + serverIp + "/ws");
+
+var serverIp = window.location.hostname;
+socket = new WebSocket("ws://" + serverIp + "/ws");
 
 socket.onopen = function () {
+        console.log('Connexion WebSocket at' + serverIp);
 	socket.send("Hello Server!");
 };
 
