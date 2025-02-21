@@ -60,6 +60,8 @@ extern char ssid[];
 extern char password[]; 
 extern bool wifi_credentials_set;
 
+uint8_t  wifi_mode=0;
+
 static int s_retry_num = 0;
 
 /* FreeRTOS event group to signal when we are connected/disconnected */
@@ -209,6 +211,7 @@ void wifi_init(void)
       /* Start WiFi */
       ESP_ERROR_CHECK(esp_wifi_start() );
 
+      wifi_mode |= (1<<WIFI_MODE_AP_BIT);
     } else {
 
       /* Initialize STA */
@@ -218,6 +221,7 @@ void wifi_init(void)
       /* Start WiFi */
      
       ESP_ERROR_CHECK(esp_wifi_start() );
+      wifi_mode |= (1<<WIFI_MODE_STA_BIT);	   
       esp_netif_get_hostname(esp_netif_sta, (const char**)&hostname);
       ESP_LOGI(TAG_AP, "hostname: %s", hostname);
 
