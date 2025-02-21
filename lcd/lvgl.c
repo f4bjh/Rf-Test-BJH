@@ -21,7 +21,7 @@ void example_lvgl_demo_ui(lv_disp_t *disp)
     esp_err_t ret;
     esp_app_desc_t app_desc;
     esp_netif_ip_info_t ip_info_ap, ip_info_sta;
-    esp_netif_t* netif_ap, netif_sta = NULL;
+    esp_netif_t* netif_ap, *netif_sta = NULL;
 
     //for Wifi AP mode
     if (wifi_mode & (1<<WIFI_MODE_AP_BIT)) {
