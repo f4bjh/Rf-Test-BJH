@@ -26,13 +26,13 @@ void example_lvgl_demo_ui(lv_disp_t *disp)
     //for Wifi AP mode
     if (wifi_mode & (1<<WIFI_MODE_AP_BIT)) {
       netif_ap = esp_netif_get_handle_from_ifkey("WIFI_AP_DEF");  
-      esp_netif_get_ip_info(netif,&ip_info_ap);
+      esp_netif_get_ip_info(netif_ap,&ip_info_ap);
       ESP_LOGI(TAG, "AP ip : "IPSTR ,IP2STR(&ip_info_ap.ip));  
     }
     //for Wifi station mode
     if (wifi_mode & (1<<WIFI_MODE_STA_BIT)) {
       netif_sta = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");  
-      esp_netif_get_ip_info(netif,&ip_info_sta);
+      esp_netif_get_ip_info(netif_sta,&ip_info_sta);
       ESP_LOGI(TAG, "STA ip : "IPSTR ,IP2STR(&ip_info_sta.ip));  
     }
 
@@ -48,7 +48,7 @@ void example_lvgl_demo_ui(lv_disp_t *disp)
     } else if (wifi_mode & (1<<WIFI_MODE_STA_BIT)) {
        lv_label_set_text_fmt(label, "%s\n%s\n" IPSTR ,app_desc.project_name, app_desc.version,IP2STR(&ip_info_ap.ip));
     } else {
-      lv_label_set_text_fmt(label, "%s\n%s\n IP address error" IPSTR ,app_desc.project_name, app_desc.version);
+      lv_label_set_text_fmt(label, "%s\n%s\n IP address error",app_desc.project_name, app_desc.version);
     }
     /* Size of the screen (if you use rotation 90 or 270, please set disp->driver->ver_res) */
     lv_obj_set_width(label, disp->driver->hor_res);
