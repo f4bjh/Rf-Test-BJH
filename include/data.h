@@ -26,26 +26,26 @@ typedef enum {
   CURRENT_PART_BUILD_DATE_TAG,
   NEXT_PART_VERSION_TAG,
   NEXT_PART_BUILD_DATE_TAG,
-} T_DATA_TAG;
+} meas_tag_t;
+
+typedef enum {
+	CHIP_NAME,
+	CHIP_VERSION,
+	CURRENT_PARTITION,
+	NEXT_PARTITION,
+	COUNTER,
+	CURRENT_PART_VERSION,
+	CURRENT_PART_BUILD_DATE,
+	NEXT_PART_VERSION,
+	NEXT_PART_BUILD_DATE,
+	LAST_MEAS
+} meas_number_t;
 
 typedef struct json_data_s {
-  T_DATA_TAG tag;
+  meas_tag_t tag;
   char length;
   char value[64];  
 } json_data_t;
-
-typedef enum {
-	DATA_TO_SEND_IS_CHIP_NAME,
-	DATA_TO_SEND_IS_CHIP_VERSION,
-	DATA_TO_SEND_IS_CURRENT_PARTITION,
-	DATA_TO_SEND_IS_NEXT_PARTITION,
-	DATA_TO_SEND_IS_COUNTER,
-	DATA_TO_SEND_IS_CURRENT_PART_VERSION,
-	DATA_TO_SEND_IS_CURRENT_PART_BUILD_DATE,
-	DATA_TO_SEND_IS_NEXT_PART_VERSION,
-	DATA_TO_SEND_IS_NEXT_PART_BUILD_DATE,
-	DATA_TO_SEND_IS_LAST
-} T_DATA_TO_SEND;
 
 void set_json_data (cJSON *root, json_data_t *json_data);
 void set_default_json_string(char **default_json_string);
