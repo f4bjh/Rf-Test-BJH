@@ -7,8 +7,8 @@
 
 
 typedef enum {
-  STATE_MEAS_INIT,
   STATE_MEAS_PENDING,
+  STATE_MEAS_INIT,
   STATE_MEAS_GET,
   STATE_MEAS_CALC,
   STATE_MEAS_FORMAT_JSON,
@@ -16,11 +16,11 @@ typedef enum {
   STATE_MEAS_REMOVE,
   STATE_MEAS_ADD,
   N_STATES,
-} StateId;
+} state_id;
 
 typedef enum {
   NOEVENT,
-  INIT_MEAS,
+  INIT_MEAS,    //event set by http_server task, for all measures of an html page 
   PULL_MEAS,    //event set by fsm task that will poll cpu1 data is measures are ready
   PUSH_MEAS,    //event set by fsm that will push data in http server queue to upload measure to client
   REMOVE_MEAS,  //event set by fsm that will remove measures (in case of error, or because it is pure static measures
@@ -28,7 +28,7 @@ typedef enum {
 } event_t;
 
 typedef struct {
-T_MEAS_NUMBER meas_num;
+meas_number_t meas_num;
 event_t  ev;
 } q_msg_t;
 
@@ -39,7 +39,7 @@ typedef struct{
 } measures_t
 
 struct {
- T_MEAS_NUMBER meas_num;
+ //meas_number_t meas_num;
  boolean once;
  uint8_t retries;
  measures_t measures;
@@ -63,36 +63,36 @@ void evaluate_state(Event e);
 
 // State routines to be executed at each state
 esp_err_t state_meas_init_func(instance_data_t *data);
-esp_err_t state_meas_get(instance_data_t *data);
-esp_err_t state_meas_calc(instance_data_t *data);
-esp_err_t state_meas_fromat_json(instance_data_t *data);
-esp_err_t state_meas_push_in_queue(instance_data_t *data);
-esp_err_t state_meas_pending(instance_data_t *data);
-esp_err_t state_meas_remove(instance_data_t *data);
-esp_err_t state_meas_add(instance_data_t *data);
+esp_err_t state_meas_get_func(instance_data_t *data);
+esp_err_t state_meas_calc_func(instance_data_t *data);
+esp_err_t state_meas_fromat_json_func(instance_data_t *data);
+esp_err_t state_meas_push_in_queue_func(instance_data_t *data);
+esp_err_t state_meas_pending_func(instance_data_t *data);
+esp_err_t state_meas_remove_func(instance_data_t *data);
+esp_err_t state_meas_add_func(instance_data_t *data);
 
 // Defining each state with associated state routine
-const state state_meas_init = {STATE_MEAS_INIT, state_meas_init_func};
-const state state_meas_get = {STATE_MEAS_GET, state_meas_get};
-const state state_meas_calc = {STATE_MEAS_CALC, state_meas_calc};
-const state state_meas_format_json = {STATE_FORMAT_JSON, state_meas_format_json};
-const state state_meas_push_in_queue = {STATE_PUSH_IN_QUEUE, state_meas_push_in_queue};
-const state state_meas_pending = {STATE_PENDING, state_meas_pending};
-const state state_meas_remove = {STATE_REMOVE, state_meas_remove};
-const state state_meas_add = {STATE_ADD, state_meas_add};
+const state_t state_meas_init = {STATE_MEAS_INIT, state_meas_init_func};
+const state_t state_meas_get = {STATE_MEAS_GET, state_meas_get_func};
+const state_t state_meas_calc = {STATE_MEAS_CALC, state_meas_calc_func};
+const state_t state_meas_format_json = {STATE_FORMAT_JSON, state_meas_format_json_func};
+const state_t state_meas_push_in_queue = {STATE_PUSH_IN_QUEUE, state_meas_push_in_queue_func};
+const state_t state_meas_pending = {STATE_PENDING, state_meas_pending_func};
+const state_t state_meas_remove = {STATE_REMOVE, state_meas_remove_func};
+const state_t state_meas_add = {STATE_ADD, state_meas_add_func};
 
 
 // Defning state transition matrix as visualized in the header (events not
 // defined, result in mainting the same state)
 state_t state_transition_mat[N_STATES][N_EVENTS] = {
    // NO_EVENT,                 INIT_MEAS,                PULL_MEAS,                PUSH_MEAS,                REMOVE_MEAS
-   { STATE_MEAS_PENDING,        STATE_MEAS_INIT,          STATE_MEAS_GET,           STATE_MEAS_PENDING,       STATE_MEAS_REMOVE},
-   { STATE_MEAS_INIT,           STATE_MEAS_INIT,          STATE_MEAS_GET,           STATE_MEAS_INIT,          STATE_MEAS_REMOVE},
-   { STATE_MEAS_GET,            STATE_MEAS_GET,           STATE_MEAS_GET,           STATE_MEAS_CALC,          STATE_MEAS_REMOVE},
-   { STATE_MEAS_CALC,           STATE_MEAS_CALC,          STATE_MEAS_CALC,          STATE_MEAS_FORMAT_JSON,   STATE_MEAS_REMOVE},
-   { STATE_MEAS_FORMAT_JSON,    STATE_MEAS_FORMAT_JSON,   STATE_MEAS_FORMAT_JSON,   STATE_MEAS_PUSH_IN_QUEUE, STATE_MEAS_REMOVE},
-   { STATE_MEAS_PUSH_IN_QUEUE,  STATE_MEAS_PUSH_IN_QUEUE, STATE_MEAS_GET,           STATE_MEAS_PUSH_IN_QUEUE, STATE_MEAS_REMOVE},
-   { STATE_MEAS_REMOVE,         STATE_MEAS_PENDING,       STATE_MEAS_REMOVE,        STATE_MEAS_REMOVE,        STATE_MEAS_REMOVE}};
+   { state_meas_pending,        state_meas_init,          state_meas_get,           state_meas_pending,       state_meas_remove},
+   { state_meas_init,           state_meas_init,          state_meas_get,           state_meas_init,          state_meas_remove},
+   { state_meas_get,            state_meas_get,           state_meas_get,           state_meas_calc,          state_meas_remove},
+   { state_meas_calc,           state_meas_calc,          state_meas_calc,          state_meas_format_json,   state_meas_remove},
+   { state_meas_format_json,    state_meas_format_json,   state_meas_format_json,   state_meas_push_in_queue, state_meas_remove},
+   { state_meas_push_in_queue,  state_meas_push_in_queue, state_meas_get,           state_meas_push_in_queue, state_meas_remove},
+   { state_meas_remove,         state_meas_pending,       state_meas_remove,        state_meas_remove,        state_meas_remove}};
    
 
 T_DATA_TAG get_measurement_tag(instance_data_t *data)
@@ -110,23 +110,18 @@ T_DATA_TAG result;
 
 
 // Define current state and initialize
-state_t current_state = STATE_MEAS_INIT;
+state_t current_state = state_meas_init;
 
-int main()
+
+
+int fsm_meas_main()
 {
 
-  instance_data_t data[DATA_TO_SEND_IS_LAST];
-  event_t ev;
+  instance_data_t data[LAST_MEAS] = {0};
+  //event_t ev;
     q_msg_t q_msg;
 
-//initilaisation de data
-  for i=0; i<LAS_DATA_TO_SEND) {
-  data->meas_num = meas_num;
-  switch(meas_num) 
-    case DATA_TO_SEND_IS_CHIP_NAME: 
-       data->once=true;
-       init_func = 
-         }
+  
 
     while(1) {
     // Event to receive from user
@@ -137,10 +132,17 @@ int main()
     //get all the event recevied in queue
     //2 bytes : [meas number T_DATA_TO_SEND] - [ event event_t]    perhaps, rename DATA_TO_SEND, in something likie measnumerment number
 
-    // par courir la queue
-   //  pour chaque evenement chopée dans la queue : 
-      xQueueReceive(queue, &q_msg , 0 ) == pdTRUE) {
-      evaluate_state(q_msg.ev, &data[q_msg.meas_num]);
+    
+   
+      if (xQueueReceive(queue, &q_msg , 0 ) == pdTRUE) {
+
+//		      il y a peut etre plusieurs msg dans la queue, a checker !!
+
+
+		        evaluate_state(q_msg.ev, &data[q_msg.meas_num]);
+     } 
+	    
+      
     
     };
     return (0);
@@ -165,11 +167,11 @@ void evaluate_state(event_t ev, instance_data_t **data)
 
 esp_err_t (*state_meas_init)(instance_data_t * data)
 { 
+data->init_func(data);
 
-data->init_func(data)
-
-
-  
+	 q_msg.meas_num = data->meas_num;
+     q_msg.ev = PULL_MEAS;
+     xQueueSend(queue, &q_msg,0); //a affiner. time to wait ? nom de la queue fsm ? nom q_msg ?
   return ESP_OK;
 }
 
@@ -264,4 +266,14 @@ esp_err_t (*state_meas_push_in_queue)(instance_data_t * data)
 
   return ESP_OK;
 }
+
+
+//to be called by http_server
+esp_err_t init_meas_fsm(meas_number_t meas_num)
+{
+     q_msg.meas_num = meas_num;
+     q_msg.ev = INIT_MEAS;
+     xQueueSend(queue, &q_msg,0); //a affiner. time to wait ? nom de la queue fsm ? nom q_msg ?
+}
+
 
