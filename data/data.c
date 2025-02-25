@@ -199,7 +199,7 @@ void get_measurement(void *pvParameters)
 	   if (json_data.length !=0) {
 
 	  	   // Send the value to the queue
-		   ESP_LOGI(TAG, "get_measurement: place measures(%d) in queue (%p)", data_to_send, xQueue);
+		   ESP_LOGV(TAG, "get_measurement: place measures(%d) in queue (%p)", data_to_send, xQueue);
 		   ESP_LOGV(TAG, "%s",json_string_send);
 		   //xQueueSend( xQueue, json_string_send, 0 );
 		   while( (xQueueSend( xQueue, json_string_send, xDelay ) == errQUEUE_FULL) && (retries <5)) {
@@ -207,7 +207,7 @@ void get_measurement(void *pvParameters)
 		   }
 
 		   if (retries == 5) 
-	  	     ESP_LOGI(TAG, "get_measurement: failed to place measures(%d) in queue(%p) : retries = %d", data_to_send--, xQueue,retries);
+	  	     ESP_LOGE(TAG, "get_measurement: failed to place measures(%d) in queue(%p) : retries = %d", data_to_send--, xQueue,retries);
 		   else
 		     ESP_LOGI(TAG, "get_measurement: succeed to place measures(%d) - retries=%d", data_to_send, retries);
 

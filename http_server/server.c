@@ -303,7 +303,7 @@ static esp_err_t ws_handler(httpd_req_t *req)
 
     // If it was a PONG, update the keep-alive
     if (ws_pkt.type == HTTPD_WS_TYPE_PONG) {
-        ESP_LOGI(TAG, "Received PONG message (fd=%d) - update the keep-alive",httpd_req_to_sockfd(req));
+        ESP_LOGI(TAG, "Received PONG message (fd=%d)",httpd_req_to_sockfd(req));
         free(buf);
 	
 	return wss_keep_alive_client_is_active(httpd_get_global_user_ctx(req->handle),
@@ -357,9 +357,10 @@ static void ws_async_send(void *arg)
 	ESP_LOGV(TAG, "%s",ws_pkt.payload);
         esp_err_t err = httpd_ws_send_frame_async(hd, fd, &ws_pkt);
 
-	if (err != ESP_OK) {
-    		ESP_LOGE(TAG, "failed to send WebSocket message: %s", esp_err_to_name(err));
-	}
+	if (err != ESP_OK) 
+    	  ESP_LOGE(TAG, "failed to send WebSocket message: %s", esp_err_to_name(err));
+	else 
+	  ESP_LOGV(TAG,"send async(%d) OK",fd);
 
       } else
 	ESP_LOGI(TAG, "no data found in queue (%p)", xQueue);
