@@ -11,7 +11,6 @@
 #include "main.h"
 #include "http_server.h"
 #include "wifi.h"
-#include "data.h"
 #include "lcd.h"
 
 static const char* TAG = "main";
@@ -67,7 +66,6 @@ void app_main(void) {
 
 	nvs_close(handle);
 
-	ESP_ERROR_CHECK(data_init());
 	wifi_init();
 	lcd_init();
 
