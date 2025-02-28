@@ -121,7 +121,7 @@ instance_meas_t *meas_mgt_init(instance_config_meas_t meas_config)
       }
 
     }
- 
+
     //create FSM-measurment on cpu0 fsm_meas_task
     xTaskCreate( meas_fsm_task, "measurment fsm ", 4096, instance_meas, tskFSM_MEASURMENT, NULL );
 

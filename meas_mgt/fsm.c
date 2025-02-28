@@ -55,9 +55,12 @@ void meas_fsm_task(void *arg)
   instance_meas_t *instance_meas = arg;
   meas_action_t meas_action;
 
+
+
     while(1) {    
-      xQueueReceive(instance_meas->q_action, (void*)&meas_action , 0 );
-      evaluate_state(meas_action.event,instance_meas + meas_action.meas_num);
+      if (xQueueReceive(instance_meas->q_action, (void*)&meas_action , 0 ) == pdTRUE) {
+        evaluate_state(meas_action.event,instance_meas + meas_action.meas_num);
+      }
     };
 	
 }
