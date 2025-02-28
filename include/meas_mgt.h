@@ -94,7 +94,7 @@ typedef struct {
 typedef struct instance_meas_s instance_meas_t;
 typedef  esp_err_t (init_func_hw_proto)(meas_t*);
 typedef init_func_hw_proto* init_func_hw_t;
-typedef  esp_err_t (calc_func_proto)(meas_t*);
+typedef  esp_err_t (calc_func_proto)(instance_meas_t *instance_meas);
 typedef calc_func_proto* calc_func_t;
 
 typedef struct instance_meas_s {
@@ -128,22 +128,13 @@ esp_err_t meas_state_push_in_queue_func(instance_meas_t *instance_meas);
 esp_err_t meas_state_pending_func(instance_meas_t *instance_meas);
 esp_err_t meas_state_remove_func(instance_meas_t *instance_meas);
 
-// Defining each state with associated state routine
-const meas_state_t meas_state_pending = {MEAS_STATE_PENDING, meas_state_pending_func};
-const meas_state_t meas_state_init = {MEAS_STATE_INIT, meas_state_init_func};
-const meas_state_t meas_state_get = {MEAS_STATE_GET, meas_state_get_func};
-const meas_state_t meas_state_calc = {MEAS_STATE_CALC, meas_state_calc_func};
-const meas_state_t meas_state_format_json = {MEAS_STATE_FORMAT_JSON, meas_state_format_json_func};
-const meas_state_t meas_state_push_in_queue = {MEAS_STATE_PUSH_IN_QUEUE, meas_state_push_in_queue_func};
-const meas_state_t meas_state_remove = {MEAS_STATE_REMOVE, meas_state_remove_func};
-
-
 instance_meas_t *meas_mgt_init(instance_config_meas_t meas_config);
+void meas_fsm_task(void *arg);
 
 //void set_json_data (cJSON *root, json_data_t *json_data);
 void set_default_json_string(char **default_json_string);
 
 //to move to aother header file
 void get_chip_info_model(meas_t *measure);
-init_func_hw_t init_chip_info_model(meas_t *measure);
-calc_func_t  calc_chip_info_model(instance_meas_t *instance_meas);
+esp_err_t init_chip_info_model(meas_t *measure);
+esp_err_t  calc_chip_info_model(instance_meas_t *instance_meas);

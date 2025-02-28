@@ -17,6 +17,8 @@
 #include "http_server.h"
 #include "meas_mgt.h"
 
+extern const meas_state_t meas_state_pending ;
+
 #define MEAS_MGT_ONCE_CONFIG_DEFAULT()    \
     {                                     \
     .current_state = meas_state_pending,  \

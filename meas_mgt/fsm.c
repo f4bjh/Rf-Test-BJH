@@ -7,8 +7,18 @@
 #include "esp_log.h"
 
 #include "meas_mgt.h"
+#include "cJSON.h"
 
 static const char *TAG = "meas_fsm";
+
+// Defining each state with associated state routine
+const meas_state_t meas_state_pending = {MEAS_STATE_PENDING, meas_state_pending_func};
+const meas_state_t meas_state_init = {MEAS_STATE_INIT, meas_state_init_func};
+const meas_state_t meas_state_get = {MEAS_STATE_GET, meas_state_get_func};
+const meas_state_t meas_state_calc = {MEAS_STATE_CALC, meas_state_calc_func};
+const meas_state_t meas_state_format_json = {MEAS_STATE_FORMAT_JSON, meas_state_format_json_func};
+const meas_state_t meas_state_push_in_queue = {MEAS_STATE_PUSH_IN_QUEUE, meas_state_push_in_queue_func};
+const meas_state_t meas_state_remove = {MEAS_STATE_REMOVE, meas_state_remove_func};
 
 meas_state_t state_transition_mat[N_STATES][N_EVENTS] = {
    // NO_EVENT,                 MEAS_INIT,                MEAS_PULL,                MEAS_PUSH,                MEAS_REMOVE
@@ -18,7 +28,7 @@ meas_state_t state_transition_mat[N_STATES][N_EVENTS] = {
    { meas_state_calc,           meas_state_calc,          meas_state_calc,          meas_state_format_json,   meas_state_remove},
    { meas_state_format_json,    meas_state_format_json,   meas_state_format_json,   meas_state_push_in_queue, meas_state_remove},
    { meas_state_push_in_queue,  meas_state_push_in_queue, meas_state_get,           meas_state_push_in_queue, meas_state_remove},
-   { meas_state_remove,         meas_state_remove,        meas_state_remove,        meas_state_remove,        meas_state_remove}};
+   { meas_state_remove,         meas_state_remove,        meas_state_remove,        meas_state_remove,        meas_state_pending}};
    
 
 /*
@@ -39,7 +49,7 @@ void evaluate_state(meas_event_t ev, instance_meas_t *instance_meas)
 }
 
 
-int meas_fsm_task(void *arg)
+void meas_fsm_task(void *arg)
 {
 
   instance_meas_t *instance_meas = arg;
@@ -47,10 +57,9 @@ int meas_fsm_task(void *arg)
 
     while(1) {    
       xQueueReceive(instance_meas->q_action, (void*)&meas_action , 0 );
-      evaluate_state(meas_action.event,&instance_meas[meas_action.meas_num]);
+      evaluate_state(meas_action.event,instance_meas + meas_action.meas_num);
     };
 	
-    return (0);
 }
 
 /*
@@ -59,32 +68,28 @@ int meas_fsm_task(void *arg)
 
 esp_err_t meas_state_init_func(instance_meas_t *instance_meas)
 {
-    meas_action_t meas_action = { .event = MEAS_PULL, .meas_num = meas_num};
-    esp_err_t err;
- 
+    meas_action_t meas_action = { .event = MEAS_PULL, .meas_num = instance_meas->meas_num};
 	
-  if ( instance_meas->init_func_hw == NULL) {
-    ESP_LOGI(TAG,"no init_func_hw for instance measure %d", instacen_meas->meas_num);    
-  } else if (instance_meas->init_func_hw(instance_meas)!=ESP_OK) {
-    ESP_LOGE(TAG,"init_func_hw error for instance measure %d", instacen_meas->meas_num);    
-  }
+      if ( instance_meas->init_func_hw == NULL) {
+        ESP_LOGI(TAG,"no init_func_hw for instance measure %d", instance_meas->meas_num);    
+      } else if (instance_meas->init_func_hw(&(instance_meas->measures))!=ESP_OK) {
+        ESP_LOGE(TAG,"init_func_hw error for instance measure %d", instance_meas->meas_num);    
+      }
 
-  if (xQueueSendToBack(instance_meas->q_action, &meas_action, 0) == pdTRUE) {
+      if (xQueueSendToBack(instance_meas->q_action, &meas_action, 0) == pdTRUE) {
         return ESP_OK;
-    }
-  return ESP_FAIL;
-
+      }
+  
+      return ESP_FAIL;
 }
 
 esp_err_t meas_state_get_func(instance_meas_t *instance_meas)
 {
-    meas_action_t meas_action = { .event = MEAS_PUSH, .meas_num = meas_num};
-    esp_err_t err;
- 
+  meas_action_t meas_action = { .event = MEAS_PUSH, .meas_num = instance_meas->meas_num};
 	
-  if (instance_meas->mesures.ready) {
+  if (instance_meas->measures.ready) {
 	  //copy instance_mease->measures.pdata into instance_meas->measures.pdata_cache
-	  instance_meas->mesures.ready = false;
+	  instance_meas->measures.ready = false;
   }
  
   if (xQueueSendToBack(instance_meas->q_action, &meas_action, 0) == pdTRUE) {
@@ -97,14 +102,12 @@ esp_err_t meas_state_get_func(instance_meas_t *instance_meas)
 
 esp_err_t meas_state_calc_func(instance_meas_t *instance_meas)
 { 
-    meas_action_t meas_action = { .event = MEAS_PUSH, .meas_num = meas_num};
-    esp_err_t err;
- 
+  meas_action_t meas_action = { .event = MEAS_PUSH, .meas_num = instance_meas->meas_num};
 	
   if ( instance_meas->calc_func == NULL) {
-    ESP_LOGI(TAG,"no calc_func for instance measure %d", instacen_meas->meas_num);    
+    ESP_LOGI(TAG,"no calc_func for instance measure %d", instance_meas->meas_num);    
   } else if (instance_meas->calc_func(instance_meas)!=ESP_OK) {
-    ESP_LOGE(TAG,"init_func_hw error for instance measure %d", instacen_meas->meas_num);    
+    ESP_LOGE(TAG,"init_func_hw error for instance measure %d", instance_meas->meas_num);    
   }
 
   if (xQueueSendToBack(instance_meas->q_action, &meas_action, 0) == pdTRUE) {
@@ -116,9 +119,8 @@ esp_err_t meas_state_calc_func(instance_meas_t *instance_meas)
 esp_err_t meas_state_format_json_func(instance_meas_t *instance_meas)
 {
 
-  meas_action_t meas_action = { .event = MEAS_PUSH, .meas_num = meas_num};
-  esp_err_t err;
-
+  meas_action_t meas_action = { .event = MEAS_PUSH, .meas_num = instance_meas->meas_num};
+  cJSON *root;
 	
         //cop string instance_meas->calc_value into  instance_meas->json_meas.value
 	instance_meas->json_meas.length=strlen(instance_meas->json_meas.value);
@@ -150,8 +152,7 @@ esp_err_t meas_state_format_json_func(instance_meas_t *instance_meas)
 
 esp_err_t meas_state_push_in_queue_func(instance_meas_t *instance_meas)
 {
-  meas_action_t meas_action = { .event = MEAS_PULL, .meas_num = meas_num};
-  esp_err_t err;
+  meas_action_t meas_action = { .event = MEAS_PULL, .meas_num = instance_meas->meas_num};
   
 	//xQueueSendToBack(instance_meas->q_json_string_meas, instance_meas->json_meas.json_string,250ms && retries<instance_meas->retries)
    
@@ -174,13 +175,15 @@ esp_err_t meas_state_pending_func(instance_meas_t *instance_meas)
 
 esp_err_t meas_state_remove_func(instance_meas_t *instance_meas)
 {
-  if ( instance_meas->json_meas.measures || instance_meas->json_meas.ready) {
-    instance_meas->json_meas.measures=false;
+
+  if ( instance_meas->measures.ready || instance_meas->json_meas.ready) {
+    instance_meas->measures.ready=false;
     instance_meas->json_meas.ready=false;
 
-    ESP_LOGI(TAG,"instance measure %d has been removed", instance_meas->meas_num);
   }
- 
+
+  ESP_LOGI(TAG,"instance measure %d has been removed", instance_meas->meas_num);
+
   return ESP_OK;
 }
 

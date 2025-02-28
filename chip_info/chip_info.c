@@ -22,15 +22,17 @@ void get_chip_info_model(meas_t *measure)
     
 }
 
-init_func_hw_t  init_chip_info_model(meas_t *measure)
+esp_err_t init_chip_info_model(meas_t *measure)
 {
     measure->size = sizeof(esp_chip_model_t);
     measure->pdata = malloc(measure->size * sizeof(uint8_t));
     measure->pdata_cache = malloc(measure->size * sizeof(uint8_t));
-    
+
+    return ESP_OK;
+
 }
 
-calc_func_t  calc_chip_info_model(instance_meas_t *instance_meas)
+esp_err_t calc_chip_info_model(instance_meas_t *instance_meas)
 {
     meas_t measure=instance_meas->measures;
 
@@ -66,6 +68,7 @@ calc_func_t  calc_chip_info_model(instance_meas_t *instance_meas)
         break;
     }
  
+    return ESP_OK;
 }
 
 

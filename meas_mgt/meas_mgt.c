@@ -11,6 +11,7 @@
 #include "main.h"
 #include "meas_mgt.h"
 
+static const char *TAG = "meas_mgt";
 
    
 #if 0
@@ -54,7 +55,6 @@ init_func_hw_t get_init_func_hw(meas_number_t meas_num)
 	NEXT_PART_VERSION,
 	NEXT_PART_BUILD_DATE,
 #endif
-
 
   }
   return func;
@@ -100,28 +100,30 @@ cette fonction a un double emploi
 instance_meas_t *meas_mgt_init(instance_config_meas_t meas_config)
 {
     meas_number_t meas_num;
-	
     instance_meas_t *instance_meas = malloc(N_MEAS * sizeof(instance_meas_t));
+    instance_meas_t *instance_meas_temp = instance_meas;
 
-    for (meas_num=0;meas_num<N_MEAS;meas_num++) {
-      (instance_meas+meas_num)->meas_num = meas_num; 
-      (instance_meas+meas_num)->current_state = config.current_state;
-      (instance_meas+meas_num)->once = config.once; 
-      (instance_meas+meas_num)->retries=config.retries;
+    for (meas_num=0;meas_num<N_MEAS;instance_meas_temp++,meas_num++) {
+
+      instance_meas_temp->meas_num = meas_num; 
+      instance_meas_temp->current_state = meas_config.current_state;
+      instance_meas_temp->once = meas_config.once; 
+      instance_meas_temp->retries=meas_config.retries;
       //instance_meas[meas_num].measures; a voir
       //instance_meas[meas_num].json_meas; a voir
-      (instance_meas+meas_num)->init_func_hw=get_init_func_hw(meas_num);
-      (instance_meas+meas_num)->calc_func= get_calc_func(meas_num);
+      instance_meas_temp->init_func_hw=get_init_func_hw(meas_num);
+      instance_meas_temp->calc_func=get_calc_func(meas_num);
 
-      (instance_meas+meas_num)->q_action = xQueueCreate(1 ,sizeof (meas_action_t)); 
-      if ((instance_meas+meas_num)->q_action == NULL) {
+      instance_meas_temp->q_action = xQueueCreate(1 ,sizeof (meas_action_t)); 
+      if (instance_meas_temp->q_action == NULL) {
         ESP_LOGE(TAG,"Failed to create q_action (%d)",meas_num);
-        return ESP_FAIL;
+	return instance_meas;
       }
+
     }
  
     //create FSM-measurment on cpu0 fsm_meas_task
-    xTaskCreate( meas_fsm_task, "measurment fsm ", 4096, data, tskFSM_MEASURMENT, NULL );
+    xTaskCreate( meas_fsm_task, "measurment fsm ", 4096, instance_meas, tskFSM_MEASURMENT, NULL );
 
     return instance_meas;
 }
@@ -135,10 +137,10 @@ instance_meas_t *meas_mgt_init(instance_config_meas_t meas_config)
 //car cpu0 (qui aura lance l'init meas_init, lui aura passe le pointeur aussi
 //a voir comment on fait d'ailleurs
 //
-esp_err_t meas_mgt_meas_init_cb(instance_meas_t *instance_meas, meas_number_t meas_num)
+esp_err_t meas_mgt_meas_init_cb(instance_meas_t *instance_meas)
 {
 	
-    meas_action_t meas_action = { .event = MEAS_INIT, .meas_num = meas_num};
+    meas_action_t meas_action = { .event = MEAS_INIT, .meas_num = instance_meas->meas_num};
 
     if (xQueueSendToBack(instance_meas->q_action, &meas_action, 0) == pdTRUE) {
         return ESP_OK;
