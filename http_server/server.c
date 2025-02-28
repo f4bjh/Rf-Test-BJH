@@ -17,11 +17,11 @@
 #include "http_server.h"
 #include "meas_mgt.h"
 
-extern const meas_state_t meas_state_pending ;
+extern const meas_state_t meas_state_init ;
 
 #define MEAS_MGT_ONCE_CONFIG_DEFAULT()    \
     {                                     \
-    .current_state = meas_state_pending,  \
+    .current_state = meas_state_init,  \
     .once = true,                         \
     .retries=5,                           \
 } 
