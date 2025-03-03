@@ -108,7 +108,6 @@ typedef struct instance_meas_s {
  init_func_hw_t init_func_hw;
  calc_func_t calc_func;
  QueueHandle_t q_action;
- //QueueHandle_t q_json_string_meas;
 } instance_meas_t;
 
 typedef struct instance_config_meas_s {
@@ -130,7 +129,6 @@ esp_err_t meas_state_remove_func(instance_meas_t *instance_meas);
 
 instance_meas_t *meas_mgt_init(instance_config_meas_t meas_config);
 void meas_fsm_task(void *arg);
-esp_err_t meas_mgt_meas_init_cb(instance_meas_t *instance_meas);
 
 //void set_json_data (cJSON *root, json_data_t *json_data);
 void set_default_json_string(char **default_json_string);

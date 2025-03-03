@@ -53,16 +53,19 @@ void meas_fsm_task(void *arg)
 {
 
   instance_meas_t *instance_meas = arg;
+  instance_meas_t *instance_meas_temp=instance_meas;
   meas_action_t meas_action;
-
+  meas_number_t meas_num;
 
 
     while(1) {   
-      
-      vTaskDelay(250 / portTICK_PERIOD_MS); 
+     
+      for (meas_num=0, instance_meas_temp=instance_meas;meas_num<N_MEAS;instance_meas_temp++,meas_num++) {
+        vTaskDelay(10 / portTICK_PERIOD_MS); 
 
-      if (xQueueReceive(instance_meas->q_action, (void*)&meas_action , 0 ) == pdTRUE) {
-        evaluate_state(meas_action.event,instance_meas + meas_action.meas_num);
+        if (xQueueReceive(instance_meas_temp->q_action, (void*)&meas_action , 0 ) == pdTRUE) {
+          evaluate_state(meas_action.event,instance_meas_temp);
+        }
       }
     };
 	
@@ -94,18 +97,24 @@ esp_err_t meas_state_init_func(instance_meas_t *instance_meas)
 esp_err_t meas_state_get_func(instance_meas_t *instance_meas)
 {
   meas_action_t meas_action = { .event = MEAS_PUSH, .meas_num = instance_meas->meas_num};
+  esp_err_t err=ESP_OK;
 
-  ESP_LOGI(TAG,"get measure %d", instance_meas->meas_num);
 
   if (instance_meas->measures.ready) {
-	  memcpy(instance_meas->measures.pdata_cache, instance_meas->measures.pdata, instance_meas->measures.size);
-	  instance_meas->measures.ready = false;
-  }
+   
+    ESP_LOGI(TAG,"measure %d ready", instance_meas->meas_num);
+
+    memcpy(instance_meas->measures.pdata_cache, instance_meas->measures.pdata, instance_meas->measures.size);
+    instance_meas->measures.ready = false;
+
+    
+  } else 
+    meas_action.event=MEAS_PULL;
  
-  if (xQueueSendToBack(instance_meas->q_action, &meas_action, 0) == pdTRUE) {
-       return ESP_OK;
-  }
-  return ESP_FAIL;
+  if (xQueueSendToBack(instance_meas->q_action, &meas_action, 0) != pdTRUE) 
+        err=ESP_FAIL;
+
+  return err;
 
 }
 
@@ -136,7 +145,9 @@ esp_err_t meas_state_format_json_func(instance_meas_t *instance_meas)
    
       ESP_LOGI(TAG,"format in json measure %d %s", instance_meas->meas_num, instance_meas->json_meas.value);
 
-      //cop string instance_meas->calc_value into  instance_meas->json_meas.value
+      strncpy( instance_meas->json_meas.value, instance_meas->calc_value, sizeof(instance_meas->json_meas.value) - 1);
+      instance_meas->json_meas.value[sizeof(instance_meas->json_meas.value) - 1] = '\0'; // Ensure null-termination
+
       instance_meas->json_meas.length=strlen(instance_meas->json_meas.value);
 
       if (instance_meas->json_meas.length !=0) {
@@ -144,9 +155,9 @@ esp_err_t meas_state_format_json_func(instance_meas_t *instance_meas)
 	  instance_meas->json_meas.tag = CHIP_INFO_MODEL_DATA_TAG;//should be the same value as in the switch case
 	  root = cJSON_CreateObject();
 	  
-	   cJSON_AddNumberToObject(root, "t",  instance_meas->json_meas.tag);
-           cJSON_AddNumberToObject(root, "l", instance_meas->json_meas.length);
-           cJSON_AddStringToObject(root, "v", instance_meas->json_meas.value);
+	  cJSON_AddNumberToObject(root, "t",  instance_meas->json_meas.tag);
+          cJSON_AddNumberToObject(root, "l", instance_meas->json_meas.length);
+          cJSON_AddStringToObject(root, "v", instance_meas->json_meas.value);
 
 	  instance_meas->json_meas.json_string = cJSON_Print(root);
 	  cJSON_Delete(root);

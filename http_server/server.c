@@ -18,6 +18,7 @@
 #include "meas_mgt.h"
 
 extern const meas_state_t meas_state_pending ;
+extern const meas_state_t meas_state_get ; //TO DEL
 
 #define MEAS_MGT_ONCE_CONFIG_DEFAULT()    \
     {                                     \
@@ -356,12 +357,17 @@ static void ws_async_send(void *arg)
     esp_task_wdt_status(NULL);
 #endif
 
+
+  // for example here only
+  // TODO : switch measurment low level functions on CPU1
+  if (instance_meas[CHIP_NAME].current_state.id==meas_state_get.id) {
+      get_chip_info_model(&(instance_meas[CHIP_NAME].measures));
+  }
+
+
   while(meas_num<N_MEAS) {
 
-    if (instance_meas->current_state.id==meas_state_pending.id)
-      meas_mgt_meas_init_cb(instance_meas);
-
-    else if (instance_meas->json_meas.ready) {
+    if (instance_meas->json_meas.ready) {
 
         json_string = instance_meas->json_meas.json_string;
 	    
@@ -381,35 +387,9 @@ static void ws_async_send(void *arg)
     instance_meas++;
     meas_num++;
   } 
-    
 	
-#if 0	
-    if ((instance_meas->q_json_string_meas != NULL)){
-    
-      if(xQueueReceive(instance_meas->q_json_string_meas, json_string_rcv , 0 ) == pdTRUE) {
-        memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
-        ws_pkt.payload = (uint8_t*)json_string_rcv;
-        ws_pkt.len = strlen(json_string_rcv);
-        ws_pkt.type = HTTPD_WS_TYPE_TEXT;
-        ESP_LOGI(TAG, "send async (%p) %d bytes of data to ws client (fd=%d)", json_string_rcv, ws_pkt.len, fd);
-        ESP_LOGV(TAG, "data to sent from queue (%p) is :",xQueue);
-	ESP_LOGV(TAG, "%s",ws_pkt.payload);
-        esp_err_t err = httpd_ws_send_frame_async(hd, fd, &ws_pkt);
-
-	if (err != ESP_OK) 
-    	  ESP_LOGE(TAG, "failed to send WebSocket message: %s", esp_err_to_name(err));
-	else 
-	  ESP_LOGV(TAG,"send async(%d) OK",fd);
-
-      } else
-	ESP_LOGI(TAG, "no data found in queue (%p)", instance_meas->q_json_string_meas);
-    } else {
-      ESP_LOGE(TAG,"q_json_string_meas measurement not created\n"); 	    
-    }
-#endif
-	
-    assert(resp_arg!=NULL);
-    free(resp_arg);
+  assert(resp_arg!=NULL);
+  free(resp_arg);
 
 }
 
@@ -421,7 +401,7 @@ static void ws_server_send_data(httpd_handle_t* server)
     instance_config_meas_t meas_config= MEAS_MGT_ONCE_CONFIG_DEFAULT();
 	
     instance_meas = meas_mgt_init(meas_config);
-   
+
 #ifndef DISABLE_WDT_TASK
     esp_task_wdt_add(NULL);
 #endif

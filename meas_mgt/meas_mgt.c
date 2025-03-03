@@ -14,26 +14,6 @@
 static const char *TAG = "meas_mgt";
 
    
-#if 0
-T_DATA_TAG get_measurement_tag(instance_data_t *data)
-{
-
-  T_DATA_TAG result;
-
-  switch (data->meas_num) {
-
-    case DATA_TO_SEND_IS_CHIP_NAME:
-      result = CHIP_INFO_MODEL_DATA_TAG;
-      break;
-    default:
-      result = NO_DATA_TAG;
-      break;
-  }
-
-  return result;
-}
-#endif
-
 init_func_hw_t get_init_func_hw(meas_number_t meas_num)
 {
   init_func_hw_t func;
@@ -102,6 +82,7 @@ instance_meas_t *meas_mgt_init(instance_config_meas_t meas_config)
     meas_number_t meas_num;
     instance_meas_t *instance_meas = malloc(N_MEAS * sizeof(instance_meas_t));
     instance_meas_t *instance_meas_temp = instance_meas;
+    meas_action_t meas_action = { .event = MEAS_INIT, .meas_num = instance_meas->meas_num};
 
     for (meas_num=0;meas_num<N_MEAS;instance_meas_temp++,meas_num++) {
 
@@ -122,6 +103,11 @@ instance_meas_t *meas_mgt_init(instance_config_meas_t meas_config)
 	return instance_meas;
       }
 
+      if (xQueueSendToBack(instance_meas_temp->q_action, &meas_action, 0) != pdTRUE) {
+	ESP_LOGE(TAG,"Failed to send MEAS_INIT to queue (%d)",meas_num);
+        return instance_meas;
+      }
+
     }
 
     //create FSM-measurment on cpu0 fsm_meas_task
@@ -129,30 +115,3 @@ instance_meas_t *meas_mgt_init(instance_config_meas_t meas_config)
 
     return instance_meas;
 }
-
-/*
-  callback to be called by http server
-*/
-//to be called by cpu1
-
-//cpu1 aura accees a la struc instance_data_t
-//car cpu0 (qui aura lance l'init meas_init, lui aura passe le pointeur aussi
-//a voir comment on fait d'ailleurs
-//
-esp_err_t meas_mgt_meas_init_cb(instance_meas_t *instance_meas)
-{
-	
-    meas_action_t meas_action = { .event = MEAS_INIT, .meas_num = instance_meas->meas_num};
-
-    if (xQueueSendToBack(instance_meas->q_action, &meas_action, 0) == pdTRUE) {
-        return ESP_OK;
-    }
-    return ESP_FAIL;
-
-}
-
-/*
-commnet http_server recupere q_out
-on doit pouvoir passer le pointeyr de instance_data_t dans les arg de ws_async_send
-et du coup dans ws_async_send : xQueueRceive (data->q_out
-*/

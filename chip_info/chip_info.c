@@ -37,7 +37,7 @@ esp_err_t calc_chip_info_model(instance_meas_t *instance_meas)
     meas_t measure=instance_meas->measures;
 
 
-    switch((esp_chip_model_t) measure.pdata_cache) {
+    switch((esp_chip_model_t) *measure.pdata_cache) {
       case CHIP_ESP32:
         sprintf(instance_meas->calc_value,"ESP32");
         break;
