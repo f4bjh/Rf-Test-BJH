@@ -82,10 +82,14 @@ esp_err_t meas_state_init_func(instance_meas_t *instance_meas)
       ESP_LOGI(TAG,"initialize measure %d", instance_meas->meas_num);
 
       if ( instance_meas->init_func_hw == NULL) {
-        ESP_LOGI(TAG,"no init_func_hw for instance measure %d", instance_meas->meas_num);    
+        ESP_LOGI(TAG,"init_func_hw not defined for instance measure %d", instance_meas->meas_num);   
+        instance_meas->measures.meas_func=NULL;
+	meas_action.event=MEAS_REMOVE;
       } else if (instance_meas->init_func_hw(&(instance_meas->measures))!=ESP_OK) {
         ESP_LOGE(TAG,"init_func_hw error for instance measure %d", instance_meas->meas_num);    
       }
+
+      //si once=false, executer la tache sur CPU1, sauf s'elle a deja ete creee
 
       if (xQueueSendToBack(instance_meas->q_action, &meas_action, 0) == pdTRUE) {
         return ESP_OK;
@@ -99,6 +103,14 @@ esp_err_t meas_state_get_func(instance_meas_t *instance_meas)
   meas_action_t meas_action = { .event = MEAS_PUSH, .meas_num = instance_meas->meas_num};
   esp_err_t err=ESP_OK;
 
+  if (instance_meas->once) {
+    if (instance_meas->measures.meas_func) {
+	instance_meas->measures.meas_func(&(instance_meas->measures));
+    } else {
+	ESP_LOGE(TAG,"meas_func not defined for %d", instance_meas->meas_num);
+	meas_action.event=MEAS_REMOVE;
+    }
+  }
 
   if (instance_meas->measures.ready) {
    
@@ -198,9 +210,11 @@ esp_err_t meas_state_pending_func(instance_meas_t *instance_meas)
 esp_err_t meas_state_remove_func(instance_meas_t *instance_meas)
 {
 
-  //TODO : free pointer of meas_t (and others ?)
-  free(instance_meas->measures.pdata);
-  free(instance_meas->measures.pdata_cache);
+  if (instance_meas->measures.pdata!=NULL)
+    free(instance_meas->measures.pdata);
+  if (instance_meas->measures.pdata_cache!=NULL)
+    free(instance_meas->measures.pdata_cache);
+
   ESP_LOGI(TAG,"instance measure %d has been removed", instance_meas->meas_num);
 
   return ESP_OK;

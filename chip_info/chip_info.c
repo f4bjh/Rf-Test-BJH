@@ -9,7 +9,7 @@
 
 //standalone task on cpu1
 //should fill instance_meas->measures.pdata
-void get_chip_info_model(meas_t *measure)
+esp_err_t get_chip_info_model(meas_t *measure)
 {
     esp_chip_info_t chip_info;
 
@@ -19,6 +19,8 @@ void get_chip_info_model(meas_t *measure)
     esp_chip_info(&chip_info);
     memcpy(measure->pdata, (uint8_t*) &(chip_info.model), measure->size);
     measure->ready=true;
+
+    return ESP_OK;
     
 }
 
@@ -27,6 +29,7 @@ esp_err_t init_chip_info_model(meas_t *measure)
     measure->size = sizeof(esp_chip_model_t);
     measure->pdata = malloc(measure->size * sizeof(uint8_t));
     measure->pdata_cache = malloc(measure->size * sizeof(uint8_t));
+    measure->meas_func = get_chip_info_model;
 
     return ESP_OK;
 

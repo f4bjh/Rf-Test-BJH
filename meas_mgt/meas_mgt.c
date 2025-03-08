@@ -90,9 +90,12 @@ instance_meas_t *meas_mgt_init(instance_config_meas_t meas_config)
       instance_meas_temp->current_state = meas_config.current_state;
       instance_meas_temp->once = meas_config.once; 
       instance_meas_temp->retries=meas_config.retries;
-      //instance_meas[meas_num].measures; a voir
       instance_meas_temp->measures.ready=false;
-      //instance_meas[meas_num].json_meas; a voir
+      instance_meas_temp->measures.size=0;
+      instance_meas_temp->measures.pdata=NULL;
+      instance_meas_temp->measures.pdata_cache=NULL;
+      instance_meas_temp->measures.meas_func=NULL;
+      //instance_meas_temp->json_meas; a voir
       instance_meas_temp->json_meas.ready=false;
       instance_meas_temp->init_func_hw=get_init_func_hw(meas_num);
       instance_meas_temp->calc_func=get_calc_func(meas_num);

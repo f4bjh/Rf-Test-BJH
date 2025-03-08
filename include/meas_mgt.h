@@ -76,11 +76,16 @@ typedef struct {
   meas_number_t meas_num;
 } meas_action_t;
 
-typedef struct{
+typedef struct meas_s meas_t;
+typedef esp_err_t (meas_func_proto)(meas_t *);
+typedef meas_func_proto* meas_func_t;
+
+typedef struct meas_s {
   bool ready;   //measure is ready (set by cup1, reset by fsm)
   size_t size;     //size of the measures (set by cpu1)
   uint8_t *pdata;  //pointer to ram with measures result (set and fill by cpu1)
   uint8_t *pdata_cache;  //cache of pdata
+  meas_func_t	  meas_func;
 } meas_t;
 
 typedef struct {
@@ -134,10 +139,6 @@ void meas_fsm_task(void *arg);
 void set_default_json_string(char **default_json_string);
 
 //to move to aother header file
-void get_chip_info_model(meas_t *measure);
+//void get_chip_info_model(meas_t *measure);
 esp_err_t init_chip_info_model(meas_t *measure);
 esp_err_t  calc_chip_info_model(instance_meas_t *instance_meas);
-
-// for example here only
-// TODO : switch measurment low level functions on CPU1
-void get_chip_info_model(meas_t *measure);

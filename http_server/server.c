@@ -357,14 +357,6 @@ static void ws_async_send(void *arg)
     esp_task_wdt_status(NULL);
 #endif
 
-
-  // for example here only
-  // TODO : switch measurment low level functions on CPU1
-  if (instance_meas[CHIP_NAME].current_state.id==meas_state_get.id) {
-      get_chip_info_model(&(instance_meas[CHIP_NAME].measures));
-  }
-
-
   while(meas_num<N_MEAS) {
 
     if (instance_meas->json_meas.ready) {
