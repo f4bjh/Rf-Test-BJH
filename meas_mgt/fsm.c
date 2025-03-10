@@ -155,7 +155,7 @@ esp_err_t meas_state_format_json_func(instance_meas_t *instance_meas)
   meas_action_t meas_action = { .event = MEAS_PUSH, .meas_num = instance_meas->meas_num};
   cJSON *root;
    
-      ESP_LOGI(TAG,"format in json measure %d %s", instance_meas->meas_num, instance_meas->json_meas.value);
+      ESP_LOGI(TAG,"format in json measure %d %s", instance_meas->meas_num, instance_meas->calc_value);
 
       strncpy( instance_meas->json_meas.value, instance_meas->calc_value, sizeof(instance_meas->json_meas.value) - 1);
       instance_meas->json_meas.value[sizeof(instance_meas->json_meas.value) - 1] = '\0'; // Ensure null-termination

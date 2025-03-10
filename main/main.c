@@ -9,6 +9,8 @@
 #include <string.h>
 
 #include "main.h"
+#include "keep_alive.h"
+#include "meas_mgt.h"
 #include "http_server.h"
 #include "wifi.h"
 #include "lcd.h"

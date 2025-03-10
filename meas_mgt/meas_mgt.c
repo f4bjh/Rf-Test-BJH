@@ -12,8 +12,10 @@
 #include "meas_mgt.h"
 
 static const char *TAG = "meas_mgt";
+extern const meas_state_t meas_state_remove ;
 
-   
+TaskHandle_t meas_fsm_tsk_handle=NULL;   
+
 init_func_hw_t get_init_func_hw(meas_number_t meas_num)
 {
   init_func_hw_t func;
@@ -114,7 +116,46 @@ instance_meas_t *meas_mgt_init(instance_config_meas_t meas_config)
     }
 
     //create FSM-measurment on cpu0 fsm_meas_task
-    xTaskCreate( meas_fsm_task, "measurment fsm ", 4096, instance_meas, tskFSM_MEASURMENT, NULL );
+    xTaskCreate( meas_fsm_task, "measurment fsm ", 4096, instance_meas, tskFSM_MEASURMENT, &meas_fsm_tsk_handle );
 
     return instance_meas;
+}
+
+esp_err_t instance_meas_remove(instance_meas_t *instance_meas)
+{
+    instance_meas_t *instance_meas_temp = instance_meas;
+    meas_number_t meas_num;
+
+   if (instance_meas == NULL) {
+      ESP_LOGE(TAG, "Removing NULL instance_meas");
+      return ESP_FAIL;
+   }
+   
+   if (meas_fsm_tsk_handle!=NULL)
+     vTaskDelete(meas_fsm_tsk_handle);
+	
+   for (meas_num=0;meas_num<N_MEAS;instance_meas_temp++,meas_num++) {
+  
+      vQueueDelete( instance_meas_temp->q_action);
+      instance_meas_temp->calc_func=NULL;
+      instance_meas_temp->init_func_hw=NULL;
+      instance_meas_temp->json_meas.ready=false;
+
+      instance_meas_temp->measures.meas_func=NULL;	   
+      if (instance_meas_temp->current_state.id != meas_state_remove.id) {
+       	if (instance_meas_temp->measures.pdata!=NULL)
+          free(instance_meas_temp->measures.pdata);
+        if (instance_meas_temp->measures.pdata_cache!=NULL)
+          free(instance_meas_temp->measures.pdata_cache);
+      }
+
+      instance_meas_temp->measures.size=0;
+      instance_meas_temp->measures.ready=false;
+      instance_meas_temp->retries=0;
+      instance_meas_temp->once = true; 
+      instance_meas_temp->current_state = meas_state_remove;
+      instance_meas_temp->meas_num = -1; 
+    }
+
+    return ESP_OK;
 }

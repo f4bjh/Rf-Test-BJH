@@ -14,8 +14,8 @@
 #include "esp_check.h"
 
 #include "main.h"
-#include "http_server.h"
 #include "meas_mgt.h"
+#include "http_server.h"
 
 extern const meas_state_t meas_state_pending ;
 extern const meas_state_t meas_state_get ; //TO DEL
@@ -125,8 +125,28 @@ esp_err_t style_get_handler(httpd_req_t *req)
 
 esp_err_t index_get_handler(httpd_req_t *req)
 {
-	httpd_resp_send(req, (const char *) index_html_start, index_html_end - index_html_start);
-	return ESP_OK;
+
+#if 0	
+    server_ctx_t *server_ctx = (server_ctx_t *) httpd_get_global_user_ctx(req->handle);
+    int pageId = 0; //define ou enum;
+
+    if (server_ctx == NULL) {
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Erreur interne");
+        return ESP_FAIL;
+    }
+
+    // Protection de l'accès à measure_index
+    if (xSemaphoreTake(server_ctx->mutex, portMAX_DELAY)) {
+        server_ctx->pageId = pageId;
+        xSemaphoreGive(server_ctx->mutex);
+    } else {
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Erreur de synchronisation");
+        return ESP_FAIL;
+    }
+#endif
+
+    httpd_resp_send(req, (const char *) index_html_start, index_html_end - index_html_start);
+    return ESP_OK;
 }
 
 esp_err_t about_get_handler(httpd_req_t *req)
@@ -271,6 +291,84 @@ esp_err_t reboot_post_handler(httpd_req_t *req)
 	return ESP_OK;
 }
 
+esp_err_t open_instance_meas(httpd_handle_t hd, int pageId)
+{
+    ESP_LOGI(TAG, "New instance meas open");
+    server_ctx_t *server_ctx = httpd_get_global_user_ctx(hd);
+    instance_meas_t  *instance_meas=NULL;
+    instance_config_meas_t meas_config= MEAS_MGT_ONCE_CONFIG_DEFAULT();
+
+    if (server_ctx == NULL) {
+       ESP_LOGE(TAG, "Contexte serveur introuvable");
+       return ESP_FAIL;
+    }
+
+    if (xSemaphoreTake(server_ctx->mutex, portMAX_DELAY)) {
+      instance_meas = server_ctx->instance_meas;
+      xSemaphoreGive(server_ctx->mutex);
+    } else {
+      ESP_LOGE(TAG, "failed to take semaphore to get server_ctx");
+      return ESP_FAIL;
+    }
+
+    if (instance_meas == NULL) {
+      instance_meas = meas_mgt_init(meas_config);
+    } else {
+      ESP_LOGE(TAG,"instance already initialised");
+      return ESP_FAIL;
+    }
+
+
+    if (xSemaphoreTake(server_ctx->mutex, portMAX_DELAY)) {
+      server_ctx->instance_meas = instance_meas;
+      xSemaphoreGive(server_ctx->mutex);
+    } else {
+      ESP_LOGE(TAG, "failed to take semaphore to set server_ctx");
+      return ESP_FAIL;
+    }
+
+    return ESP_OK;
+}
+
+void close_instance_meas(httpd_handle_t hd)
+{
+    server_ctx_t *server_ctx = httpd_get_global_user_ctx(hd);
+    //wss_keep_alive_t wss_keep_alive;
+    instance_meas_t  *instance_meas=NULL;
+
+
+    ESP_LOGI(TAG, "close meas instance");
+
+#if 0
+    wss_keep_alive = server_ctx->keep_alive;
+    wss_keep_alive_remove_client(wss_keep_alive, sockfd);
+#endif
+
+    if (xSemaphoreTake(server_ctx->mutex, portMAX_DELAY)) {
+      instance_meas = server_ctx->instance_meas;
+      xSemaphoreGive(server_ctx->mutex);
+    } else {
+      ESP_LOGE(TAG, "failed to take semaphore to get server_ctx");
+      return;
+    }
+
+    instance_meas_remove(instance_meas);
+    if (instance_meas != NULL) 
+      free(instance_meas);
+
+    if (xSemaphoreTake(server_ctx->mutex, portMAX_DELAY)) {
+      server_ctx->instance_meas = NULL;
+      xSemaphoreGive(server_ctx->mutex);
+    } else {
+      ESP_LOGE(TAG, "failed to take semaphore to set server_ctx");
+      return;
+    }
+
+//  close(sockfd);
+}
+
+
+//handle and trigged by an HTTP request
 static esp_err_t ws_handler(httpd_req_t *req)
 {
     
@@ -314,20 +412,32 @@ static esp_err_t ws_handler(httpd_req_t *req)
     if (ws_pkt.type == HTTPD_WS_TYPE_PONG) {
         ESP_LOGI(TAG, "Received PONG message (fd=%d)",httpd_req_to_sockfd(req));
         free(buf);
-	
-	return wss_keep_alive_client_is_active(httpd_get_global_user_ctx(req->handle),
-                httpd_req_to_sockfd(req));
+	server_ctx_t *h_meas = httpd_get_global_user_ctx(req->handle);
+        wss_keep_alive_t h = h_meas->keep_alive;
+
+	return wss_keep_alive_client_is_active(h,httpd_req_to_sockfd(req));
 
     // If it was a TEXT message, just echo it back
     } else if (ws_pkt.type == HTTPD_WS_TYPE_TEXT || ws_pkt.type == HTTPD_WS_TYPE_PING || ws_pkt.type == HTTPD_WS_TYPE_CLOSE) {
         if (ws_pkt.type == HTTPD_WS_TYPE_TEXT) {
             ESP_LOGI(TAG, "Received packet with message (fd=%d): %s",httpd_req_to_sockfd(req), ws_pkt.payload);
+
+           //here, will have handle received payload
+	   //it can be a new instance meas to create (based on payload value, wich will contain the pageId)
+	   //but it can also be some control of hardware 
+	   //(for example, output power of generator, or window time precision of frequencymeter, etc...)
+
+           int pageId = 0; //define ou enum;
+
+	   open_instance_meas(req->handle, pageId);
+
 	} else if (ws_pkt.type == HTTPD_WS_TYPE_PING) {
             // Response PONG packet to peer
             ESP_LOGI(TAG, "Got a WS PING frame, Replying PONG");
             ws_pkt.type = HTTPD_WS_TYPE_PONG;
         } else if (ws_pkt.type == HTTPD_WS_TYPE_CLOSE) {
             // Response CLOSE packet with no payload to peer
+	    close_instance_meas(req->handle);
             ws_pkt.len = 0;
             ws_pkt.payload = NULL;
 	}
@@ -348,18 +458,19 @@ static void ws_async_send(void *arg)
     httpd_handle_t hd = resp_arg->hd;
     int fd = resp_arg->fd;
     httpd_ws_frame_t ws_pkt;
-    //char json_string_rcv[JSON_STRING_SIZE_OF_MEASUREMENTS *sizeof(char)];
     char *json_string;
-    instance_meas_t *instance_meas = resp_arg->instance_meas;
     meas_number_t meas_num=0;
+    instance_meas_t  *instance_meas=resp_arg->instance_meas;
 
 #ifndef DISABLE_WDT_TASK
     esp_task_wdt_status(NULL);
 #endif
 
-  while(meas_num<N_MEAS) {
 
-    if (instance_meas->json_meas.ready) {
+  if (instance_meas!=NULL) {
+    while(meas_num<N_MEAS) {
+
+      if (instance_meas->json_meas.ready) {
 
         json_string = instance_meas->json_meas.json_string;
 	    
@@ -374,12 +485,12 @@ static void ws_async_send(void *arg)
 	if (err != ESP_OK) {
     		ESP_LOGE(TAG, "failed to send WebSocket message: %s", esp_err_to_name(err));
 	}
-    instance_meas->json_meas.ready=false;
-    }
-    instance_meas++;
-    meas_num++;
-  } 
-	
+        instance_meas->json_meas.ready=false;
+      }
+      instance_meas++;
+      meas_num++;
+    } 
+  }	
   assert(resp_arg!=NULL);
   free(resp_arg);
 
@@ -389,10 +500,8 @@ static void ws_async_send(void *arg)
 static void ws_server_send_data(httpd_handle_t* server)
 {
     bool send_messages = true;
-    instance_meas_t  *instance_meas;
-    instance_config_meas_t meas_config= MEAS_MGT_ONCE_CONFIG_DEFAULT();
-	
-    instance_meas = meas_mgt_init(meas_config);
+    server_ctx_t *server_ctx = NULL;
+    instance_meas_t  *instance_meas=NULL;
 
 #ifndef DISABLE_WDT_TASK
     esp_task_wdt_add(NULL);
@@ -406,13 +515,23 @@ static void ws_server_send_data(httpd_handle_t* server)
 	if (!*server) { // httpd might not have been created by now
 	    continue;
 	}
+
+        server_ctx = (server_ctx_t *) httpd_get_global_user_ctx(*server);
+
+        if (xSemaphoreTake(server_ctx->mutex, portMAX_DELAY)) {
+          instance_meas = server_ctx->instance_meas;
+          xSemaphoreGive(server_ctx->mutex);
+        } else {
+          ESP_LOGE(TAG, "failed to take semaphore to get instance_meas in server_ctx");
+          continue;
+        }
+
 	size_t clients = max_clients;
 	int    client_fds[max_clients];
 	if (httpd_get_client_list(*server, &clients, client_fds) == ESP_OK) {
 	    for (size_t i=0; i < clients; ++i) {
 		int sock = client_fds[i];
 		if (httpd_ws_get_fd_info(*server, sock) == HTTPD_WS_CLIENT_WEBSOCKET) {
-		    ESP_LOGV(TAG, "sending async message to active client (fd=%d)", sock);
 		    struct async_resp_arg *resp_arg = malloc(sizeof(struct async_resp_arg));
 		    assert(resp_arg != NULL);
 		    resp_arg->hd = *server;
@@ -435,18 +554,26 @@ static void ws_server_send_data(httpd_handle_t* server)
 
 esp_err_t wss_open_fd(httpd_handle_t hd, int sockfd)
 {
+    server_ctx_t *server_ctx = httpd_get_global_user_ctx(hd);
+    wss_keep_alive_t wss_keep_alive;
+
     ESP_LOGI(TAG, "New client connected %d", sockfd);
-    wss_keep_alive_t h = httpd_get_global_user_ctx(hd);
-    return wss_keep_alive_add_client(h, sockfd);
+ 
+    wss_keep_alive = server_ctx->keep_alive;
+    return wss_keep_alive_add_client(wss_keep_alive, sockfd);
 }
 
 void wss_close_fd(httpd_handle_t hd, int sockfd)
 {
+    server_ctx_t *server_ctx = httpd_get_global_user_ctx(hd);
+    wss_keep_alive_t wss_keep_alive;
+
     ESP_LOGI(TAG, "Client disconnected %d", sockfd);
-    wss_keep_alive_t h = httpd_get_global_user_ctx(hd);
-    wss_keep_alive_remove_client(h, sockfd);
+    wss_keep_alive = server_ctx->keep_alive;
+    wss_keep_alive_remove_client(wss_keep_alive, sockfd);
     close(sockfd);
 }
+
 
 
 
@@ -795,6 +922,9 @@ httpd_uri_t set_wifi_uri_handler = {
 esp_err_t http_server_init(void)
 {
 	//static httpd_handle_t http_server = NULL;
+        server_ctx_t *server_ctx = calloc(1, sizeof(server_ctx_t));
+	server_ctx->mutex = xSemaphoreCreateMutex();
+	server_ctx->instance_meas=NULL;
 
 	// Prepare keep-alive engine
 	wss_keep_alive_config_t keep_alive_config = KEEP_ALIVE_CONFIG_DEFAULT();
@@ -802,6 +932,7 @@ esp_err_t http_server_init(void)
 	keep_alive_config.client_not_alive_cb = client_not_alive_cb;
 	keep_alive_config.check_client_alive_cb = check_client_alive_cb;
 	wss_keep_alive_t keep_alive = wss_keep_alive_start(&keep_alive_config);
+	server_ctx->keep_alive = keep_alive;
 
 	httpd_config_t config = HTTPD_DEFAULT_CONFIG();
 
@@ -810,7 +941,7 @@ esp_err_t http_server_init(void)
 	config.max_uri_handlers = 255;
 
 	config.max_open_sockets = max_clients;
-	config.global_user_ctx = keep_alive;
+	config.global_user_ctx = server_ctx;
 	config.open_fn = wss_open_fd;
 	config.close_fn = wss_close_fd;
 	config.task_priority = tskHTTP_SERVER;
