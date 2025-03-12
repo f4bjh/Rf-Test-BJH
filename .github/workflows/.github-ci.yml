@@ -30,10 +30,12 @@ jobs:
         
     - name: Build the ESP32-S3 project
       run: |
+        . $GITHUB_WORKSPACE/esp-idf/export.sh
         idf.py set-target esp32s3
         idf.py build
 
     - name: Boot with QEMU to verify the binary
       run: |
+        . $GITHUB_WORKSPACE/esp-idf/export.sh
         idf.py qemu
       continue-on-error: false  # Fail if QEMU boot doesn't work
