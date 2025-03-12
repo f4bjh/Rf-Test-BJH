@@ -431,6 +431,12 @@ static esp_err_t ws_handler(httpd_req_t *req)
 
 	   open_instance_meas(req->handle, pageId);
 
+	   //client is waiting data only in json format
+	   //response TEXT with no payload
+	   ws_pkt.len = 0;
+           ws_pkt.payload = NULL;
+
+
 	} else if (ws_pkt.type == HTTPD_WS_TYPE_PING) {
             // Response PONG packet to peer
             ESP_LOGI(TAG, "Got a WS PING frame, Replying PONG");

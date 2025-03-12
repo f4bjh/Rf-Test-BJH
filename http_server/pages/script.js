@@ -14,7 +14,7 @@ socket = new WebSocket("ws://" + serverIp + "/ws");
 
 socket.onopen = function () {
         console.log('Connexion WebSocket at' + serverIp);
-	socket.send("Hello Server!");
+	socket.send("Hello Rf-Test-BJH server!");
 };
 
 // Gérer les erreurs de connexion
@@ -29,6 +29,11 @@ socket.addEventListener('close', (event) => {
 
 // Gérer les messages reçus du serveur
 socket.addEventListener('message', (event) => {
+	if (!event.data || event.data.length === 0) {
+          console.warn("Message vide reçu sur le WebSocket.");
+          return;
+        }
+
 	const json_data = JSON.parse(event.data);
 
 	// Afficher le tag hexadécimal dans la console du navigateur
