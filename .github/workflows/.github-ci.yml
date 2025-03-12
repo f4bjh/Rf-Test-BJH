@@ -9,39 +9,37 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-and-check:
     runs-on: ubuntu-latest
-    steps:
-    - name: Checkout repo
-      uses: actions/checkout@v4
-      with:
-        submodules: 'recursive'
-    
-    - name: Output results
-      run: |
-        ls -l
 
-    - name: esp-idf build
-      uses: espressif/esp-idf-ci-action@main
-      with:
-        esp_idf_version: v5.4
-        target: esp32s3
-        path: '.'
-        
-    - name: List build artefacts
-      run: |
-        ls -l build/
-    
-    - name: Store Artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: Rf-Test-BJH.bin 
-        path: |
-          build/Rf-Test-BJH.bin
-
-  qemu:
-    runs-on: ubuntu-latest
     steps:
-      -
-        name: Set up QEMU
-        uses: espressif/qemu@esp-develop
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python for ESP-IDF
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install ESP-IDF dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake ninja-build ccache dfu-util python3-pip
+        python3 -m pip install --upgrade pip
+        python3 -m pip install -r $GITHUB_WORKSPACE/requirements.txt
+
+    - name: Set up ESP-IDF environment
+      run: |
+        cd $GITHUB_WORKSPACE
+        ./install.sh
+        . $GITHUB_WORKSPACE/export.sh
+
+    - name: Build the ESP32-S3 project
+      run: |
+        idf.py set-target esp32s3
+        idf.py build
+
+    - name: Boot with QEMU to verify the binary
+      run: |
+        idf.py qemu
+      continue-on-error: false  # Fail if QEMU boot doesn't work
