@@ -126,25 +126,6 @@ esp_err_t style_get_handler(httpd_req_t *req)
 esp_err_t index_get_handler(httpd_req_t *req)
 {
 
-#if 0	
-    server_ctx_t *server_ctx = (server_ctx_t *) httpd_get_global_user_ctx(req->handle);
-    int pageId = 0; //define ou enum;
-
-    if (server_ctx == NULL) {
-        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Erreur interne");
-        return ESP_FAIL;
-    }
-
-    // Protection de l'accès à measure_index
-    if (xSemaphoreTake(server_ctx->mutex, portMAX_DELAY)) {
-        server_ctx->pageId = pageId;
-        xSemaphoreGive(server_ctx->mutex);
-    } else {
-        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Erreur de synchronisation");
-        return ESP_FAIL;
-    }
-#endif
-
     httpd_resp_send(req, (const char *) index_html_start, index_html_end - index_html_start);
     return ESP_OK;
 }
@@ -339,11 +320,6 @@ void close_instance_meas(httpd_handle_t hd)
 
     ESP_LOGI(TAG, "close meas instance");
 
-#if 0
-    wss_keep_alive = server_ctx->keep_alive;
-    wss_keep_alive_remove_client(wss_keep_alive, sockfd);
-#endif
-
     if (xSemaphoreTake(server_ctx->mutex, portMAX_DELAY)) {
       instance_meas = server_ctx->instance_meas;
       xSemaphoreGive(server_ctx->mutex);
@@ -420,16 +396,31 @@ static esp_err_t ws_handler(httpd_req_t *req)
     // If it was a TEXT message, just echo it back
     } else if (ws_pkt.type == HTTPD_WS_TYPE_TEXT || ws_pkt.type == HTTPD_WS_TYPE_PING || ws_pkt.type == HTTPD_WS_TYPE_CLOSE) {
         if (ws_pkt.type == HTTPD_WS_TYPE_TEXT) {
-            ESP_LOGI(TAG, "Received packet with message (fd=%d): %s",httpd_req_to_sockfd(req), ws_pkt.payload);
 
            //here, will have handle received payload
 	   //it can be a new instance meas to create (based on payload value, wich will contain the pageId)
 	   //but it can also be some control of hardware 
 	   //(for example, output power of generator, or window time precision of frequencymeter, etc...)
 
-           int pageId = 0; //define ou enum;
+          
+           cJSON *root = cJSON_Parse((char *)ws_pkt.payload);
+           if (!root) {
+		ESP_LOGE(TAG, "Erreur de parsing JSON");
+	    }else {
 
-	   open_instance_meas(req->handle, pageId);
+		    // Extraction des valeurs
+		    cJSON *t = cJSON_GetObjectItem(root, "t");
+		    cJSON *l = cJSON_GetObjectItem(root, "l");
+		    cJSON *v = cJSON_GetObjectItem(root, "v");
+
+		    ESP_LOGI(TAG, "Received packet with message (fd=%d): t: %d, l: %d, v: %s", httpd_req_to_sockfd(req), t->valueint, l->valueint, v->valuestring);
+
+		    char *page_name="index.html";
+		    if (strncmp(v->valuestring,page_name, strlen(page_name))==0) {
+			int pageId = 0; //define ou enum;
+			open_instance_meas(req->handle, pageId);
+		    }
+	    }
 
 	   //client is waiting data only in json format
 	   //response TEXT with no payload
@@ -811,7 +802,7 @@ httpd_uri_t style_get = {
 };
 
 httpd_uri_t index_get = {
-	.uri	  = "/",
+	.uri	  = "/index.html",
 	.method   = HTTP_GET,
 	.handler  = index_get_handler,
 	.user_ctx = NULL
