@@ -11,6 +11,7 @@ on:
 jobs:
   build-and-run:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
 
     steps:
     - name: Checkout code
@@ -23,22 +24,23 @@ jobs:
 
     - name: Install ESP-IDF
       run: |
-        git clone --recursive https://github.com/espressif/esp-idf.git
+        git clone --branch v5.4 --single-branch --recursive https://github.com/espressif/esp-idf.git
         cd esp-idf
         ./install.sh  # Installe toutes les dépendances nécessaires pour ESP-IDF
-        . ./export.sh  # Active l'environnement ESP-IDF
 
-    - name: Install qemu-xtensa
-      run: |
-        . $GITHUB_WORKSPACE/esp-idf/export.sh
-        python $IDF_PATH/tools/idf_tools.py install qemu-xtensa
-        
     - name: Build the ESP32-S3 project
       run: |
         . $GITHUB_WORKSPACE/esp-idf/export.sh
         idf.py set-target esp32s3
         idf.py build
 
+    - name: Install QEMU
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libsdl2-2.0-0
+        . $GITHUB_WORKSPACE/esp-idf/export.sh
+        python $IDF_PATH/tools/idf_tools.py install qemu-xtensa
+    
     - name: Boot with QEMU to verify the binary
       run: |
         . $GITHUB_WORKSPACE/esp-idf/export.sh
