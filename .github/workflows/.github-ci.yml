@@ -27,6 +27,11 @@ jobs:
         cd esp-idf
         ./install.sh  # Installe toutes les dépendances nécessaires pour ESP-IDF
         . ./export.sh  # Active l'environnement ESP-IDF
+
+    - name: Install qemu-xtensa
+      run: |
+        . $GITHUB_WORKSPACE/esp-idf/export.sh
+        python $IDF_PATH/tools/idf_tools.py install qemu-xtensa
         
     - name: Build the ESP32-S3 project
       run: |
