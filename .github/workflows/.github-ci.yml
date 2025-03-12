@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-check:
+  build-and-run:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,19 +21,13 @@ jobs:
       with:
         python-version: '3.x'
 
-    - name: Install ESP-IDF dependencies
+    - name: Install ESP-IDF
       run: |
-        sudo apt-get update
-        sudo apt-get install -y cmake ninja-build ccache dfu-util python3-pip
-        python3 -m pip install --upgrade pip
-        python3 -m pip install -r $GITHUB_WORKSPACE/requirements.txt
-
-    - name: Set up ESP-IDF environment
-      run: |
-        cd $GITHUB_WORKSPACE
-        ./install.sh
-        . $GITHUB_WORKSPACE/export.sh
-
+        git clone --recursive https://github.com/espressif/esp-idf.git
+        cd esp-idf
+        ./install.sh  # Installe toutes les dépendances nécessaires pour ESP-IDF
+        . ./export.sh  # Active l'environnement ESP-IDF
+        
     - name: Build the ESP32-S3 project
       run: |
         idf.py set-target esp32s3
