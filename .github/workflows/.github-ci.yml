@@ -9,39 +9,40 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-and-run:
     runs-on: ubuntu-latest
-    steps:
-    - name: Checkout repo
-      uses: actions/checkout@v4
-      with:
-        submodules: 'recursive'
-    
-    - name: Output results
-      run: |
-        ls -l
+    timeout-minutes: 5
 
-    - name: esp-idf build
-      uses: espressif/esp-idf-ci-action@main
-      with:
-        esp_idf_version: v5.4
-        target: esp32s3
-        path: '.'
-        
-    - name: List build artefacts
-      run: |
-        ls -l build/
-    
-    - name: Store Artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: Rf-Test-BJH.bin 
-        path: |
-          build/Rf-Test-BJH.bin
-
-  qemu:
-    runs-on: ubuntu-latest
     steps:
-      -
-        name: Set up QEMU
-        uses: espressif/qemu@esp-develop
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python for ESP-IDF
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install ESP-IDF
+      run: |
+        git clone --branch v5.4 --single-branch --recursive https://github.com/espressif/esp-idf.git
+        cd esp-idf
+        ./install.sh  # Installe toutes les dépendances nécessaires pour ESP-IDF
+
+    - name: Build the ESP32-S3 project
+      run: |
+        . $GITHUB_WORKSPACE/esp-idf/export.sh
+        idf.py set-target esp32s3
+        idf.py build
+
+    - name: Install QEMU
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libsdl2-2.0-0
+        . $GITHUB_WORKSPACE/esp-idf/export.sh
+        python $IDF_PATH/tools/idf_tools.py install qemu-xtensa
+    
+    - name: Boot with QEMU to verify the binary
+      run: |
+        . $GITHUB_WORKSPACE/esp-idf/export.sh
+        idf.py qemu
+      continue-on-error: false  # Fail if QEMU boot doesn't work
