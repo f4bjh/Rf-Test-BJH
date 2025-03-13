@@ -13,7 +13,6 @@ esp_err_t get_chip_info_model(meas_t *measure)
 {
     esp_chip_info_t chip_info;
 
-    //todo : management once case    
     memset(measure->pdata, 0, measure->size);
         
     esp_chip_info(&chip_info);
@@ -38,7 +37,6 @@ esp_err_t init_chip_info_model(meas_t *measure)
 esp_err_t calc_chip_info_model(instance_meas_t *instance_meas)
 {
     meas_t measure=instance_meas->measures;
-
 
     switch((esp_chip_model_t) *measure.pdata_cache) {
       case CHIP_ESP32:
@@ -75,17 +73,43 @@ esp_err_t calc_chip_info_model(instance_meas_t *instance_meas)
 }
 
 
-void get_chip_info_revision(char *data)
+esp_err_t get_chip_info_revision(meas_t *measure)
 {
-
     esp_chip_info_t chip_info;
-    //uint32_t flash_size;
+
+    memset(measure->pdata, 0, measure->size);
+        
     esp_chip_info(&chip_info);
+    memcpy(measure->pdata, (uint8_t*) &(chip_info.revision), measure->size);
+    measure->ready=true;
 
-    unsigned major_rev = chip_info.revision / 100;
-    unsigned minor_rev = chip_info.revision % 100;
+    return ESP_OK;
+}
 
-    memset(data, 0, 32*sizeof(char));
-    sprintf(data,"%d.%d", major_rev, minor_rev);
+esp_err_t init_chip_revision(meas_t *measure)
+{
+    measure->size = sizeof(uint16_t);
+    measure->pdata = malloc(measure->size * sizeof(uint8_t));
+    measure->pdata_cache = malloc(measure->size * sizeof(uint8_t));
+    measure->meas_func = get_chip_info_revision;
+
+    return ESP_OK;
 
 }
+
+
+esp_err_t calc_chip_revision(instance_meas_t *instance_meas)
+{
+    meas_t measure=instance_meas->measures;
+    
+    unsigned major_rev = *(measure.pdata_cache) / 100;
+    unsigned minor_rev = *(measure.pdata_cache) % 100;
+
+    memset(instance_meas->calc_value, 0, 64*sizeof(char));
+    sprintf(instance_meas->calc_value,"%d.%d", major_rev, minor_rev);
+   
+    return ESP_OK;
+}
+
+
+

@@ -17,16 +17,6 @@
 #include "meas_mgt.h"
 #include "http_server.h"
 
-extern const meas_state_t meas_state_pending ;
-extern const meas_state_t meas_state_get ; //TO DEL
-
-#define MEAS_MGT_ONCE_CONFIG_DEFAULT()    \
-    {                                     \
-    .current_state = meas_state_pending,  \
-    .once = true,                         \
-    .retries=5,                           \
-} 
-
 /*
  * HTTP Server
  */
@@ -272,13 +262,12 @@ esp_err_t reboot_post_handler(httpd_req_t *req)
 	return ESP_OK;
 }
 
-esp_err_t open_instance_meas(httpd_handle_t hd, int pageId)
+esp_err_t open_instance_meas(httpd_handle_t hd, html_page_id_t pageId)
 {
     ESP_LOGI(TAG, "New instance meas open");
     server_ctx_t *server_ctx = httpd_get_global_user_ctx(hd);
     instance_meas_t  *instance_meas=NULL;
-    instance_config_meas_t meas_config= MEAS_MGT_ONCE_CONFIG_DEFAULT();
-
+ 
     if (server_ctx == NULL) {
        ESP_LOGE(TAG, "Contexte serveur introuvable");
        return ESP_FAIL;
@@ -293,7 +282,7 @@ esp_err_t open_instance_meas(httpd_handle_t hd, int pageId)
     }
 
     if (instance_meas == NULL) {
-      instance_meas = meas_mgt_init(meas_config);
+      instance_meas = meas_mgt_init(pageId);
     } else {
       ESP_LOGE(TAG,"instance already initialised");
       return ESP_FAIL;
@@ -417,7 +406,7 @@ static esp_err_t ws_handler(httpd_req_t *req)
 
 		    char *page_name="index.html";
 		    if (strncmp(v->valuestring,page_name, strlen(page_name))==0) {
-			int pageId = 0; //define ou enum;
+			int pageId = INDEX_HTML_PAGE_ID; //define ou enum;
 			open_instance_meas(req->handle, pageId);
 		    }
 	    }
@@ -456,7 +445,6 @@ static void ws_async_send(void *arg)
     int fd = resp_arg->fd;
     httpd_ws_frame_t ws_pkt;
     char *json_string;
-    meas_number_t meas_num=0;
     instance_meas_t  *instance_meas=resp_arg->instance_meas;
 
 #ifndef DISABLE_WDT_TASK
@@ -465,7 +453,7 @@ static void ws_async_send(void *arg)
 
 
   if (instance_meas!=NULL) {
-    while(meas_num<N_MEAS) {
+    while(instance_meas->meas_num!=-1) {
 
       if (instance_meas->json_meas.ready) {
 
@@ -485,7 +473,6 @@ static void ws_async_send(void *arg)
         instance_meas->json_meas.ready=false;
       }
       instance_meas++;
-      meas_num++;
     } 
   }	
   assert(resp_arg!=NULL);

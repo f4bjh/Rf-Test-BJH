@@ -51,16 +51,17 @@ void evaluate_state(meas_event_t ev, instance_meas_t *instance_meas)
 
 void meas_fsm_task(void *arg)
 {
-
-  instance_meas_t *instance_meas = arg;
+  meas_fsm_task_arg_t *meas_fsm_task_arg = arg;
+  instance_meas_t *instance_meas = meas_fsm_task_arg->instance_meas;
   instance_meas_t *instance_meas_temp=instance_meas;
+  size_t  n_meas = meas_fsm_task_arg->n_meas;
   meas_action_t meas_action;
   meas_number_t meas_num;
 
 
     while(1) {   
      
-      for (meas_num=0, instance_meas_temp=instance_meas;meas_num<N_MEAS;instance_meas_temp++,meas_num++) {
+      for (meas_num=0, instance_meas_temp=instance_meas;meas_num<n_meas;instance_meas_temp++,meas_num++) {
         vTaskDelay(10 / portTICK_PERIOD_MS); 
 
         if (xQueueReceive(instance_meas_temp->q_action, (void*)&meas_action , 0 ) == pdTRUE) {
@@ -149,6 +150,28 @@ esp_err_t meas_state_calc_func(instance_meas_t *instance_meas)
   return ESP_FAIL;
 
 }
+
+T_DATA_TAG get_tag_measurement(meas_number_t meas_num)
+{
+ T_DATA_TAG tag;
+
+  switch (meas_num) {
+    case CHIP_NAME:
+      tag = CHIP_INFO_MODEL_DATA_TAG;
+      break;
+    case CHIP_VERSION:
+      tag = CHIP_INFO_REVISION_DATA_TAG;
+      break;
+    default:
+      tag = NO_DATA_TAG;
+      break;
+  }
+
+  return tag;
+
+}
+
+
 esp_err_t meas_state_format_json_func(instance_meas_t *instance_meas)
 {
 
@@ -164,7 +187,7 @@ esp_err_t meas_state_format_json_func(instance_meas_t *instance_meas)
 
       if (instance_meas->json_meas.length !=0) {
 
-	  instance_meas->json_meas.tag = CHIP_INFO_MODEL_DATA_TAG;//should be the same value as in the switch case
+	  instance_meas->json_meas.tag = get_tag_measurement(instance_meas->meas_num);
 	  root = cJSON_CreateObject();
 	  
 	  cJSON_AddNumberToObject(root, "t",  instance_meas->json_meas.tag);

@@ -116,10 +116,29 @@ typedef struct instance_meas_s {
 } instance_meas_t;
 
 typedef struct instance_config_meas_s {
-  meas_state_t current_state;
+ meas_state_t current_state;
+ uint8_t retries;
+ meas_t measures; //output data from cpu1
+ json_meas_t json_meas; //output string from meas_state_format_json_func
+ } instance_meas_default_t;
+
+typedef enum {
+  INDEX_HTML_PAGE_ID,
+  GENERATOR_HTML_PAGE_ID,
+  FREQUENCYMETER_HTML_PAGE_ID,
+  POWERMETER_HTML_PAGE_ID,
+  UPLOAD_HTML_PAGE_ID,
+  WIFI_HTML_PAGE_ID,
+  ABOUT_HTML_PAGE_ID,
+  N_PAGES
+} html_page_id_t;
+
+typedef struct instance_meas_per_html_page_s {
+  meas_number_t meas_num;
   bool once;
-  uint8_t retries;
-} instance_config_meas_t;
+ init_func_hw_t init_func_hw;
+ calc_func_t calc_func;
+} instance_meas_per_html_page_t;
 
 typedef  esp_err_t (*state_func)(instance_meas_t *);
 
@@ -132,14 +151,14 @@ esp_err_t meas_state_push_in_queue_func(instance_meas_t *instance_meas);
 esp_err_t meas_state_pending_func(instance_meas_t *instance_meas);
 esp_err_t meas_state_remove_func(instance_meas_t *instance_meas);
 
-instance_meas_t *meas_mgt_init(instance_config_meas_t meas_config);
+instance_meas_t *meas_mgt_init(html_page_id_t page_id);
+
+typedef struct meas_fsm_task_arg_s{
+  instance_meas_t *instance_meas;
+  size_t n_meas;
+} meas_fsm_task_arg_t;
 void meas_fsm_task(void *arg);
 
 //void set_json_data (cJSON *root, json_data_t *json_data);
 void set_default_json_string(char **default_json_string);
-
-//to move to aother header file
-//void get_chip_info_model(meas_t *measure);
-esp_err_t init_chip_info_model(meas_t *measure);
-esp_err_t  calc_chip_info_model(instance_meas_t *instance_meas);
 esp_err_t instance_meas_remove(instance_meas_t *instance_meas);
