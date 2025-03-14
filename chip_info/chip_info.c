@@ -29,6 +29,7 @@ esp_err_t init_chip_info_model(meas_t *measure)
     measure->pdata = malloc(measure->size * sizeof(uint8_t));
     measure->pdata_cache = malloc(measure->size * sizeof(uint8_t));
     measure->meas_func = get_chip_info_model;
+    measure->task_handle = NULL;
 
     return ESP_OK;
 
@@ -37,7 +38,8 @@ esp_err_t init_chip_info_model(meas_t *measure)
 esp_err_t calc_chip_info_model(instance_meas_t *instance_meas)
 {
     meas_t measure=instance_meas->measures;
-
+    memset(instance_meas->calc_value, 0, CALC_VALUE_SIZE*sizeof(char));
+ 
     switch((esp_chip_model_t) *measure.pdata_cache) {
       case CHIP_ESP32:
         sprintf(instance_meas->calc_value,"ESP32");
@@ -92,6 +94,7 @@ esp_err_t init_chip_revision(meas_t *measure)
     measure->pdata = malloc(measure->size * sizeof(uint8_t));
     measure->pdata_cache = malloc(measure->size * sizeof(uint8_t));
     measure->meas_func = get_chip_info_revision;
+    measure->task_handle = NULL;
 
     return ESP_OK;
 
@@ -101,11 +104,11 @@ esp_err_t init_chip_revision(meas_t *measure)
 esp_err_t calc_chip_revision(instance_meas_t *instance_meas)
 {
     meas_t measure=instance_meas->measures;
-    
+    memset(instance_meas->calc_value, 0, CALC_VALUE_SIZE*sizeof(char));
+     
     unsigned major_rev = *(measure.pdata_cache) / 100;
     unsigned minor_rev = *(measure.pdata_cache) % 100;
 
-    memset(instance_meas->calc_value, 0, 64*sizeof(char));
     sprintf(instance_meas->calc_value,"%d.%d", major_rev, minor_rev);
    
     return ESP_OK;

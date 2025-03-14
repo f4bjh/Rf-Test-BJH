@@ -9,6 +9,7 @@ idf_component_register(
 	SRCS "../lcd/lcd.c"
 	SRCS "../lcd/lvgl.c"
 	SRCS "../wifi/softap_sta.c"
+	SRCS "../counter/counter.c"
 	INCLUDE_DIRS "../include"
 	EMBED_FILES ../http_server/pages/about.html
 	EMBED_FILES ../http_server/pages/frequencymeter.html

@@ -11,6 +11,7 @@
 #include "main.h"
 #include "meas_mgt.h"
 #include "chip_info.h"
+#include "counter.h"
 
 static const char *TAG = "meas_mgt";
 
@@ -35,9 +36,12 @@ TaskHandle_t meas_fsm_tsk_handle=NULL;
 
 instance_meas_per_html_page_t instance_meas_per_html_page[N_PAGES][N_MEAS] = 
 {
-  {  //index.html
-    {CHIP_NAME,    true, init_chip_info_model, calc_chip_info_model}, //list of : meas_t value, once, init_func_hw, get_calc_func
-    {CHIP_VERSION, true, init_chip_revision,   calc_chip_revision}, //list of : meas_t value, once, init_func_hw, get_calc_func
+  //index.html
+  {
+    //meas_t value, once, init_func_hw, get_calc_func
+    {CHIP_NAME,    true, init_chip_info_model, calc_chip_info_model},
+    {CHIP_VERSION, true, init_chip_revision,   calc_chip_revision},
+    {COUNTER,      false, init_counter,         calc_counter},
     LAST_INSTANCE_MEAS
   },
 };
@@ -137,6 +141,8 @@ esp_err_t instance_meas_remove(instance_meas_t *instance_meas)
           free(instance_meas_temp->measures.pdata);
         if (instance_meas_temp->measures.pdata_cache!=NULL)
           free(instance_meas_temp->measures.pdata_cache);
+	if (instance_meas_temp->measures.task_handle!=NULL)
+	  vTaskDelete(instance_meas_temp->measures.task_handle);
       }
 
       instance_meas_temp->measures.size=0;

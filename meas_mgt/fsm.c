@@ -162,6 +162,9 @@ T_DATA_TAG get_tag_measurement(meas_number_t meas_num)
     case CHIP_VERSION:
       tag = CHIP_INFO_REVISION_DATA_TAG;
       break;
+    case COUNTER:
+      tag = COUNTER_VALUE_TAG;
+      break;
     default:
       tag = NO_DATA_TAG;
       break;
@@ -237,7 +240,9 @@ esp_err_t meas_state_remove_func(instance_meas_t *instance_meas)
     free(instance_meas->measures.pdata);
   if (instance_meas->measures.pdata_cache!=NULL)
     free(instance_meas->measures.pdata_cache);
-
+  if (instance_meas->measures.task_handle!=NULL)
+    vTaskDelete(instance_meas->measures.task_handle);
+ 
   ESP_LOGI(TAG,"instance measure %d has been removed", instance_meas->meas_num);
 
   return ESP_OK;

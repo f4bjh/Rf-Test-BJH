@@ -15,6 +15,8 @@
 
 #define GET_MEASURMENT_DELAY 10 //10ms
 
+#define CALC_VALUE_SIZE 64
+
 typedef enum {
   NO_DATA_TAG,
   CHIP_INFO_MODEL_DATA_TAG,
@@ -86,13 +88,14 @@ typedef struct meas_s {
   uint8_t *pdata;  //pointer to ram with measures result (set and fill by cpu1)
   uint8_t *pdata_cache;  //cache of pdata
   meas_func_t	  meas_func;
+  TaskHandle_t task_handle;
 } meas_t;
 
 typedef struct {
   bool ready;
   T_DATA_TAG tag;
   char length;
-  char value[64];  
+  char value[CALC_VALUE_SIZE];  
   char *json_string;
 } json_meas_t;
 
