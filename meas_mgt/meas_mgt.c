@@ -31,25 +31,6 @@ TaskHandle_t meas_fsm_tsk_handle=NULL;
     .json_meas.ready=false,               \
 } 
 
-//1ere version au brouillon sous if 0
-#if 0
-instance_meas_per_html_page_t instance_meas_per_html_page[N_PAGES][N_MEAS] = 
-{
-  {  //index.html
-    {CHIP_NAME,    true, init_chip_info_model, calc_chip_info_model}, //list of : meas_t value, once, init_func_hw, get_calc_func
-    {CHIP_VERSION, true, init_chip_revision,   calc_chip_revision}, //list of : meas_t value, once, init_func_hw, get_calc_func
-    {               }, //list of : meas_t value, once, init_func_hw, get_calc_func
-    {               } //list of : meas_t value, once, init_func_hw, get_calc_func
-  },
-  {//powermeter.html
-    {               }, //list of : meas_t value, once, init_func_hw, get_calc_func
-    {               } //list of : meas_t value, once, init_func_hw, get_calc_func
-  },
-  {...
-  }
-};
-#endif
-
 #define LAST_INSTANCE_MEAS {-1,false,NULL,NULL}
 
 instance_meas_per_html_page_t instance_meas_per_html_page[N_PAGES][N_MEAS] = 
@@ -61,61 +42,6 @@ instance_meas_per_html_page_t instance_meas_per_html_page[N_PAGES][N_MEAS] =
   },
 };
 
-
-#if 0
-init_func_hw_t get_init_func_hw(meas_number_t meas_num)
-{
-  init_func_hw_t func;
-
-  switch(meas_num) {
-    case CHIP_NAME:
-      func=init_chip_info_model; 
-      break;
-    default:
-      func=NULL;
-      break;
-
-	CHIP_VERSION,
-	CURRENT_PARTITION,
-	NEXT_PARTITION,
-	COUNTER,
-	CURRENT_PART_VERSION,
-	CURRENT_PART_BUILD_DATE,
-	NEXT_PART_VERSION,
-	NEXT_PART_BUILD_DATE,
-
-
-  }
-  return func;
-}
-
-calc_func_t get_calc_func(meas_number_t meas_num)
-{
-  calc_func_t func;
-
-  switch(meas_num) {
-    case CHIP_NAME:
-      func=calc_chip_info_model;
-      break;
-    default:
-      func=NULL;
-      break;
-
-	CHIP_VERSION,
-	CURRENT_PARTITION,
-	NEXT_PARTITION,
-	COUNTER,
-	CURRENT_PART_VERSION,
-	CURRENT_PART_BUILD_DATE,
-	NEXT_PART_VERSION,
-	NEXT_PART_BUILD_DATE,
-
-
-
-  }
-  return func;
-}
-#endif
 
 size_t get_nb_of_instance_meas(html_page_id_t page_id)
 {
@@ -137,7 +63,7 @@ instance_meas_t *meas_mgt_init(html_page_id_t page_id)
    size_t n_meas;
    meas_number_t meas_num;
    meas_action_t meas_action = { .event = MEAS_INIT, .meas_num = 0};
-   meas_fsm_task_arg_t meas_fsm_task_arg;
+   static meas_fsm_task_arg_t meas_fsm_task_arg;
 
    n_meas = get_nb_of_instance_meas(page_id);
 
