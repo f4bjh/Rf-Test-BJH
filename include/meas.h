@@ -10,3 +10,5 @@ typedef struct counter_task_arg_s {
 esp_err_t init_counter(meas_t *measure);
 esp_err_t  calc_counter(instance_meas_t *instance_meas);
 
+esp_err_t init_current_part(meas_t *measure);
+esp_err_t calc_current_part(instance_meas_t *instance_meas);

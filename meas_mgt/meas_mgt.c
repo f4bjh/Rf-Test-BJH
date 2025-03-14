@@ -37,10 +37,11 @@ instance_meas_per_html_page_t instance_meas_per_html_page[N_PAGES][N_MEAS] =
 {
   //index.html
   {
-    //meas_t value, once,  init_func_hw,         get_calc_func
-    {CHIP_NAME,     true,  init_chip_info_model, calc_chip_info_model},
-    {CHIP_VERSION,  true,  init_chip_revision,   calc_chip_revision},
-    {COUNTER,       false, init_counter,         calc_counter},
+    //meas_t value,     once,  init_func_hw,         get_calc_func
+    {CHIP_NAME,         true,  init_chip_info_model, calc_chip_info_model},
+    {CHIP_VERSION,      true,  init_chip_revision,   calc_chip_revision},
+    {COUNTER,           false, init_counter,         calc_counter},
+    {CURRENT_PARTITION, true,  init_current_part,    calc_current_part},
     LAST_INSTANCE_MEAS
   },
 };

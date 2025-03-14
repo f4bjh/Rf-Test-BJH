@@ -165,6 +165,9 @@ T_DATA_TAG get_tag_measurement(meas_number_t meas_num)
     case COUNTER:
       tag = COUNTER_VALUE_TAG;
       break;
+    case CURRENT_PARTITION:
+      tag = CURRENT_PARTITION_NAME_TAG;
+      break;
     default:
       tag = NO_DATA_TAG;
       break;
