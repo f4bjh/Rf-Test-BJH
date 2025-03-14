@@ -18,13 +18,13 @@ void counter_task(void *arg)
 
   while(1) {   
      
-        vTaskDelay(25 / portTICK_PERIOD_MS);
+        vTaskDelay(100 / portTICK_PERIOD_MS);
 	
 	if (counter == 100)
 	  counter=1;
 	else
           counter++;
-	if (counter % 10) {
+	if ( (counter % 10)==0) {
 	  *(measure->pdata) = counter;
 	  measure->ready=true;
 	}
@@ -61,7 +61,7 @@ esp_err_t calc_counter(instance_meas_t *instance_meas)
     meas_t measure=instance_meas->measures;
     memset(instance_meas->calc_value, 0, CALC_VALUE_SIZE*sizeof(char));
  
-    sprintf(instance_meas->calc_value,"%d", *(measure.pdata_cache) );
+    sprintf(instance_meas->calc_value,"%d", *(measure.pdata_cache)/10 );
    
     return ESP_OK;
 }
