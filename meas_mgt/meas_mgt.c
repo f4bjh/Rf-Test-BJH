@@ -33,15 +33,20 @@ TaskHandle_t meas_fsm_tsk_handle=NULL;
 
 #define LAST_INSTANCE_MEAS {-1,false,NULL,NULL}
 
-instance_meas_per_html_page_t instance_meas_per_html_page[N_PAGES][N_MEAS] = 
+instance_meas_per_html_page_t instance_meas_per_html_page[N_PAGES][N_MEAS+1] = 
 {
   //index.html
   {
     //meas_t value,     once,  init_func_hw,         get_calc_func
-    {CHIP_NAME,         true,  init_chip_info_model, calc_chip_info_model},
-    {CHIP_VERSION,      true,  init_chip_revision,   calc_chip_revision},
-    {COUNTER,           false, init_counter,         calc_counter},
-    {CURRENT_PARTITION, true,  init_current_part,    calc_current_part},
+    {CHIP_NAME,               true,  init_chip_info_model,         calc_chip_info_model},
+    {CHIP_VERSION,            true,  init_chip_revision,           calc_chip_revision},
+    {COUNTER,                 false, init_counter,                 calc_counter},
+    {CURRENT_PARTITION,       true,  init_current_part,            calc_current_part},
+    {NEXT_PARTITION,          true,  init_next_part,               calc_next_part},
+    {CURRENT_PART_VERSION,    true,  init_current_part_version,    calc_current_part_version},
+    {CURRENT_PART_BUILD_DATE, true,  init_current_part_build_date, calc_current_part_build_date},
+    {NEXT_PART_VERSION,       true,  init_next_part_version,       calc_next_part_version},
+    {NEXT_PART_BUILD_DATE,    true,  init_next_part_build_date,    calc_next_part_build_date},
     LAST_INSTANCE_MEAS
   },
 };

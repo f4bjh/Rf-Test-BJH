@@ -168,6 +168,21 @@ T_DATA_TAG get_tag_measurement(meas_number_t meas_num)
     case CURRENT_PARTITION:
       tag = CURRENT_PARTITION_NAME_TAG;
       break;
+    case NEXT_PARTITION:
+      tag = NEXT_PARTITION_TAG;
+      break;
+    case CURRENT_PART_VERSION:
+      tag = CURRENT_PART_VERSION_TAG;
+      break;
+    case CURRENT_PART_BUILD_DATE:
+      tag = CURRENT_PART_BUILD_DATE_TAG;
+      break;
+    case NEXT_PART_VERSION:
+      tag = NEXT_PART_VERSION_TAG;
+      break;
+    case NEXT_PART_BUILD_DATE:
+      tag = NEXT_PART_BUILD_DATE_TAG;
+      break;
     default:
       tag = NO_DATA_TAG;
       break;
