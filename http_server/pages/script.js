@@ -24,7 +24,7 @@ socket.onopen = function () {
 
         // Création de l'objet JSON
         const jsonData = {
-        t: 0x00,
+        t: 0x01,
         l: l,
         v: pageId
         };

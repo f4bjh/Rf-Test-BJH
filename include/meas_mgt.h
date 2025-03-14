@@ -28,7 +28,13 @@ typedef enum {
   CURRENT_PART_BUILD_DATE_TAG,
   NEXT_PART_VERSION_TAG,
   NEXT_PART_BUILD_DATE_TAG,
-} T_DATA_TAG;
+} data_to_client_tag_t;
+
+typedef enum {
+  NO_DATA_TAG2,
+  PAGE_ID_TAG,
+  POWER_LEVEL_TAG,
+} data_from_client_tag_t;  
 
 typedef enum {
 	CHIP_NAME,
@@ -93,7 +99,7 @@ typedef struct meas_s {
 
 typedef struct {
   bool ready;
-  T_DATA_TAG tag;
+  data_to_client_tag_t tag;
   char length;
   char value[CALC_VALUE_SIZE];  
   char *json_string;

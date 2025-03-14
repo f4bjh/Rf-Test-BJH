@@ -119,6 +119,12 @@ esp_err_t index_get_handler(httpd_req_t *req)
     httpd_resp_send(req, (const char *) index_html_start, index_html_end - index_html_start);
     return ESP_OK;
 }
+httpd_uri_t index_get = {
+	.uri	  = "/index.html",
+	.method   = HTTP_GET,
+	.handler  = index_get_handler,
+	.user_ctx = NULL
+};
 
 esp_err_t about_get_handler(httpd_req_t *req)
 {
@@ -184,6 +190,12 @@ esp_err_t upload_get_handler(httpd_req_t *req)
 	httpd_resp_send(req, (const char *) upload_html_start, upload_html_end - upload_html_start);
 	return ESP_OK;
 }
+httpd_uri_t upload_get = {
+	.uri	  = "/upload.html",
+	.method   = HTTP_GET,
+	.handler  = upload_get_handler,
+	.user_ctx = NULL
+};
 
 esp_err_t wifi_get_handler(httpd_req_t *req)
 {
@@ -264,7 +276,7 @@ esp_err_t reboot_post_handler(httpd_req_t *req)
 
 esp_err_t open_instance_meas(httpd_handle_t hd, html_page_id_t pageId)
 {
-    ESP_LOGI(TAG, "New instance meas open");
+    ESP_LOGI(TAG, "New instance meas open %d", pageId);
     server_ctx_t *server_ctx = httpd_get_global_user_ctx(hd);
     instance_meas_t  *instance_meas=NULL;
  
@@ -332,6 +344,57 @@ void close_instance_meas(httpd_handle_t hd)
 //  close(sockfd);
 }
 
+void ws_process_received_page_id(httpd_req_t *req, int size, char* received_page_id)
+{
+  const char *page_name;
+  int pageId;
+
+
+    //TODO : if l=0, it is index.html also
+    //need to revert old commit that changed uri name into index.html also
+
+    page_name=&(index_get.uri[1]);
+    if (strncmp(received_page_id,page_name, strlen(page_name))==0) {
+	pageId = INDEX_HTML_PAGE_ID; //define ou enum;
+    }
+    page_name=&(upload_get.uri[1]);
+    if (strncmp(received_page_id,page_name, strlen(page_name))==0) {
+        pageId = UPLOAD_HTML_PAGE_ID; //define ou enum;
+    }
+    
+    open_instance_meas(req->handle, pageId);
+    return ;
+
+}
+
+void ws_process_received_json(httpd_req_t *req, httpd_ws_frame_t ws_pkt)
+{
+
+           cJSON *root = cJSON_Parse((char *)ws_pkt.payload);
+
+           if (!root) {
+		ESP_LOGE(TAG, "failed to parse received JSON");
+	   }else {
+
+	        // Extraction des valeurs
+	        cJSON *t = cJSON_GetObjectItem(root, "t");
+	        cJSON *l = cJSON_GetObjectItem(root, "l");
+	        cJSON *v = cJSON_GetObjectItem(root, "v");
+		//TODO : shall we delete root or not ?
+		//cJSON_Delete(root);
+
+	        ESP_LOGI(TAG, "Received packet with message (fd=%d): t: %d, l: %d, v: %s", httpd_req_to_sockfd(req), t->valueint, l->valueint, v->valuestring);
+
+		switch (t->valueint) {
+  	  	  case PAGE_ID_TAG:
+		    ws_process_received_page_id(req,l->valueint,v->valuestring);
+		    break;
+		  default:
+		    break;
+		}
+	   } 
+}
+
 
 //handle and trigged by an HTTP request
 static esp_err_t ws_handler(httpd_req_t *req)
@@ -382,40 +445,15 @@ static esp_err_t ws_handler(httpd_req_t *req)
 
 	return wss_keep_alive_client_is_active(h,httpd_req_to_sockfd(req));
 
-    // If it was a TEXT message, just echo it back
     } else if (ws_pkt.type == HTTPD_WS_TYPE_TEXT || ws_pkt.type == HTTPD_WS_TYPE_PING || ws_pkt.type == HTTPD_WS_TYPE_CLOSE) {
         if (ws_pkt.type == HTTPD_WS_TYPE_TEXT) {
 
-           //here, will have handle received payload
-	   //it can be a new instance meas to create (based on payload value, wich will contain the pageId)
-	   //but it can also be some control of hardware 
-	   //(for example, output power of generator, or window time precision of frequencymeter, etc...)
+          ws_process_received_json(req, ws_pkt);
 
-          
-           cJSON *root = cJSON_Parse((char *)ws_pkt.payload);
-           if (!root) {
-		ESP_LOGE(TAG, "Erreur de parsing JSON");
-	    }else {
-
-		    // Extraction des valeurs
-		    cJSON *t = cJSON_GetObjectItem(root, "t");
-		    cJSON *l = cJSON_GetObjectItem(root, "l");
-		    cJSON *v = cJSON_GetObjectItem(root, "v");
-
-		    ESP_LOGI(TAG, "Received packet with message (fd=%d): t: %d, l: %d, v: %s", httpd_req_to_sockfd(req), t->valueint, l->valueint, v->valuestring);
-
-		    char *page_name="index.html";
-		    if (strncmp(v->valuestring,page_name, strlen(page_name))==0) {
-			int pageId = INDEX_HTML_PAGE_ID; //define ou enum;
-			open_instance_meas(req->handle, pageId);
-		    }
-	    }
-
-	   //client is waiting data only in json format
-	   //response TEXT with no payload
-	   ws_pkt.len = 0;
-           ws_pkt.payload = NULL;
-
+	  //client is waiting data only in json format
+	  //response TEXT with no payload
+	  ws_pkt.len = 0;
+          ws_pkt.payload = NULL;
 
 	} else if (ws_pkt.type == HTTPD_WS_TYPE_PING) {
             // Response PONG packet to peer
@@ -436,6 +474,15 @@ static esp_err_t ws_handler(httpd_req_t *req)
     free(buf);
     return ret;
 }
+httpd_uri_t ws = {
+        .uri        = "/ws",
+        .method     = HTTP_GET,
+        .handler    = ws_handler,
+        .user_ctx   = NULL,
+        .is_websocket = true,
+        .handle_ws_control_frames = true
+};
+
 
 
 static void ws_async_send(void *arg)
@@ -788,13 +835,6 @@ httpd_uri_t style_get = {
 	.user_ctx = NULL
 };
 
-httpd_uri_t index_get = {
-	.uri	  = "/index.html",
-	.method   = HTTP_GET,
-	.handler  = index_get_handler,
-	.user_ctx = NULL
-};
-
 httpd_uri_t about_get = {
 	.uri	  = "/about.html",
 	.method   = HTTP_GET,
@@ -858,13 +898,6 @@ httpd_uri_t script_js_get = {
 	.user_ctx = NULL
 };
 
-httpd_uri_t upload_get = {
-	.uri	  = "/upload.html",
-	.method   = HTTP_GET,
-	.handler  = upload_get_handler,
-	.user_ctx = NULL
-};
-
 httpd_uri_t wifi_get = {
 	.uri	  = "/wifi.html",
 	.method   = HTTP_GET,
@@ -884,15 +917,6 @@ httpd_uri_t reboot_post = {
 	.method   = HTTP_POST,
 	.handler  = reboot_post_handler,
 	.user_ctx = NULL
-};
-
-httpd_uri_t ws = {
-        .uri        = "/ws",
-        .method     = HTTP_GET,
-        .handler    = ws_handler,
-        .user_ctx   = NULL,
-        .is_websocket = true,
-        .handle_ws_control_frames = true
 };
 
 // HTTP server URI handler structure

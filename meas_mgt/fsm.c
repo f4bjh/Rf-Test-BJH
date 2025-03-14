@@ -151,9 +151,9 @@ esp_err_t meas_state_calc_func(instance_meas_t *instance_meas)
 
 }
 
-T_DATA_TAG get_tag_measurement(meas_number_t meas_num)
+data_to_client_tag_t get_tag_measurement(meas_number_t meas_num)
 {
- T_DATA_TAG tag;
+ data_to_client_tag_t tag;
 
   switch (meas_num) {
     case CHIP_NAME:

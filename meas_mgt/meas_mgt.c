@@ -49,6 +49,24 @@ instance_meas_per_html_page_t instance_meas_per_html_page[N_PAGES][N_MEAS+1] =
     {NEXT_PART_BUILD_DATE,    true,  init_next_part_build_date,    calc_next_part_build_date},
     LAST_INSTANCE_MEAS
   },
+  //generator.html
+  {
+    LAST_INSTANCE_MEAS
+  },
+  //frequencymeter.html
+  {
+    LAST_INSTANCE_MEAS
+  },
+  //powermeter.html
+  {
+    LAST_INSTANCE_MEAS
+  },
+  //upload.html
+  {
+    {CURRENT_PARTITION,       true,  init_current_part,            calc_current_part},
+    {NEXT_PARTITION,          true,  init_next_part,               calc_next_part},
+    LAST_INSTANCE_MEAS
+  }, 
 };
 
 
