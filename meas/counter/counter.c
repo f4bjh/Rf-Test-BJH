@@ -5,7 +5,7 @@
 #include "esp_log.h"
 
 #include "meas_mgt.h"
-#include "counter.h"
+#include "meas.h"
 
 //standalone task on cpu1
 //should fill instance_meas->measures.pdata
