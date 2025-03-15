@@ -23,7 +23,8 @@ typedef enum {
   CHIP_INFO_REVISION_DATA_TAG,
   CURRENT_PARTITION_NAME_TAG,
   NEXT_PARTITION_TAG,
-  COUNTER_VALUE_TAG,
+  CPU0_COUNTER_VALUE_TAG,
+  CPU1_COUNTER_VALUE_TAG,
   CURRENT_PART_VERSION_TAG,
   CURRENT_PART_BUILD_DATE_TAG,
   NEXT_PART_VERSION_TAG,
@@ -41,7 +42,8 @@ typedef enum {
 	CHIP_VERSION,
 	CURRENT_PARTITION,
 	NEXT_PARTITION,
-	COUNTER,
+	CPU0_COUNTER,
+	CPU1_COUNTER,
 	CURRENT_PART_VERSION,
 	CURRENT_PART_BUILD_DATE,
 	NEXT_PART_VERSION,
@@ -94,6 +96,7 @@ typedef struct meas_s {
   uint8_t *pdata;  //pointer to ram with measures result (set and fill by cpu1)
   uint8_t *pdata_cache;  //cache of pdata
   meas_func_t	  meas_func;
+  uint8_t  meas_param_in[8];
   TaskHandle_t task_handle;
 } meas_t;
 
@@ -127,8 +130,8 @@ typedef struct instance_meas_s {
 typedef struct instance_config_meas_s {
  meas_state_t current_state;
  uint8_t retries;
- meas_t measures; //output data from cpu1
- json_meas_t json_meas; //output string from meas_state_format_json_func
+ meas_t measures; 
+ json_meas_t json_meas; 
  } instance_meas_default_t;
 
 typedef enum {
@@ -145,8 +148,9 @@ typedef enum {
 typedef struct instance_meas_per_html_page_s {
   meas_number_t meas_num;
   bool once;
- init_func_hw_t init_func_hw;
- calc_func_t calc_func;
+  init_func_hw_t init_func_hw;
+  calc_func_t calc_func;
+  uint8_t meas_param_in[8];
 } instance_meas_per_html_page_t;
 
 typedef  esp_err_t (*state_func)(instance_meas_t *);

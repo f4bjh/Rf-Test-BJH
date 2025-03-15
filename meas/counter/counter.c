@@ -42,14 +42,15 @@ esp_err_t init_counter(meas_t *measure)
    
    counter_task_arg.measure=measure;
 
-   //create a counter task on CPU1
+   //create a counter task on a specific CPU 0 or 1
+   //CPU number set in measure->meas_param_in[0]
    xTaskCreatePinnedToCore(counter_task, 
 		   "counter task", 
 		   configMINIMAL_STACK_SIZE, 
 		   &counter_task_arg,
 		   tskIDLE_PRIORITY + 1,
 		   &(measure->task_handle),
-		   1);
+		   measure->meas_param_in[0]);
 
    return ESP_OK;
 

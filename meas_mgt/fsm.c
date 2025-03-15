@@ -162,8 +162,11 @@ data_to_client_tag_t get_tag_measurement(meas_number_t meas_num)
     case CHIP_VERSION:
       tag = CHIP_INFO_REVISION_DATA_TAG;
       break;
-    case COUNTER:
-      tag = COUNTER_VALUE_TAG;
+    case CPU0_COUNTER:
+      tag = CPU0_COUNTER_VALUE_TAG;
+      break;
+   case CPU1_COUNTER:
+      tag = CPU1_COUNTER_VALUE_TAG;
       break;
     case CURRENT_PARTITION:
       tag = CURRENT_PARTITION_NAME_TAG;

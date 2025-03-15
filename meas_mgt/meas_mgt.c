@@ -31,22 +31,23 @@ TaskHandle_t meas_fsm_tsk_handle=NULL;
     .json_meas.ready=false,               \
 } 
 
-#define LAST_INSTANCE_MEAS {-1,false,NULL,NULL}
+#define LAST_INSTANCE_MEAS {-1,false,NULL,NULL,{0}}
 
 instance_meas_per_html_page_t instance_meas_per_html_page[N_PAGES][N_MEAS+1] = 
 {
   //index.html
   {
-    //meas_t value,     once,  init_func_hw,         get_calc_func
-    {CHIP_NAME,               true,  init_chip_info_model,         calc_chip_info_model},
-    {CHIP_VERSION,            true,  init_chip_revision,           calc_chip_revision},
-    {COUNTER,                 false, init_counter,                 calc_counter},
-    {CURRENT_PARTITION,       true,  init_current_part,            calc_current_part},
-    {NEXT_PARTITION,          true,  init_next_part,               calc_next_part},
-    {CURRENT_PART_VERSION,    true,  init_current_part_version,    calc_current_part_version},
-    {CURRENT_PART_BUILD_DATE, true,  init_current_part_build_date, calc_current_part_build_date},
-    {NEXT_PART_VERSION,       true,  init_next_part_version,       calc_next_part_version},
-    {NEXT_PART_BUILD_DATE,    true,  init_next_part_build_date,    calc_next_part_build_date},
+    //meas_t value,           once,  init_func_hw,                 get_calc_func,                meas_param_in
+    {CHIP_NAME,               true,  init_chip_info_model,         calc_chip_info_model,         {0}},
+    {CHIP_VERSION,            true,  init_chip_revision,           calc_chip_revision,           {0}},
+    {CPU0_COUNTER,            false, init_counter,                 calc_counter,                 {0}},
+    {CPU1_COUNTER,            false, init_counter,                 calc_counter,                 {1}},
+    {CURRENT_PARTITION,       true,  init_current_part,            calc_current_part,            {0}},
+    {NEXT_PARTITION,          true,  init_next_part,               calc_next_part,               {0}},
+    {CURRENT_PART_VERSION,    true,  init_current_part_version,    calc_current_part_version,    {0}},
+    {CURRENT_PART_BUILD_DATE, true,  init_current_part_build_date, calc_current_part_build_date, {0}},
+    {NEXT_PART_VERSION,       true,  init_next_part_version,       calc_next_part_version,       {0}},
+    {NEXT_PART_BUILD_DATE,    true,  init_next_part_build_date,    calc_next_part_build_date,    {0}},
     LAST_INSTANCE_MEAS
   },
   //generator.html
@@ -63,8 +64,8 @@ instance_meas_per_html_page_t instance_meas_per_html_page[N_PAGES][N_MEAS+1] =
   },
   //upload.html
   {
-    {CURRENT_PARTITION,       true,  init_current_part,            calc_current_part},
-    {NEXT_PARTITION,          true,  init_next_part,               calc_next_part},
+    {CURRENT_PARTITION,       true,  init_current_part,            calc_current_part, {0}},
+    {NEXT_PARTITION,          true,  init_next_part,               calc_next_part,    {0}},
     LAST_INSTANCE_MEAS
   }, 
 };
@@ -91,6 +92,7 @@ instance_meas_t *meas_mgt_init(html_page_id_t page_id)
    meas_number_t meas_num;
    meas_action_t meas_action = { .event = MEAS_INIT, .meas_num = 0};
    static meas_fsm_task_arg_t meas_fsm_task_arg;
+   uint8_t index;
 
    n_meas = get_nb_of_instance_meas(page_id);
 
@@ -108,6 +110,8 @@ instance_meas_t *meas_mgt_init(html_page_id_t page_id)
       instance_meas_temp->measures.pdata= instance_meas_default.measures.pdata;
       instance_meas_temp->measures.pdata_cache= instance_meas_default.measures.pdata_cache;
       instance_meas_temp->measures.meas_func= instance_meas_default.measures.meas_func;
+      for (index=0; index<8; index++)
+        instance_meas_temp->measures.meas_param_in[index] = instance_meas_per_html_page[page_id][meas_num].meas_param_in[index];
       instance_meas_temp->json_meas.ready= instance_meas_default.json_meas.ready;
       instance_meas_temp->init_func_hw=instance_meas_per_html_page[page_id][meas_num].init_func_hw;
       instance_meas_temp->calc_func=instance_meas_per_html_page[page_id][meas_num].calc_func;
