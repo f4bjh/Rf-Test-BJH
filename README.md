@@ -58,6 +58,18 @@ with minicom:
 $ minicom -D /dev/ttyACM0 
 ``` 
 
+analyse assembleur  
+pour rechercher la partie assemblée du fonction _meas_fsm_task_
+```
+$ xtensa-esp32-elf-objdump -d -Mnumeric build/Rf-Test-BJH.elf | awk '/<meas_fsm_task>:/,/^$/'
+```
+afin de s'assurer que ce résultat est complet :  
+```
+$  xtensa-esp-elf-nm --numeric-sort build/Rf-Test-BJH.elf | grep " T "
+```
+cette dernière commande liste les symboles. Il suffit de vérifier que l'adresse de la fonction suivante, se situe bien après la dernière addresse de la fonction recherchée auparavant  
+ 
+
 - gdb
 
 ```

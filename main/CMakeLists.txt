@@ -3,11 +3,14 @@ idf_component_register(
 	SRCS "../http_server/keep_alive.c"
 	SRCS "../http_server/server.c"
 	SRCS "../cJSON/cJSON.c"
-	SRCS "../data/chip_info.c"
-	SRCS "../data/data.c"
+	SRCS "../meas_mgt/meas_mgt.c"
+	SRCS "../meas_mgt/fsm.c"
 	SRCS "../lcd/lcd.c"
 	SRCS "../lcd/lvgl.c"
 	SRCS "../wifi/softap_sta.c"
+	SRCS "../meas/counter/counter.c"
+	SRCS "../meas/chip_info/chip_info.c"
+	SRCS "../meas/part_info/part_info.c"
 	INCLUDE_DIRS "../include"
 	EMBED_FILES ../http_server/pages/about.html
 	EMBED_FILES ../http_server/pages/frequencymeter.html
