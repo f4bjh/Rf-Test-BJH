@@ -23,7 +23,7 @@ esp_err_t get_current_part(meas_t *measure)
 
 esp_err_t init_current_part(meas_t *measure)
 {
-    measure->size = 6*sizeof(char);
+    measure->size = 8*sizeof(char);
     measure->pdata = malloc(measure->size * sizeof(uint8_t));
     measure->pdata_cache = malloc(measure->size * sizeof(uint8_t));
     measure->meas_func = get_current_part;
@@ -38,7 +38,7 @@ esp_err_t calc_current_part(instance_meas_t *instance_meas)
     meas_t measure=instance_meas->measures;
     memset(instance_meas->calc_value, 0, CALC_VALUE_SIZE*sizeof(char));
  
-    sprintf(instance_meas->calc_value,"%s", measure.pdata_cache);
+    snprintf(instance_meas->calc_value,measure.size,"%s", measure.pdata_cache);
 
     return ESP_OK;
 }
@@ -59,7 +59,7 @@ esp_err_t get_next_part(meas_t *measure)
 
 esp_err_t init_next_part(meas_t *measure)
 {
-    measure->size = 6*sizeof(char);
+    measure->size = 8*sizeof(char);
     measure->pdata = malloc(measure->size * sizeof(uint8_t));
     measure->pdata_cache = malloc(measure->size * sizeof(uint8_t));
     measure->meas_func = get_next_part;
@@ -74,7 +74,7 @@ esp_err_t calc_next_part(instance_meas_t *instance_meas)
     meas_t measure=instance_meas->measures;
     memset(instance_meas->calc_value, 0, CALC_VALUE_SIZE*sizeof(char));
  
-    sprintf(instance_meas->calc_value,"%s", measure.pdata_cache);
+    snprintf(instance_meas->calc_value,measure.size,"%s", measure.pdata_cache);
 
     return ESP_OK;
 }
@@ -98,7 +98,7 @@ esp_err_t get_current_part_version(meas_t *measure)
 
 esp_err_t init_current_part_version(meas_t *measure)
 {
-    measure->size = 32*sizeof(char);
+    measure->size = 33*sizeof(char);
     measure->pdata = malloc(measure->size * sizeof(uint8_t));
     measure->pdata_cache = malloc(measure->size * sizeof(uint8_t));
     measure->meas_func = get_current_part_version;
@@ -113,7 +113,7 @@ esp_err_t calc_current_part_version(instance_meas_t *instance_meas)
     meas_t measure=instance_meas->measures;
     memset(instance_meas->calc_value, 0, CALC_VALUE_SIZE*sizeof(char));
  
-    sprintf(instance_meas->calc_value,"%s", measure.pdata_cache);
+    snprintf(instance_meas->calc_value,measure.size,"%s", measure.pdata_cache);
 
     return ESP_OK;
 }
@@ -155,7 +155,7 @@ esp_err_t calc_current_part_build_date(instance_meas_t *instance_meas)
     memset(instance_meas->calc_value, 0, CALC_VALUE_SIZE*sizeof(char));
  
     n= snprintf(instance_meas->calc_value,19, "%s - ", measure.pdata_cache);
-    sprintf(instance_meas->calc_value + n,"%s", measure.pdata_cache + 16);
+    snprintf(instance_meas->calc_value + n,17,"%s", measure.pdata_cache + 16);
 
 
     return ESP_OK;
@@ -202,7 +202,7 @@ esp_err_t calc_next_part_version(instance_meas_t *instance_meas)
     meas_t measure=instance_meas->measures;
     memset(instance_meas->calc_value, 0, CALC_VALUE_SIZE*sizeof(char));
  
-    sprintf(instance_meas->calc_value,"%s", measure.pdata_cache);
+    snprintf(instance_meas->calc_value,measure.size,"%s", measure.pdata_cache);
 
     return ESP_OK;
 }
@@ -244,7 +244,7 @@ esp_err_t calc_next_part_build_date(instance_meas_t *instance_meas)
     memset(instance_meas->calc_value, 0, CALC_VALUE_SIZE*sizeof(char));
  
     n= snprintf(instance_meas->calc_value,19, "%s - ", measure.pdata_cache);
-    sprintf(instance_meas->calc_value + n,"%s", measure.pdata_cache + 16);
+    snprintf(instance_meas->calc_value + n,16,"%s", measure.pdata_cache + 16);
 
 
     return ESP_OK;
