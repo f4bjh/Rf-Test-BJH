@@ -14,6 +14,7 @@ esp_err_t get_current_part(meas_t *measure)
     memset(measure->pdata, 0, measure->size);
         
     partition = esp_ota_get_running_partition();
+    measure->size = strlen(partition->label)+1;
     memcpy(measure->pdata, (uint8_t*)partition->label, measure->size);
     measure->ready=true;
 
@@ -23,7 +24,7 @@ esp_err_t get_current_part(meas_t *measure)
 
 esp_err_t init_current_part(meas_t *measure)
 {
-    measure->size = 8*sizeof(char);
+    measure->size = 7*sizeof(char);
     measure->pdata = malloc(measure->size * sizeof(uint8_t));
     measure->pdata_cache = malloc(measure->size * sizeof(uint8_t));
     measure->meas_func = get_current_part;
@@ -50,6 +51,7 @@ esp_err_t get_next_part(meas_t *measure)
     memset(measure->pdata, 0, measure->size);
         
     partition = esp_ota_get_next_update_partition(NULL);
+    measure->size = strlen(partition->label)+1;
     memcpy(measure->pdata, (uint8_t*)partition->label, measure->size);
     measure->ready=true;
 
@@ -59,7 +61,7 @@ esp_err_t get_next_part(meas_t *measure)
 
 esp_err_t init_next_part(meas_t *measure)
 {
-    measure->size = 8*sizeof(char);
+    measure->size = 7*sizeof(char);
     measure->pdata = malloc(measure->size * sizeof(uint8_t));
     measure->pdata_cache = malloc(measure->size * sizeof(uint8_t));
     measure->meas_func = get_next_part;
@@ -83,14 +85,19 @@ esp_err_t get_current_part_version(meas_t *measure)
 {
     const esp_partition_t *partition; 
     esp_app_desc_t app_desc;
+    esp_err_t ret;
 
     memset(measure->pdata, 0, measure->size);
         
     partition = esp_ota_get_running_partition();
-    esp_ota_get_partition_description(partition, &app_desc);
+    ret = esp_ota_get_partition_description(partition, &app_desc);
 
-    memcpy(measure->pdata, (uint8_t*)app_desc.version, measure->size);
-    measure->ready=true;
+    if (ret == ESP_OK){
+      measure->size = strlen(app_desc.version); 
+      memcpy(measure->pdata, (uint8_t*)app_desc.version, measure->size);
+      measure->ready=true;
+    } else
+      measure->ready=false;
 
     return ESP_OK;
     
@@ -98,7 +105,7 @@ esp_err_t get_current_part_version(meas_t *measure)
 
 esp_err_t init_current_part_version(meas_t *measure)
 {
-    measure->size = 33*sizeof(char);
+    measure->size = 32*sizeof(char);
     measure->pdata = malloc(measure->size * sizeof(uint8_t));
     measure->pdata_cache = malloc(measure->size * sizeof(uint8_t));
     measure->meas_func = get_current_part_version;
@@ -122,15 +129,20 @@ esp_err_t get_current_part_build_date(meas_t *measure)
 {
     const esp_partition_t *partition; 
     esp_app_desc_t app_desc;
+    esp_err_t ret;
 
     memset(measure->pdata, 0, measure->size);
         
     partition = esp_ota_get_running_partition();
-    esp_ota_get_partition_description(partition, &app_desc);
+    ret = esp_ota_get_partition_description(partition, &app_desc);
 
-    memcpy(measure->pdata, (uint8_t*)app_desc.date, 16);
-    memcpy(measure->pdata + 16, (uint8_t*)app_desc.time, 16);
-    measure->ready=true;
+    if (ret == ESP_OK) {
+      measure->size = 32; //just confirmed so far
+      memcpy(measure->pdata, (uint8_t*)app_desc.date, 16);
+      memcpy(measure->pdata + 16, (uint8_t*)app_desc.time, 16);
+      measure->ready=true;
+    } else
+      measure->ready=false;
 
     return ESP_OK;
     
@@ -161,25 +173,23 @@ esp_err_t calc_current_part_build_date(instance_meas_t *instance_meas)
     return ESP_OK;
 }
 
-
-
-
-
-
-
-
 esp_err_t get_next_part_version(meas_t *measure)
 {
     const esp_partition_t *partition; 
     esp_app_desc_t app_desc;
+    esp_err_t ret;
 
     memset(measure->pdata, 0, measure->size);
         
     partition = esp_ota_get_next_update_partition(NULL);
-    esp_ota_get_partition_description(partition, &app_desc);
+    ret = esp_ota_get_partition_description(partition, &app_desc);
 
-    memcpy(measure->pdata, (uint8_t*)app_desc.version, measure->size);
-    measure->ready=true;
+    if (ret == ESP_OK) {
+      measure->size = strlen(app_desc.version)+1;
+      memcpy(measure->pdata, (uint8_t*)app_desc.version, measure->size);
+      measure->ready=true;
+    } else
+      measure->ready=false;
 
     return ESP_OK;
     
@@ -211,15 +221,21 @@ esp_err_t get_next_part_build_date(meas_t *measure)
 {
     const esp_partition_t *partition; 
     esp_app_desc_t app_desc;
+    esp_err_t ret;
 
     memset(measure->pdata, 0, measure->size);
         
     partition = esp_ota_get_next_update_partition(NULL);
-    esp_ota_get_partition_description(partition, &app_desc);
+    ret = esp_ota_get_partition_description(partition, &app_desc);
 
-    memcpy(measure->pdata, (uint8_t*)app_desc.date, 16);
-    memcpy(measure->pdata + 16, (uint8_t*)app_desc.time, 16);
-    measure->ready=true;
+    if (ret == ESP_OK) {
+      measure->size =32; //just confirmed so far
+      memcpy(measure->pdata, (uint8_t*)app_desc.date, 16);
+      memcpy(measure->pdata + 16, (uint8_t*)app_desc.time, 16);
+      measure->ready=true;
+   } else
+      measure->ready=false;
+    
 
     return ESP_OK;
     
