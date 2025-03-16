@@ -93,7 +93,7 @@ esp_err_t get_current_part_version(meas_t *measure)
     ret = esp_ota_get_partition_description(partition, &app_desc);
 
     if (ret == ESP_OK){
-      measure->size = strlen(app_desc.version); 
+      measure->size = strlen(app_desc.version)+1; 
       memcpy(measure->pdata, (uint8_t*)app_desc.version, measure->size);
       measure->ready=true;
     } else
