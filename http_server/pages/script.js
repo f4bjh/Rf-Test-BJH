@@ -77,6 +77,7 @@ socket.addEventListener('message', (event) => {
 	// Filtrer les données en fonction de la page active
 	switch (pageId) {
 	case 'index.html':
+	case '':
 		if (json_data.t === 0x00) {
 			chip_model = `unable to read chip info`;
 			chip_revision = `unable to read chip info`;
