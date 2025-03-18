@@ -29,6 +29,7 @@ typedef enum {
   CURRENT_PART_BUILD_DATE_TAG,
   NEXT_PART_VERSION_TAG,
   NEXT_PART_BUILD_DATE_TAG,
+  FREQUENCY_TAG
 } data_to_client_tag_t;
 
 typedef enum {
@@ -48,6 +49,7 @@ typedef enum {
 	CURRENT_PART_BUILD_DATE,
 	NEXT_PART_VERSION,
 	NEXT_PART_BUILD_DATE,
+	FREQUENCY,
 	N_MEAS
 } meas_number_t;
 

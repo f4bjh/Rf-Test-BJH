@@ -27,3 +27,7 @@ esp_err_t calc_next_part_version(instance_meas_t *instance_meas);
 
 esp_err_t init_next_part_build_date(meas_t *measure);
 esp_err_t calc_next_part_build_date(instance_meas_t *instance_meas);
+
+esp_err_t init_frequencymeter(meas_t *measure);
+esp_err_t calc_frequencymeter(instance_meas_t *instance_meas);
+

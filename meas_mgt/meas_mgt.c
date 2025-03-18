@@ -56,6 +56,7 @@ instance_meas_per_html_page_t instance_meas_per_html_page[N_PAGES][N_MEAS+1] =
   },
   //frequencymeter.html
   {
+    {FREQUENCY,    false,  init_frequencymeter,    calc_frequencymeter,    {0}},
     LAST_INSTANCE_MEAS
   },
   //powermeter.html
