@@ -8,6 +8,12 @@ let current_part_version = `unknown`;
 let current_part_build_date = `unknown`;
 let next_part_version = `unknown`;
 let next_part_build_date = `unknown`;
+let frequency = `unknown`;
+let freq_digit3 = 0;
+let freq_digit2 = 0;
+let freq_digit1 = 0;
+let freq_digit0 = 0;
+
 
 
 var serverIp = window.location.hostname;
@@ -67,7 +73,8 @@ socket.addEventListener('message', (event) => {
 	const PartitionInfo = document.getElementById('partition-info');
 	const current_part_info = document.getElementById('current-part-info');
 	const next_part_info = document.getElementById('next-part-info');
-			
+	const freq_digit = document.getElementById('freq-digit'); //MSB
+				
 	// Récupérer l'URL de la page actuelle
 	const url = window.location.href;
 
@@ -157,9 +164,24 @@ socket.addEventListener('message', (event) => {
 		PartitionInfo.innerHTML += `next partition    : ${next_partition}<br>`;
 		break;
 	case 'frequencymeter.html':
-		if (json_data.t === 0x03 || json_data.t === 0x07) {
-			messageContainer.innerHTML += `Valeur champ ${json_data.t} : ${json_data.v}<br>`;
-	    		}
+		if (json_data.t === 0xB) {
+	    		if (json_data.l !== 0) {
+				frequency = `${json_data.v}`;
+			}
+		}
+		let strFreq = String(frequency).padStart(4, '0');
+		//for an unknown reason, MSB and LSB seems to be switched
+		freq_digit3 = parseInt(strFreq[0]);
+		freq_digit2 = parseInt(strFreq[1]);
+		freq_digit1 = parseInt(strFreq[2]);
+		freq_digit0 = parseInt(strFreq[3]);
+		freq_digit.innerHTML = `
+		<div class='s7s'><input value='` + freq_digit3 + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+		<div class='s7s'><input value='` + freq_digit2 + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+		<div class='s7s'><input value='` + freq_digit1 + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+		<div class='s7s'><input value='` + freq_digit0 + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+		<div class='unit-Hz'>MHz</div>
+		`;
 		break;
 	case 'powermeter.html':
 	       if (json_data.t === 0x46 || json_data.t === 0xAB) {

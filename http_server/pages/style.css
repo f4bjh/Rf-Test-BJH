@@ -116,8 +116,8 @@ nav ul ul ul li {
     font-size: 125px;
     color: rgb(0,255,0);
     position: relative;
-    top: -10px;
-    left: 10px;
+    top: 0px;
+    left: 0px;
     }
 
 .min_dBm {
@@ -248,7 +248,9 @@ li > a:after { content:  ' +'; }
   }
   
   .s7s {
-    display: inline-block;
+    display: inline-block !important; /* Force les chiffres à s'afficher sur une seule ligne */
+    margin-right: 5px; /* Espacement entre les chiffres */
+    vertical-align: middle; /* Ajuste l'alignement vertical */
     width: var(--c-w);
     height: var(--c-h);
     background: var(--bg-color);
