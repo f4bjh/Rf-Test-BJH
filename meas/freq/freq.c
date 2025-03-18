@@ -102,7 +102,7 @@ esp_err_t stop_frequencymeter(meas_t *measure)
   timer = measure->handle;
 
   ESP_ERROR_CHECK(gptimer_stop(timer));  // Arrêter le timer
-  ESP_ERROR_CHECK(gptimer_del_timer(timer));   // Supprimer le timer
+  //ESP_ERROR_CHECK(gptimer_del_timer(timer));   // Supprimer le timer
 
   return ESP_OK;
 }
