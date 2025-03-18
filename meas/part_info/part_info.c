@@ -3,6 +3,7 @@
 #include <freertos/task.h>
 #include <esp_ota_ops.h>
 #include "esp_log.h"
+#include <sys/param.h>
 
 #include "meas_mgt.h"
 #include "meas.h"
@@ -14,7 +15,7 @@ esp_err_t get_current_part(meas_t *measure)
     memset(measure->pdata, 0, measure->size);
         
     partition = esp_ota_get_running_partition();
-    measure->size = strlen(partition->label)+1;
+    measure->size = MIN(strlen(partition->label)+1,7);
     memcpy(measure->pdata, (uint8_t*)partition->label, measure->size);
     measure->ready=true;
 
@@ -51,7 +52,7 @@ esp_err_t get_next_part(meas_t *measure)
     memset(measure->pdata, 0, measure->size);
         
     partition = esp_ota_get_next_update_partition(NULL);
-    measure->size = strlen(partition->label)+1;
+    measure->size = MIN(strlen(partition->label)+1,7);
     memcpy(measure->pdata, (uint8_t*)partition->label, measure->size);
     measure->ready=true;
 
@@ -93,13 +94,13 @@ esp_err_t get_current_part_version(meas_t *measure)
     ret = esp_ota_get_partition_description(partition, &app_desc);
 
     if (ret == ESP_OK){
-      measure->size = strlen(app_desc.version)+1; 
+      measure->size = MIN(strlen(app_desc.version),32); 
       memcpy(measure->pdata, (uint8_t*)app_desc.version, measure->size);
       measure->ready=true;
     } else
       measure->ready=false;
 
-    return ESP_OK;
+    return ret;
     
 }
 
@@ -144,7 +145,7 @@ esp_err_t get_current_part_build_date(meas_t *measure)
     } else
       measure->ready=false;
 
-    return ESP_OK;
+    return ret;
     
 }
 
@@ -185,13 +186,13 @@ esp_err_t get_next_part_version(meas_t *measure)
     ret = esp_ota_get_partition_description(partition, &app_desc);
 
     if (ret == ESP_OK) {
-      measure->size = strlen(app_desc.version)+1;
+      measure->size = MIN(strlen(app_desc.version)+1,32);
       memcpy(measure->pdata, (uint8_t*)app_desc.version, measure->size);
       measure->ready=true;
     } else
       measure->ready=false;
 
-    return ESP_OK;
+    return ret;
     
 }
 
@@ -237,7 +238,7 @@ esp_err_t get_next_part_build_date(meas_t *measure)
       measure->ready=false;
     
 
-    return ESP_OK;
+    return ret;
     
 }
 

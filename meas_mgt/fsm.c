@@ -108,12 +108,22 @@ esp_err_t meas_state_get_func(instance_meas_t *instance_meas)
 
   if (instance_meas->once) {
     if (instance_meas->measures.meas_func) {
-	instance_meas->measures.meas_func(&(instance_meas->measures));
+	
+	err = instance_meas->measures.meas_func(&(instance_meas->measures));
+        if (err != ESP_OK)  {
+  	  ESP_LOGE(TAG,"meas_func error for measure %d %s (code: 0x%x)", instance_meas->meas_num, esp_err_to_name(err), err);
+	  instance_meas->measures.ready = false;
+	  meas_action.event=MEAS_REMOVE;
+	  goto meas_state_get_func_end;
+        }
+
     } else {
 	ESP_LOGE(TAG,"meas_func not defined for %d", instance_meas->meas_num);
 	meas_action.event=MEAS_REMOVE;
+        goto meas_state_get_func_end;
     }
   }
+
 
   if (instance_meas->measures.ready) {
    
@@ -125,7 +135,8 @@ esp_err_t meas_state_get_func(instance_meas_t *instance_meas)
     
   } else 
     meas_action.event=MEAS_PULL;
- 
+
+meas_state_get_func_end: 
   if (xQueueSendToBack(instance_meas->q_action, &meas_action, 0) != pdTRUE) 
         err=ESP_FAIL;
 
@@ -276,8 +287,6 @@ esp_err_t meas_state_remove_func(instance_meas_t *instance_meas)
       }
   }
 
-
- 
   return err;
 }
 
