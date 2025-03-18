@@ -67,6 +67,7 @@ void init_timer(meas_t *measure)
         .on_alarm = timer_callback,
     };
 
+    measure->handle = (void*) gptimer;
     user_ctx = measure;
     gptimer_register_event_callbacks(gptimer, &cbs, user_ctx);
 
@@ -94,6 +95,17 @@ esp_err_t init_frequencymeter(meas_t *measure)
 
 }
 
+esp_err_t stop_frequencymeter(meas_t *measure)
+{
+  static gptimer_handle_t timer;
+ 
+  timer = measure->handle;
+
+  ESP_ERROR_CHECK(gptimer_stop(timer));  // Arrêter le timer
+  ESP_ERROR_CHECK(gptimer_del_timer(timer));   // Supprimer le timer
+
+  return ESP_OK;
+}
 
 esp_err_t calc_frequencymeter(instance_meas_t *instance_meas)
 {

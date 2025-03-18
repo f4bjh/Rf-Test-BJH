@@ -30,7 +30,7 @@ esp_err_t init_chip_info_model(meas_t *measure)
     measure->pdata = malloc(measure->size * sizeof(uint8_t));
     measure->pdata_cache = malloc(measure->size * sizeof(uint8_t));
     measure->meas_func = get_chip_info_model;
-    measure->task_handle = NULL;
+    measure->handle = NULL;
 
     return ESP_OK;
 
@@ -95,7 +95,7 @@ esp_err_t init_chip_revision(meas_t *measure)
     measure->pdata = malloc(measure->size * sizeof(uint8_t));
     measure->pdata_cache = malloc(measure->size * sizeof(uint8_t));
     measure->meas_func = get_chip_info_revision;
-    measure->task_handle = NULL;
+    measure->handle = NULL;
 
     return ESP_OK;
 

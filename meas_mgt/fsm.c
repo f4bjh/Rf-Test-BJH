@@ -64,9 +64,11 @@ void meas_fsm_task(void *arg)
       for (meas_num=0, instance_meas_temp=instance_meas;meas_num<n_meas;instance_meas_temp++,meas_num++) {
         vTaskDelay(10 / portTICK_PERIOD_MS); 
 
-        if (xQueueReceive(instance_meas_temp->q_action, (void*)&meas_action , 0 ) == pdTRUE) {
-          evaluate_state(meas_action.event,instance_meas_temp);
-        }
+	if (instance_meas_temp->meas_num !=REMOVED_MEAS) {
+          if (xQueueReceive(instance_meas_temp->q_action, (void*)&meas_action , 0 ) == pdTRUE) {
+            evaluate_state(meas_action.event,instance_meas_temp);
+          }
+	}
       }
     };
 	
@@ -259,17 +261,24 @@ esp_err_t meas_state_pending_func(instance_meas_t *instance_meas)
 
 esp_err_t meas_state_remove_func(instance_meas_t *instance_meas)
 {
-
-  if (instance_meas->measures.pdata!=NULL)
-    free(instance_meas->measures.pdata);
-  if (instance_meas->measures.pdata_cache!=NULL)
-    free(instance_meas->measures.pdata_cache);
-  if (instance_meas->measures.task_handle!=NULL)
-    vTaskDelete(instance_meas->measures.task_handle);
+  meas_action_t meas_action = { .event = MEAS_REMOVE, .meas_num = instance_meas->meas_num};
+  esp_err_t err;
  
-  ESP_LOGI(TAG,"instance measure %d has been removed", instance_meas->meas_num);
+  if (instance_meas->meas_num!=REMOVED_MEAS &&
+      !instance_meas->json_meas.ready) {
+	ESP_LOGI(TAG,"remove instance measure %d", instance_meas->meas_num);
+	err = instance_meas_remove(instance_meas);
+  } else {
+      if (xQueueSendToBack(instance_meas->q_action, &meas_action, 0) == pdTRUE) {
+           err=ESP_OK;
+      } else {
+         err = ESP_FAIL;
+      }
+  }
 
-  return ESP_OK;
+
+ 
+  return err;
 }
 
 

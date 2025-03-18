@@ -351,7 +351,8 @@ void close_instance_meas(httpd_handle_t hd)
       return;
     }
 
-    instance_meas_remove(instance_meas);
+    instance_meas_remove_all(instance_meas);
+	
     if (instance_meas != NULL) 
       free(instance_meas);
 
@@ -362,8 +363,6 @@ void close_instance_meas(httpd_handle_t hd)
       ESP_LOGE(TAG, "failed to take semaphore to set server_ctx");
       return;
     }
-
-//  close(sockfd);
 }
 
 void ws_process_received_page_id(httpd_req_t *req, int size, char* received_page_id)
@@ -527,7 +526,7 @@ static void ws_async_send(void *arg)
 
 
   if (instance_meas!=NULL) {
-    while(instance_meas->meas_num!=-1) {
+    while(instance_meas->meas_num!=LAST_MEAS) {
 
       if (instance_meas->json_meas.ready) {
 
