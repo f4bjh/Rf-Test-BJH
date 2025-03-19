@@ -18,15 +18,12 @@ static pcnt_unit_handle_t pcnt_unit = NULL;  // Déclaration du handle PCNT
 
 static bool IRAM_ATTR timer_callback(gptimer_handle_t timer, const gptimer_alarm_event_data_t *edata, void *user_ctx) {
     int count = 0;
-    int count_STUBED = 1000;
     pcnt_unit_get_count(pcnt_unit, &count);
     pulse_count = count;
     pcnt_unit_clear_count(pcnt_unit);  // Réinitialisation du compteur
 
     meas_t *measure=user_ctx;
-    // for test only
-    //*(measure->pdata) = count;
-    memcpy(measure->pdata, &count_STUBED, measure->size);
+    memcpy(measure->pdata, &pulse_count, measure->size);
     measure->ready=true;
 
     return true;  // Demande au timer de relancer l'interruption
@@ -114,15 +111,15 @@ esp_err_t calc_frequencymeter(instance_meas_t *instance_meas)
 {
     meas_t measure=instance_meas->measures;
     memset(instance_meas->calc_value, 0, CALC_VALUE_SIZE*sizeof(char));
+    int freq=0;
 
-    ESP_LOGI("freq", "Fréquence mesurée: %d Hz", pulse_count);
-    
-    sprintf(instance_meas->calc_value,"%d%d%d%d", 
-		    *(measure.pdata_cache+3),
-		    *(measure.pdata_cache+2),
-		    *(measure.pdata_cache+1),
-		    *(measure.pdata_cache) );
-   
+    freq = *(measure.pdata_cache);
+    freq |= ((*(measure.pdata_cache+1))<<8)&0xFF00;
+    freq |= ((*(measure.pdata_cache+2))<<16)&0xFF0000;
+    freq |= ((*(measure.pdata_cache+3))<<24)&0xFF000000;
+
+    sprintf(instance_meas->calc_value,"%d", freq );
+
     return ESP_OK;
 }
 
