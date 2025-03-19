@@ -10,7 +10,7 @@
 #include "meas.h"
 
 #define PCNT_INPUT_GPIO      4       // GPIO d'entrée du signal
-#define MEASURE_PERIOD_US    1000000 // Période d'échantillonnage (1s)
+#define MEASURE_PERIOD_US    1000000 // Période d'échantillonnage (1s) - periode de declenchement de l'IT timer
 
 static gptimer_handle_t gptimer = NULL;
 static int pulse_count = 0;
@@ -18,12 +18,15 @@ static pcnt_unit_handle_t pcnt_unit = NULL;  // Déclaration du handle PCNT
 
 static bool IRAM_ATTR timer_callback(gptimer_handle_t timer, const gptimer_alarm_event_data_t *edata, void *user_ctx) {
     int count = 0;
+    int count_STUBED = 1000;
     pcnt_unit_get_count(pcnt_unit, &count);
     pulse_count = count;
     pcnt_unit_clear_count(pcnt_unit);  // Réinitialisation du compteur
 
     meas_t *measure=user_ctx;
-    *(measure->pdata) = count;
+    // for test only
+    //*(measure->pdata) = count;
+    memcpy(measure->pdata, &count_STUBED, measure->size);
     measure->ready=true;
 
     return true;  // Demande au timer de relancer l'interruption
@@ -59,7 +62,7 @@ void init_timer(meas_t *measure)
     gptimer_config_t timer_config = {
         .clk_src = GPTIMER_CLK_SRC_DEFAULT,
         .direction = GPTIMER_COUNT_UP,
-        .resolution_hz = 1000000,  // Précision à 1 µs
+        .resolution_hz = 1*1000*1000,  // 1MHz
     };
     gptimer_new_timer(&timer_config, &gptimer);
 
@@ -72,7 +75,7 @@ void init_timer(meas_t *measure)
     gptimer_register_event_callbacks(gptimer, &cbs, user_ctx);
 
     gptimer_alarm_config_t alarm_config = {
-        .alarm_count = MEASURE_PERIOD_US, // Déclenchement chaque seconde
+        .alarm_count = MEASURE_PERIOD_US, // precision du frequencemetre (1Hz)
         .reload_count = 0,
         .flags.auto_reload_on_alarm = true,
     };
@@ -113,8 +116,12 @@ esp_err_t calc_frequencymeter(instance_meas_t *instance_meas)
     memset(instance_meas->calc_value, 0, CALC_VALUE_SIZE*sizeof(char));
 
     ESP_LOGI("freq", "Fréquence mesurée: %d Hz", pulse_count);
-
-    sprintf(instance_meas->calc_value,"%d", *(measure.pdata_cache)/10 );
+    
+    sprintf(instance_meas->calc_value,"%d%d%d%d", 
+		    *(measure.pdata_cache+3),
+		    *(measure.pdata_cache+2),
+		    *(measure.pdata_cache+1),
+		    *(measure.pdata_cache) );
    
     return ESP_OK;
 }
