@@ -239,7 +239,7 @@ void wifi_init(void)
       /* xEventGroupWaitBits() returns the bits before the call returned,
        * hence we can test which event actually happened. */
       if (bits & WIFI_CONNECTED_BIT) {
-        ESP_LOGI(TAG_STA, "connected to ap SSID:%s password:%s",
+        ESP_LOGV(TAG_STA, "connected to ap SSID:%s password:%s",
                  ssid, password);
 #if 0
 	to check, what is it for ?
