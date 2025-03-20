@@ -267,7 +267,7 @@ esp_err_t update_post_handler(httpd_req_t *req)
 }
 
 
-esp_err_t reboot_post_handler(httpd_req_t *req)
+esp_err_t reboot_after_upload_post_handler(httpd_req_t *req)
 {
 	const esp_partition_t *ota_partition = esp_ota_get_next_update_partition(NULL);
 	if (esp_ota_set_boot_partition(ota_partition) != ESP_OK) {
@@ -280,6 +280,15 @@ esp_err_t reboot_post_handler(httpd_req_t *req)
 
 	return ESP_OK;
 }
+
+esp_err_t reboot_post_handler(httpd_req_t *req)
+{
+	ESP_LOGI(TAG,"Reboot requested !!!");
+	esp_restart();
+
+	return ESP_OK;
+}
+
 
 esp_err_t open_instance_meas(httpd_handle_t hd, html_page_id_t pageId)
 {
@@ -920,6 +929,13 @@ httpd_uri_t update_post = {
 	.user_ctx = NULL
 };
 
+httpd_uri_t reboot_after_upload_post = {
+	.uri	  = "/reboot_after_upload",
+	.method   = HTTP_POST,
+	.handler  = reboot_after_upload_post_handler,
+	.user_ctx = NULL
+};
+
 httpd_uri_t reboot_post = {
 	.uri	  = "/reboot",
 	.method   = HTTP_POST,
@@ -978,6 +994,7 @@ esp_err_t http_server_init(void)
 		httpd_register_uri_handler(http_server, &upload_get);
 		httpd_register_uri_handler(http_server, &wifi_get);
 		httpd_register_uri_handler(http_server, &update_post);
+		httpd_register_uri_handler(http_server, &reboot_after_upload_post);
 		httpd_register_uri_handler(http_server, &reboot_post);
 		httpd_register_uri_handler(http_server, &ws);
 		httpd_register_uri_handler(http_server, &set_wifi_uri_handler);
