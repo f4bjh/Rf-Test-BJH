@@ -137,7 +137,7 @@ instance_meas_t *meas_mgt_init(html_page_id_t page_id)
     //create FSM-measurment on cpu0 fsm_meas_task
     meas_fsm_task_arg.instance_meas=instance_meas;
     meas_fsm_task_arg.n_meas=n_meas;
-    xTaskCreate( meas_fsm_task, "measurment fsm ", 4096, &meas_fsm_task_arg, tskFSM_MEASURMENT, &meas_fsm_tsk_handle );
+    xTaskCreatePinnedToCore( meas_fsm_task, "measurment fsm ", 4096, &meas_fsm_task_arg, tskFSM_MEASURMENT, &meas_fsm_tsk_handle,0 );
 
     return instance_meas;
 }

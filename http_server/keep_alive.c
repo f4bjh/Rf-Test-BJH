@@ -180,8 +180,8 @@ wss_keep_alive_t wss_keep_alive_start(wss_keep_alive_config_t *config)
     keep_alive_storage->keep_alive_period_ms = config->keep_alive_period_ms;
     keep_alive_storage->user_ctx = config->user_ctx;
     keep_alive_storage->q =  xQueueCreate(queue_size, sizeof(client_fd_action_t));
-    if (xTaskCreate(keep_alive_task, "keep_alive_task", config->task_stack_size,
-                    keep_alive_storage, config->task_prio, &xHandle_keep_alive) != pdTRUE) {
+    if (xTaskCreatePinnedToCore(keep_alive_task, "keep_alive_task", config->task_stack_size,
+                    keep_alive_storage, config->task_prio, &xHandle_keep_alive,0) != pdTRUE) {
         wss_keep_alive_stop(keep_alive_storage);
         return false;
     }
