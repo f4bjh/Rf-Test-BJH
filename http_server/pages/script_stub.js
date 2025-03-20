@@ -33,8 +33,52 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
+// Stub de WebSocket pour émuler la connexion
+function WebSocketStub(url) {
+  // Simule l'URL du WebSocket
+  console.log(`WebSocket connecté à: ${url}`);
+
+  // Simule l'ouverture de la connexion
+  setTimeout(() => {
+    if (this.onopen) {
+      this.onopen();  // Appeler onopen après 1 seconde
+    }
+  }, 1000);
+
+  // Simule l'envoi de messages
+  this.send = function(message) {
+    console.log("Message envoyé : " + message);
+    // Simule une réponse après un délai
+    //setTimeout(() => {
+    if (this.onmessage) {
+       this.onmessage({ data : message});
+    }
+    //}, 500);
+  };
+
+  // Simule une fermeture de connexion
+  this.close = function() {
+    console.log("Connexion WebSocket fermée.");
+    if (this.onclose) {
+      this.onclose();
+    }
+  };
+
+  // Simule une erreur
+  this.onerror = function() {
+    console.log("Erreur WebSocket simulée.");
+    if (this.onerror) {
+      this.onerror();
+    }
+  };
+}
+
+// Remplacer WebSocket par le stub dans l'environnement de test (en local ou hors ligne)
+window.WebSocket = WebSocketStub;
+
 var serverIp = window.location.hostname;
-socket = new WebSocket("ws://" + serverIp + "/ws");
+//socket = new WebSocket("ws://" + serverIp + "/ws");
+socket = new WebSocket("ws://localhost:8080");
 
 socket.onopen = function () {
         // Extraire le paramètre d'identification de la page
@@ -58,21 +102,25 @@ socket.onopen = function () {
         console.log(jsonString); // {"t":0,"l":3,"v":"123"}
 
         // Envoi via WebSocket
-        socket.send(jsonString);
+        //socket.send(jsonString);
 };
 
 // Gérer les erreurs de connexion
-socket.addEventListener('error', (event) => {
+//socket.addEventListener('error', (event) => {
+socket.onerror = function() {
 	console.error('Erreur de connexion WebSocket : ', event);
-});
+};
 
 // Gérer la fermeture de la connexion
-socket.addEventListener('close', (event) => {
+//socket.addEventListener('close', (event) => {
+socket.onclose = function() {	
 	console.log('Connexion WebSocket fermée');
-});
+};
 
 // Gérer les messages reçus du serveur
-socket.addEventListener('message', (event) => {
+//socket.addEventListener('message', (event) => {
+socket.onmessage = function(event) {
+	console.log("Message reçu : " + event.data); 
 	if (!event.data || event.data.length === 0) {
           console.warn("Message vide reçu sur le WebSocket.");
           return;
@@ -187,6 +235,10 @@ socket.addEventListener('message', (event) => {
 			}
 		}
 		
+		
+		console.log(`freq range sélectionné: ${freq_range}`)
+		
+		
 		let strFreq = String(frequency).padStart(10, '0');
 		
 		for (let i = 0; i < 10; i++) {
@@ -261,4 +313,4 @@ socket.addEventListener('message', (event) => {
 		}
 		break;
         }
-});
+};

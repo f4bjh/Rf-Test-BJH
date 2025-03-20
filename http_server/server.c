@@ -144,6 +144,12 @@ esp_err_t frequencymeter_get_handler(httpd_req_t *req)
 	httpd_resp_send(req, (const char *) frequencymeter_html_start, frequencymeter_html_end - frequencymeter_html_start);
 	return ESP_OK;
 }
+httpd_uri_t frequencymeter_get = {
+	.uri	  = "/frequencymeter.html",
+	.method   = HTTP_GET,
+	.handler  = frequencymeter_get_handler,
+	.user_ctx = NULL
+};
 
 esp_err_t generator_get_handler(httpd_req_t *req)
 {
@@ -345,7 +351,8 @@ void close_instance_meas(httpd_handle_t hd)
       return;
     }
 
-    instance_meas_remove(instance_meas);
+    instance_meas_remove_all(instance_meas);
+	
     if (instance_meas != NULL) 
       free(instance_meas);
 
@@ -356,8 +363,6 @@ void close_instance_meas(httpd_handle_t hd)
       ESP_LOGE(TAG, "failed to take semaphore to set server_ctx");
       return;
     }
-
-//  close(sockfd);
 }
 
 void ws_process_received_page_id(httpd_req_t *req, int size, char* received_page_id)
@@ -377,6 +382,10 @@ void ws_process_received_page_id(httpd_req_t *req, int size, char* received_page
     page_name=&(upload_get.uri[1]);
     if (strncmp(received_page_id,page_name, strlen(page_name))==0) {
         pageId = UPLOAD_HTML_PAGE_ID; //define ou enum;
+    }
+    page_name=&(frequencymeter_get.uri[1]);
+    if (strncmp(received_page_id,page_name, strlen(page_name))==0) {
+        pageId = FREQUENCYMETER_HTML_PAGE_ID; //define ou enum;
     }
     
     open_instance_meas(req->handle, pageId);
@@ -517,7 +526,7 @@ static void ws_async_send(void *arg)
 
 
   if (instance_meas!=NULL) {
-    while(instance_meas->meas_num!=-1) {
+    while(instance_meas->meas_num!=LAST_MEAS) {
 
       if (instance_meas->json_meas.ready) {
 
@@ -856,13 +865,6 @@ httpd_uri_t about_get = {
 	.uri	  = "/about.html",
 	.method   = HTTP_GET,
 	.handler  = about_get_handler,
-	.user_ctx = NULL
-};
-
-httpd_uri_t frequencymeter_get = {
-	.uri	  = "/frequencymeter.html",
-	.method   = HTTP_GET,
-	.handler  = frequencymeter_get_handler,
 	.user_ctx = NULL
 };
 

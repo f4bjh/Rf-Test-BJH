@@ -113,12 +113,22 @@ nav ul ul ul li {
 
 .unit-Hz {
     display: inline;
-    font-size: 125px;
+    font-size: 150px;
     color: rgb(0,255,0);
     position: relative;
-    top: -10px;
+    top: 50px;
     left: 10px;
     }
+
+.entre-digit {
+    display: inline;
+    font-size: 150px;
+    color: rgb(0,255,0);
+    position: relative;
+    top: 50px;
+    left: 10px;
+    }
+
 
 .min_dBm {
     display: inline-block;
@@ -248,7 +258,9 @@ li > a:after { content:  ' +'; }
   }
   
   .s7s {
-    display: inline-block;
+    display: inline-block !important; /* Force les chiffres à s'afficher sur une seule ligne */
+    margin-right: 5px; /* Espacement entre les chiffres */
+    vertical-align: middle; /* Ajuste l'alignement vertical */
     width: var(--c-w);
     height: var(--c-h);
     background: var(--bg-color);
@@ -477,3 +489,33 @@ li > a:after { content:  ' +'; }
 	font-size: 60px;
 	color: #FFF;
 }	
+
+.frequency-range-selection {
+    position: absolute;
+    left: -50%;
+    top: -20%;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    text-align: left;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.frequency-range-selection h3 {
+    font-family: 'Roboto', sans-serif;
+    font-size: 28px;
+    color: #FFD700;
+}
+
+.frequency-range-selection label {
+    display: block;
+    margin: 10px 0;
+    cursor: pointer;
+}
+
+
+
+
+
+

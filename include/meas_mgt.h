@@ -29,6 +29,7 @@ typedef enum {
   CURRENT_PART_BUILD_DATE_TAG,
   NEXT_PART_VERSION_TAG,
   NEXT_PART_BUILD_DATE_TAG,
+  FREQUENCY_TAG
 } data_to_client_tag_t;
 
 typedef enum {
@@ -48,10 +49,11 @@ typedef enum {
 	CURRENT_PART_BUILD_DATE,
 	NEXT_PART_VERSION,
 	NEXT_PART_BUILD_DATE,
+	FREQUENCY,
 	N_MEAS
 } meas_number_t;
-
-#define LAST_MEAS N_MEAS
+#define LAST_MEAS -1
+#define REMOVED_MEAS -2
 
 typedef enum {
   MEAS_STATE_PENDING,
@@ -89,6 +91,9 @@ typedef struct {
 typedef struct meas_s meas_t;
 typedef esp_err_t (meas_func_proto)(meas_t *);
 typedef meas_func_proto* meas_func_t;
+typedef esp_err_t (meas_stop_func_proto)(meas_t *);
+typedef meas_stop_func_proto* meas_stop_func_t;
+
 
 typedef struct meas_s {
   bool ready;   //measure is ready (set by cup1, reset by fsm)
@@ -97,7 +102,9 @@ typedef struct meas_s {
   uint8_t *pdata_cache;  //cache of pdata
   meas_func_t	  meas_func;
   uint8_t  meas_param_in[8];
-  TaskHandle_t task_handle;
+  void *  handle;
+  meas_stop_func_t meas_stop_func;
+  //TaskHandle_t task_handle;
 } meas_t;
 
 typedef struct {
@@ -151,6 +158,8 @@ typedef struct instance_meas_per_html_page_s {
   init_func_hw_t init_func_hw;
   calc_func_t calc_func;
   uint8_t meas_param_in[8];
+  void* handle;
+  meas_stop_func_t meas_stop_func;
 } instance_meas_per_html_page_t;
 
 typedef  esp_err_t (*state_func)(instance_meas_t *);
@@ -175,3 +184,4 @@ void meas_fsm_task(void *arg);
 //void set_json_data (cJSON *root, json_data_t *json_data);
 void set_default_json_string(char **default_json_string);
 esp_err_t instance_meas_remove(instance_meas_t *instance_meas);
+esp_err_t instance_meas_remove_all(instance_meas_t *instance_meas);

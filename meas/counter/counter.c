@@ -49,11 +49,23 @@ esp_err_t init_counter(meas_t *measure)
 		   configMINIMAL_STACK_SIZE, 
 		   &counter_task_arg,
 		   tskIDLE_PRIORITY + 1,
-		   &(measure->task_handle),
+		   (TaskHandle_t*) &(measure->handle),
 		   measure->meas_param_in[0]);
 
    return ESP_OK;
 
+}
+
+esp_err_t stop_counter(meas_t *measure)
+{
+  static TaskHandle_t task_handle;
+
+  task_handle = measure->handle;
+
+  if (task_handle!=NULL)
+    vTaskDelete(task_handle);
+
+  return ESP_OK;
 }
 
 
