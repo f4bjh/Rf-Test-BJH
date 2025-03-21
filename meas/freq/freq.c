@@ -6,10 +6,11 @@
 #include "driver/gptimer.h"
 #include "driver/pulse_cnt.h"
 
+#include "gpio.h"
 #include "meas_mgt.h"
 #include "meas.h"
 
-#define PCNT_INPUT_GPIO      4       // GPIO d'entrée du signal
+#define PCNT_INPUT_GPIO      GPIO_FREQUENCYMETER_INPUT       // GPIO d'entrée du signal
 #define MEASURE_PERIOD_US    1000000 // Période d'échantillonnage (1s) - periode de declenchement de l'IT timer
 
 static gptimer_handle_t gptimer = NULL;
