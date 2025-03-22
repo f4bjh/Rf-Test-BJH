@@ -1,3 +1,4 @@
+#if 0
 #include <string.h>
 
 #include <freertos/FreeRTOS.h>
@@ -16,43 +17,13 @@
 #include "main.h"
 #include "meas_mgt.h"
 #include "http_server.h"
-
+#endif
 /*
  * HTTP Server
  */
-static const char* TAG = "http_server";
-
-static const size_t max_clients = 4;
+static const char* TAG = "ws";
 
 #if 0
-extern const uint8_t style_css_start[] asm("_binary_style_css_start");
-extern const uint8_t style_css_end[] asm("_binary_style_css_end");
-extern const uint8_t index_html_start[] asm("_binary_index_html_start");
-extern const uint8_t index_html_end[] asm("_binary_index_html_end");
-extern const uint8_t about_html_start[] asm("_binary_about_html_start");
-extern const uint8_t about_html_end[] asm("_binary_about_html_end");
-extern const uint8_t frequencymeter_html_start[] asm("_binary_frequencymeter_html_start");
-extern const uint8_t frequencymeter_html_end[] asm("_binary_frequencymeter_html_end");
-extern const uint8_t generator_html_start[] asm("_binary_generator_html_start");
-extern const uint8_t generator_html_end[] asm("_binary_generator_html_end");
-extern const uint8_t jquery_gauge_css_start[] asm("_binary_jquery_gauge_css_start");
-extern const uint8_t jquery_gauge_css_end[] asm("_binary_jquery_gauge_css_end");
-extern const uint8_t jquery_gauge_js_start[] asm("_binary_jquery_gauge_js_start");
-extern const uint8_t jquery_gauge_js_end[] asm("_binary_jquery_gauge_js_end");
-extern const uint8_t jquery_gauge_min_js_start[] asm("_binary_jquery_gauge_min_js_start");
-extern const uint8_t jquery_gauge_min_js_end[] asm("_binary_jquery_gauge_min_js_end");
-extern const uint8_t jquery_min_js_start[] asm("_binary_jquery_min_js_start");
-extern const uint8_t jquery_min_js_end[] asm("_binary_jquery_min_js_end");
-extern const uint8_t powermeter_html_start[] asm("_binary_powermeter_html_start");
-extern const uint8_t powermeter_html_end[] asm("_binary_powermeter_html_end");
-extern const uint8_t script_js_start[] asm("_binary_script_js_start");
-extern const uint8_t script_js_end[] asm("_binary_script_js_end");
-extern const uint8_t upload_html_start[] asm("_binary_upload_html_start");
-extern const uint8_t upload_html_end[] asm("_binary_upload_html_end");
-extern const uint8_t wifi_html_start[] asm("_binary_wifi_html_start");
-extern const uint8_t wifi_html_end[] asm("_binary_wifi_html_end");
-#endif
-
 extern TaskHandle_t xHandle_keep_alive;
 
 struct async_resp_arg {
@@ -62,8 +33,8 @@ struct async_resp_arg {
 };
 
 static httpd_handle_t http_server = NULL;
+#endif
 
-#if 0
 static void send_ping(void *arg)
 {
     struct async_resp_arg *resp_arg = arg;
@@ -79,8 +50,8 @@ static void send_ping(void *arg)
     httpd_ws_send_frame_async(hd, fd, &ws_pkt);
     free(resp_arg);
 }
-#endif
 
+#if 0
 bool client_not_alive_cb(wss_keep_alive_t h, int fd)
 {
     ESP_LOGE(TAG, "Client not alive, closing fd %d", fd);
@@ -110,7 +81,6 @@ bool check_client_alive_cb(wss_keep_alive_t h, int fd)
     
 }
 
-#if 0
 esp_err_t style_get_handler(httpd_req_t *req)
 {
 	httpd_resp_set_type(req, "text/css");
@@ -299,7 +269,7 @@ esp_err_t reboot_post_handler(httpd_req_t *req)
 
 	return ESP_OK;
 }
-#endif
+
 
 esp_err_t open_instance_meas(httpd_handle_t hd, html_page_id_t pageId)
 {
@@ -371,7 +341,6 @@ void close_instance_meas(httpd_handle_t hd)
 }
 #endif
 
-#if 0
 void ws_process_received_page_id(httpd_req_t *req, int size, char* received_page_id)
 {
   const char *page_name;
@@ -637,10 +606,10 @@ void wss_close_fd(httpd_handle_t hd, int sockfd)
     wss_keep_alive_remove_client(wss_keep_alive, sockfd);
     close(sockfd);
 }
-#endif
 
 
 
+#if 0
 void ngx_unescape_uri(u_char **dst, u_char **src, size_t size, unsigned int type)
 {
     u_char  *d, *s, ch, c, decoded;
@@ -668,7 +637,7 @@ void ngx_unescape_uri(u_char **dst, u_char **src, size_t size, unsigned int type
                 goto done;
             }
 
-            if (ch == '%') {
+      if (ch == '%') {
                 state = sw_quoted;
                 break;
             }
@@ -778,6 +747,7 @@ void example_uri_decode(char *dest, const char *src, size_t len)
     unsigned char *dst_ptr = (unsigned char *)dest;
     ngx_unescape_uri(&dst_ptr, &src_ptr, len, NGX_UNESCAPE_URI);
 }
+#endif
 
 #if 0
 // HTTP request handler for setting Wi-Fi credentials
@@ -861,9 +831,7 @@ static esp_err_t set_wifi_post_handler(httpd_req_t *req)
 
         return err; 
 }
-#endif
 
-#if 0
 httpd_uri_t style_get = {
 	.uri	  = "/style.css",
 	.method   = HTTP_GET,
@@ -964,6 +932,7 @@ httpd_uri_t set_wifi_uri_handler = {
 };
 #endif
 
+#if 0
 esp_err_t http_server_init(void)
 {
 	//static httpd_handle_t http_server = NULL;
@@ -1018,3 +987,4 @@ esp_err_t http_server_init(void)
 
 	return http_server == NULL ? ESP_FAIL : ESP_OK;
 }
+#endif
