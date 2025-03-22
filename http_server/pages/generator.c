@@ -24,7 +24,6 @@ static const char* TAG = "http_server";
 
 static const size_t max_clients = 4;
 
-#if 0
 extern const uint8_t style_css_start[] asm("_binary_style_css_start");
 extern const uint8_t style_css_end[] asm("_binary_style_css_end");
 extern const uint8_t index_html_start[] asm("_binary_index_html_start");
@@ -51,7 +50,6 @@ extern const uint8_t upload_html_start[] asm("_binary_upload_html_start");
 extern const uint8_t upload_html_end[] asm("_binary_upload_html_end");
 extern const uint8_t wifi_html_start[] asm("_binary_wifi_html_start");
 extern const uint8_t wifi_html_end[] asm("_binary_wifi_html_end");
-#endif
 
 extern TaskHandle_t xHandle_keep_alive;
 
@@ -63,7 +61,6 @@ struct async_resp_arg {
 
 static httpd_handle_t http_server = NULL;
 
-#if 0
 static void send_ping(void *arg)
 {
     struct async_resp_arg *resp_arg = arg;
@@ -79,7 +76,6 @@ static void send_ping(void *arg)
     httpd_ws_send_frame_async(hd, fd, &ws_pkt);
     free(resp_arg);
 }
-#endif
 
 bool client_not_alive_cb(wss_keep_alive_t h, int fd)
 {
@@ -110,7 +106,6 @@ bool check_client_alive_cb(wss_keep_alive_t h, int fd)
     
 }
 
-#if 0
 esp_err_t style_get_handler(httpd_req_t *req)
 {
 	httpd_resp_set_type(req, "text/css");
@@ -299,7 +294,7 @@ esp_err_t reboot_post_handler(httpd_req_t *req)
 
 	return ESP_OK;
 }
-#endif
+
 
 esp_err_t open_instance_meas(httpd_handle_t hd, html_page_id_t pageId)
 {
@@ -369,9 +364,7 @@ void close_instance_meas(httpd_handle_t hd)
       return;
     }
 }
-#endif
 
-#if 0
 void ws_process_received_page_id(httpd_req_t *req, int size, char* received_page_id)
 {
   const char *page_name;
@@ -637,7 +630,7 @@ void wss_close_fd(httpd_handle_t hd, int sockfd)
     wss_keep_alive_remove_client(wss_keep_alive, sockfd);
     close(sockfd);
 }
-#endif
+
 
 
 
@@ -779,7 +772,6 @@ void example_uri_decode(char *dest, const char *src, size_t len)
     ngx_unescape_uri(&dst_ptr, &src_ptr, len, NGX_UNESCAPE_URI);
 }
 
-#if 0
 // HTTP request handler for setting Wi-Fi credentials
 static esp_err_t set_wifi_post_handler(httpd_req_t *req)
 {
@@ -861,9 +853,7 @@ static esp_err_t set_wifi_post_handler(httpd_req_t *req)
 
         return err; 
 }
-#endif
 
-#if 0
 httpd_uri_t style_get = {
 	.uri	  = "/style.css",
 	.method   = HTTP_GET,
@@ -962,7 +952,6 @@ httpd_uri_t set_wifi_uri_handler = {
     .handler   = set_wifi_post_handler,
     .user_ctx  = NULL
 };
-#endif
 
 esp_err_t http_server_init(void)
 {
