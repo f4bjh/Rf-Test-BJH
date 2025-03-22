@@ -15,6 +15,7 @@
 #include "esp_lvgl_port.h"
 #include "lvgl.h"
 #include "lcd.h"
+#include "gpio.h"
 
 #if CONFIG_EXAMPLE_LCD_CONTROLLER_SH1107
 #include "esp_lcd_sh1107.h"
@@ -30,8 +31,6 @@ static const char *TAG = "example";
 //////////////////// Please update the following configuration according to your LCD spec //////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define EXAMPLE_LCD_PIXEL_CLOCK_HZ    (400 * 1000)
-#define EXAMPLE_PIN_NUM_SDA           8
-#define EXAMPLE_PIN_NUM_SCL           9
 #define EXAMPLE_PIN_NUM_RST           -1
 #define EXAMPLE_I2C_HW_ADDR           0x3C
 
@@ -51,17 +50,24 @@ extern void example_lvgl_demo_ui(lv_disp_t *disp);
 
 void lcd_init(void)
 {
+    esp_err_t ret;
+
     ESP_LOGI(TAG, "Initialize I2C bus");
     i2c_master_bus_handle_t i2c_bus = NULL;
     i2c_master_bus_config_t bus_config = {
         .clk_source = I2C_CLK_SRC_DEFAULT,
         .glitch_ignore_cnt = 7,
         .i2c_port = I2C_BUS_PORT,
-        .sda_io_num = EXAMPLE_PIN_NUM_SDA,
-        .scl_io_num = EXAMPLE_PIN_NUM_SCL,
+        .sda_io_num = GPIO_LCD_SDA,
+        .scl_io_num = GPIO_LCD_SCL,
         .flags.enable_internal_pullup = true,
     };
-    ESP_ERROR_CHECK(i2c_new_master_bus(&bus_config, &i2c_bus));
+    ret = i2c_new_master_bus(&bus_config, &i2c_bus);
+    if (ret != ESP_OK) {
+      ESP_LOGE(TAG, "Failed to initialize I2C bus");
+      return;
+    }
+
 
     ESP_LOGI(TAG, "Install panel IO");
     esp_lcd_panel_io_handle_t io_handle = NULL;
@@ -81,7 +87,11 @@ void lcd_init(void)
         }
 #endif
     };
-    ESP_ERROR_CHECK(esp_lcd_new_panel_io_i2c(i2c_bus, &io_config, &io_handle));
+    ret = esp_lcd_new_panel_io_i2c(i2c_bus, &io_config, &io_handle);
+    if (ret != ESP_OK) {
+      ESP_LOGE(TAG, "Failed to install panel IO");
+      return;
+    }
 
     ESP_LOGI(TAG, "Install SSD1306 panel driver");
     esp_lcd_panel_handle_t panel_handle = NULL;
@@ -94,14 +104,31 @@ void lcd_init(void)
         .height = EXAMPLE_LCD_V_RES,
     };
     panel_config.vendor_config = &ssd1306_config;
-    ESP_ERROR_CHECK(esp_lcd_new_panel_ssd1306(io_handle, &panel_config, &panel_handle));
+    ret = esp_lcd_new_panel_ssd1306(io_handle, &panel_config, &panel_handle);
+    if (ret != ESP_OK) {
+      ESP_LOGE(TAG, "Failed to initialize SSD 1306");
+      return;
+    }
 #elif CONFIG_EXAMPLE_LCD_CONTROLLER_SH1107
     ESP_ERROR_CHECK(esp_lcd_new_panel_sh1107(io_handle, &panel_config, &panel_handle));
 #endif
 
-    ESP_ERROR_CHECK(esp_lcd_panel_reset(panel_handle));
-    ESP_ERROR_CHECK(esp_lcd_panel_init(panel_handle));
-    ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(panel_handle, true));
+    ret= esp_lcd_panel_reset(panel_handle);
+    if (ret != ESP_OK) {
+      ESP_LOGE(TAG, "Failed to reset panel");
+      return;
+    }
+
+    ret= esp_lcd_panel_init(panel_handle);
+    if (ret != ESP_OK) {
+      ESP_LOGE(TAG, "Failed to init panel");
+      return;
+    }
+    ret=esp_lcd_panel_disp_on_off(panel_handle, true);
+    if (ret != ESP_OK) {
+      ESP_LOGE(TAG, "Failed to on-off display");
+      return;
+    }
 
 #if CONFIG_EXAMPLE_LCD_CONTROLLER_SH1107
     ESP_ERROR_CHECK(esp_lcd_panel_invert_color(panel_handle, true));
