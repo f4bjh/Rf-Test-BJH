@@ -156,6 +156,12 @@ esp_err_t generator_get_handler(httpd_req_t *req)
 	httpd_resp_send(req, (const char *) generator_html_start, generator_html_end - generator_html_start);
 	return ESP_OK;
 }
+httpd_uri_t generator_get = {
+	.uri	  = "/generator.html",
+	.method   = HTTP_GET,
+	.handler  = generator_get_handler,
+	.user_ctx = NULL
+};
 
 esp_err_t jquery_gauge_css_get_handler(httpd_req_t *req)
 {
@@ -387,7 +393,11 @@ void ws_process_received_page_id(httpd_req_t *req, int size, char* received_page
     if (strncmp(received_page_id,page_name, strlen(page_name))==0) {
         pageId = FREQUENCYMETER_HTML_PAGE_ID; //define ou enum;
     }
-    
+    page_name=&(generator_get.uri[1]);
+    if (strncmp(received_page_id,page_name, strlen(page_name))==0) {
+        pageId = GENERATOR_HTML_PAGE_ID; //define ou enum;
+    }
+     
     open_instance_meas(req->handle, pageId);
     return ;
 
@@ -865,13 +875,6 @@ httpd_uri_t about_get = {
 	.uri	  = "/about.html",
 	.method   = HTTP_GET,
 	.handler  = about_get_handler,
-	.user_ctx = NULL
-};
-
-httpd_uri_t generator_get = {
-	.uri	  = "/generator.html",
-	.method   = HTTP_GET,
-	.handler  = generator_get_handler,
 	.user_ctx = NULL
 };
 
