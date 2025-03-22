@@ -36,26 +36,27 @@ instance_meas_per_html_page_t instance_meas_per_html_page[N_PAGES][N_MEAS+1] =
 {
   //index.html
   {
-    //meas_t value,           once,  init_func_hw,                 get_calc_func,                meas_param_in
-    {CHIP_NAME,               true,  init_chip_info_model,         calc_chip_info_model,         {0},NULL,NULL},
-    {CHIP_VERSION,            true,  init_chip_revision,           calc_chip_revision,           {0},NULL,NULL},
-    {CPU0_COUNTER,            false, init_counter,                 calc_counter,                 {0},NULL,stop_counter},
-    {CPU1_COUNTER,            false, init_counter,                 calc_counter,                 {1},NULL,stop_counter},
-    {CURRENT_PARTITION,       true,  init_current_part,            calc_current_part,            {0},NULL,NULL},
-    {NEXT_PARTITION,          true,  init_next_part,               calc_next_part,               {0},NULL,NULL},
-    {CURRENT_PART_VERSION,    true,  init_current_part_version,    calc_current_part_version,    {0},NULL,NULL},
-    {CURRENT_PART_BUILD_DATE, true,  init_current_part_build_date, calc_current_part_build_date, {0},NULL,NULL},
-    {NEXT_PART_VERSION,       true,  init_next_part_version,       calc_next_part_version,       {0},NULL,NULL},
-    {NEXT_PART_BUILD_DATE,    true,  init_next_part_build_date,    calc_next_part_build_date,    {0},NULL,NULL},
+    //meas_t value,           once,  init_func_hw,                 get_calc_func,                meas_param_in, some handle, meas_stop_func
+    {CHIP_NAME,               true,  init_chip_info_model,         calc_chip_info_model,         {0},           NULL,        NULL},
+    {CHIP_VERSION,            true,  init_chip_revision,           calc_chip_revision,           {0},           NULL,        NULL},
+    {CPU0_COUNTER,            false, init_counter,                 calc_counter,                 {0},           NULL,        stop_counter},
+    {CPU1_COUNTER,            false, init_counter,                 calc_counter,                 {1},           NULL,        stop_counter},
+    {CURRENT_PARTITION,       true,  init_current_part,            calc_current_part,            {0},           NULL,        NULL},
+    {NEXT_PARTITION,          true,  init_next_part,               calc_next_part,               {0},           NULL,        NULL},
+    {CURRENT_PART_VERSION,    true,  init_current_part_version,    calc_current_part_version,    {0},           NULL,        NULL},
+    {CURRENT_PART_BUILD_DATE, true,  init_current_part_build_date, calc_current_part_build_date, {0},           NULL,        NULL},
+    {NEXT_PART_VERSION,       true,  init_next_part_version,       calc_next_part_version,       {0},           NULL,        NULL},
+    {NEXT_PART_BUILD_DATE,    true,  init_next_part_build_date,    calc_next_part_build_date,    {0},           NULL,        NULL},
     LAST_INSTANCE_MEAS
   },
   //generator.html
   {
+    {RF_GEN,                  false, init_rf_gen,                  calc_rf_gen,                  {0},           NULL,        stop_rf_gen},
     LAST_INSTANCE_MEAS
   },
   //frequencymeter.html
   {
-    {FREQUENCY,    false,  init_frequencymeter,    calc_frequencymeter,    {0},NULL,stop_frequencymeter},
+    {FREQUENCY,               false, init_frequencymeter,          calc_frequencymeter,          {0},           NULL,        stop_frequencymeter},
     LAST_INSTANCE_MEAS
   },
   //powermeter.html
@@ -64,8 +65,8 @@ instance_meas_per_html_page_t instance_meas_per_html_page[N_PAGES][N_MEAS+1] =
   },
   //upload.html
   {
-    {CURRENT_PARTITION,       true,  init_current_part,            calc_current_part, {0},NULL,NULL},
-    {NEXT_PARTITION,          true,  init_next_part,               calc_next_part,    {0},NULL,NULL},
+    {CURRENT_PARTITION,       true,  init_current_part,            calc_current_part, {0},                      NULL,        NULL},
+    {NEXT_PARTITION,          true,  init_next_part,               calc_next_part,    {0},                      NULL,        NULL},
     LAST_INSTANCE_MEAS
   }, 
 };

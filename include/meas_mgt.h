@@ -31,13 +31,14 @@ typedef enum {
   CURRENT_PART_BUILD_DATE_TAG,
   NEXT_PART_VERSION_TAG,
   NEXT_PART_BUILD_DATE_TAG,
-  FREQUENCY_TAG
+  FREQUENCY_TAG,
+  RF_GEN_TAG, //not sure there will be some data to display in html page from rf_gen
 } data_to_client_tag_t;
 
 typedef enum {
   NO_DATA_TAG2,
   PAGE_ID_TAG,
-  POWER_LEVEL_TAG,
+  POWER_LEVEL_TAG, //set power level of rf_gen
 } data_from_client_tag_t;  
 
 typedef enum {
@@ -52,6 +53,7 @@ typedef enum {
 	NEXT_PART_VERSION,
 	NEXT_PART_BUILD_DATE,
 	FREQUENCY,
+	RF_GEN,
 	N_MEAS
 } meas_number_t;
 #define LAST_MEAS -1
