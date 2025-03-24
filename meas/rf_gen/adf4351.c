@@ -112,7 +112,7 @@ int ADF4351_set_freq(ADF4351_cfg_t *pcfg, uint32_t freq)
 
     if(freq != (uint32_t) cfreq)
     {
-        ESP_LOGI(TAG, "Calculated frequency different from input frequency");
+        ESP_LOGI(TAG, "Calculated frequency (%f) different from input frequency ", cfreq);
     }
     
     // error checks

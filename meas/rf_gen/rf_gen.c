@@ -13,12 +13,16 @@ void rf_gen_task(void *arg)
  
   measure->ready=false;
 
-    while(1)
-    {
-        vTaskDelay(2500 / portTICK_PERIOD_MS);
-        ADF4351_disable(&vfo);
-        vTaskDelay(2500 / portTICK_PERIOD_MS);
+    //while(1)
+    //{
+        //vTaskDelay(2500 / portTICK_PERIOD_MS);
+	//ESP_LOGI(TAG,"ADF4351 disable");
+        //ADF4351_disable(&vfo);
+        //vTaskDelay(2500 / portTICK_PERIOD_MS);
+	ESP_LOGI(TAG,"ADF4351 enable");
         ADF4351_enable(&vfo);
+    while(1) {
+       vTaskDelay(2500 / portTICK_PERIOD_MS);
     }
 }
 
@@ -77,7 +81,7 @@ esp_err_t init_rf_gen(meas_t *measure)
    //CPU number set in measure->meas_param_in[0]
    xTaskCreatePinnedToCore(rf_gen_task, 
 		   "rf_gen task", 
-		   configMINIMAL_STACK_SIZE, 
+		   4096, 
 		   &rf_gen_task_arg,
 		   tskIDLE_PRIORITY + 1,
 		   (TaskHandle_t*) &(measure->handle),
