@@ -64,3 +64,4 @@ esp_err_t init_rf_gen(meas_t *measure);
 esp_err_t stop_counter(meas_t *measure);
 esp_err_t calc_rf_gen(instance_meas_t *instance_meas);
 esp_err_t stop_rf_gen(meas_t *measure);
+esp_err_t update_rf_gen(meas_t *measure);

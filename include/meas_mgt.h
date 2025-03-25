@@ -97,7 +97,8 @@ typedef esp_err_t (meas_func_proto)(meas_t *);
 typedef meas_func_proto* meas_func_t;
 typedef esp_err_t (meas_stop_func_proto)(meas_t *);
 typedef meas_stop_func_proto* meas_stop_func_t;
-
+typedef esp_err_t (meas_update_func_proto)(meas_t *);
+typedef meas_update_func_proto* meas_update_func_t;
 
 typedef struct meas_s {
   bool ready;   //measure is ready (set by cup1, reset by fsm)
@@ -105,10 +106,10 @@ typedef struct meas_s {
   uint8_t *pdata;  //pointer to ram with measures result (set and fill by cpu1)
   uint8_t *pdata_cache;  //cache of pdata
   meas_func_t	  meas_func;
-  uint8_t  meas_param_in[8];
+  uint8_t  meas_param_in[16];
   void *  handle;
   meas_stop_func_t meas_stop_func;
-  //TaskHandle_t task_handle;
+  meas_update_func_t meas_update_func;
 } meas_t;
 
 typedef struct {
@@ -164,6 +165,7 @@ typedef struct instance_meas_per_html_page_s {
   uint8_t meas_param_in[8];
   void* handle;
   meas_stop_func_t meas_stop_func;
+  meas_update_func_t meas_update_func;
 } instance_meas_per_html_page_t;
 
 typedef  esp_err_t (*state_func)(instance_meas_t *);

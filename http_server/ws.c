@@ -80,6 +80,43 @@ void close_instance_meas(httpd_handle_t hd)
     }
 }
 
+void ws_process_update_param(httpd_req_t *req, int num, int size, char* param_value)
+{
+    server_ctx_t *server_ctx = NULL;
+    instance_meas_t  *instance_meas=NULL;
+    instance_meas_t  *instance_meas_temp=NULL;
+    char *endptr;
+    uint32_t value;
+    esp_err_t ret;
+
+      server_ctx = (server_ctx_t *) httpd_get_global_user_ctx(req->handle);
+
+      if (xSemaphoreTake(server_ctx->mutex, portMAX_DELAY)) {
+          instance_meas = server_ctx->instance_meas;
+          xSemaphoreGive(server_ctx->mutex);
+      } else {
+          ESP_LOGE(TAG, "failed to take semaphore to get instance_meas in server_ctx");
+          return;
+      }
+
+      instance_meas_temp = instance_meas+num;
+
+      //convert char param_value into meas_param_in[8];
+    
+       value = strtol(param_value, &endptr, 10); // Base 10
+
+       // Vérification du dépassement
+       if (value > INT_MAX || value < INT_MIN) 
+         ESP_LOGE(TAG,"Erreur : valeur hors limites pour un int 32 bits.\n");
+       memcpy(instance_meas_temp->measures.meas_param_in, &value, 4);
+
+      ret = instance_meas_temp->measures.meas_update_func(&(instance_meas_temp->measures));
+      if (ret != ESP_OK)
+        ESP_LOGE(TAG, "error in meas_update (%d)",num);
+
+
+}
+
 void ws_process_received_page_id(httpd_req_t *req, int size, char* received_page_id)
 {
   const char *page_name;
@@ -102,7 +139,11 @@ void ws_process_received_page_id(httpd_req_t *req, int size, char* received_page
     if (strncmp(received_page_id,page_name, strlen(page_name))==0) {
         pageId = FREQUENCYMETER_HTML_PAGE_ID; //define ou enum;
     }
-    
+    page_name=&(generator_get.uri[1]);
+    if (strncmp(received_page_id,page_name, strlen(page_name))==0) {
+        pageId = GENERATOR_HTML_PAGE_ID; //define ou enum;
+    }
+
     open_instance_meas(req->handle, pageId);
     return ;
 
@@ -130,6 +171,9 @@ void ws_process_received_json(httpd_req_t *req, httpd_ws_frame_t ws_pkt)
   	  	  case PAGE_ID_TAG:
 		    ws_process_received_page_id(req,l->valueint,v->valuestring);
 		    break;
+		  case POWER_LEVEL_TAG:
+		    //1st measure (0)
+		    ws_process_update_param(req, 0, l->valueint,v->valuestring);
 		  default:
 		    break;
 		}

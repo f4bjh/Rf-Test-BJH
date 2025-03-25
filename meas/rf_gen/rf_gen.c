@@ -26,7 +26,13 @@ void rf_gen_task(void *arg)
 //TODO
 esp_err_t update_rf_gen(meas_t *measure)
 {
- 
+
+  ESP_LOGI(TAG,"param=%02X %02X %02X %02X",
+		  measure->meas_param_in[0],	
+		  measure->meas_param_in[1],	
+		  measure->meas_param_in[2],	
+		  measure->meas_param_in[3]);	
+
 
   return ESP_OK;
 }
