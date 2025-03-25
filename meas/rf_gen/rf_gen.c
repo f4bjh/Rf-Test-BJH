@@ -13,17 +13,22 @@ void rf_gen_task(void *arg)
  
   measure->ready=false;
 
-    //while(1)
-    //{
-        //vTaskDelay(2500 / portTICK_PERIOD_MS);
-	//ESP_LOGI(TAG,"ADF4351 disable");
-        //ADF4351_disable(&vfo);
-        //vTaskDelay(2500 / portTICK_PERIOD_MS);
-	ESP_LOGI(TAG,"ADF4351 enable");
-        ADF4351_enable(&vfo);
-    while(1) {
-       vTaskDelay(2500 / portTICK_PERIOD_MS);
-    }
+  while(1) {
+       vTaskDelay(100 / portTICK_PERIOD_MS);
+
+       //TO DO
+       //
+       // check if lock detect is on
+
+  }
+}
+
+//TODO
+esp_err_t update_rf_gen(meas_t *measure)
+{
+ 
+
+  return ESP_OK;
 }
 
 esp_err_t init_rf_gen(meas_t *measure)
@@ -81,7 +86,7 @@ esp_err_t init_rf_gen(meas_t *measure)
    //CPU number set in measure->meas_param_in[0]
    xTaskCreatePinnedToCore(rf_gen_task, 
 		   "rf_gen task", 
-		   4096, 
+		   configMINIMAL_STACK_SIZE, 
 		   &rf_gen_task_arg,
 		   tskIDLE_PRIORITY + 1,
 		   (TaskHandle_t*) &(measure->handle),
