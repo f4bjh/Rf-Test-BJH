@@ -37,8 +37,37 @@
 
   <h2>RF Generator</h2>
 
-  fréquence + réglage
-  niveau + réglage
+  <div id="frequency-control" style="position: absolute;left:33%;">
+    
+    <div id="scale-selector">
+        <label>résolution :</label>
+        <label><input type="radio" name="scale" value="100000000"> 100 MHz</label>
+		<label><input type="radio" name="scale" value="10000000"> 10 MHz</label>
+        <label><input type="radio" name="scale" value="1000000"> 1 MHz</label>
+        <label><input type="radio" name="scale" value="100000"> 100 kHz</label>
+        <label><input type="radio" name="scale" value="10000"> 10 kHz</label>
+        <label><input type="radio" name="scale" value="1000"> 1 kHz</label>
+        <label><input type="radio" name="scale" value="100"> 100 Hz</label>
+        <label><input type="radio" name="scale" value="10"> 10 Hz</label>
+        <label><input type="radio" name="scale" value="1" checked> 1 Hz</label>
+        <button id="decrease">-</button>
+        <button id="increase">+</button>
+	</div>
+    <div id="frequency-display" style="position: relative;left:0%;"></div>
+  </div>
+
+
+  <div style="position: absolute;left:5%;">
+    <button id="rf-gen-status-toggle-btn">ON/OFF</button>
+    <div id="rf-gen-status" class="power-off">OFF</div>
+    <div id="output-power-selector" class="range-selection">
+        <h3>Power :</h3>
+        <label><input type="radio" name="output_pwr" value="0"> -4 dBm</label>
+        <label><input type="radio" name="output_pwr" value="1"> -1 dBm</label>
+        <label><input type="radio" name="output_pwr" value="2"> +2 dBm</label>
+        <label><input type="radio" name="output_pwr" value="3" checked> +5 dBm</label>
+    </div>	
+  </div>
   
  <footer>
    <p class='bas_de_page'>F4BJH - return to <a href="/">Home</a></p>
