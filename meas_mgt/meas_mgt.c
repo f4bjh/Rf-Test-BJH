@@ -8,7 +8,6 @@
 #include <esp_ota_ops.h>
 #include "esp_log.h"
 
-#include "main.h"
 #include "meas_mgt.h"
 #include "meas.h"
 

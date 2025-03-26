@@ -1,20 +1,3 @@
-#include <string.h>
-
-#include <freertos/FreeRTOS.h>
-#include <esp_http_server.h>
-#include <freertos/task.h>
-#include <esp_ota_ops.h>
-#include <sys/param.h>
-#include <esp_http_server.h>
-#include "lwip/sockets.h"
-#include "esp_log.h"
-#include "keep_alive.h"
-#include "esp_task_wdt.h"
-#include <nvs_flash.h>
-#include "esp_check.h"
-
-#include "main.h"
-#include "meas_mgt.h"
 #include "http_server.h"
 
 /*
@@ -28,8 +11,11 @@ extern const uint8_t style_css_start[] asm("_binary_style_css_start");
 extern const uint8_t style_css_end[] asm("_binary_style_css_end");
 extern const uint8_t index_html_start[] asm("_binary_index_html_start");
 extern const uint8_t index_html_end[] asm("_binary_index_html_end");
+extern httpd_uri_t about_get;
+#if 0
 extern const uint8_t about_html_start[] asm("_binary_about_html_start");
 extern const uint8_t about_html_end[] asm("_binary_about_html_end");
+#endif
 extern const uint8_t frequencymeter_html_start[] asm("_binary_frequencymeter_html_start");
 extern const uint8_t frequencymeter_html_end[] asm("_binary_frequencymeter_html_end");
 extern const uint8_t generator_html_start[] asm("_binary_generator_html_start");
@@ -52,6 +38,8 @@ extern const uint8_t wifi_html_start[] asm("_binary_wifi_html_start");
 extern const uint8_t wifi_html_end[] asm("_binary_wifi_html_end");
 
 extern TaskHandle_t xHandle_keep_alive;
+
+TaskHandle_t xHandle_ws_send_msg;
 
 struct async_resp_arg {
     httpd_handle_t hd;
@@ -132,12 +120,13 @@ httpd_uri_t index2_get = {
 	.user_ctx = NULL
 };
 
-
+#if 0
 esp_err_t about_get_handler(httpd_req_t *req)
 {
 	httpd_resp_send(req, (const char *) about_html_start, about_html_end - about_html_start);
 	return ESP_OK;
 }
+#endif
 
 esp_err_t frequencymeter_get_handler(httpd_req_t *req)
 {
@@ -554,9 +543,10 @@ static void ws_async_send(void *arg)
 }
 
 // Get all clients and send async message
-static void ws_server_send_data(httpd_handle_t* server)
+void ws_server_send_data(void* arg)
 {
     bool send_messages = true;
+    httpd_handle_t* server=arg;
     server_ctx_t *server_ctx = NULL;
     instance_meas_t  *instance_meas=NULL;
 
@@ -564,10 +554,13 @@ static void ws_server_send_data(httpd_handle_t* server)
     esp_task_wdt_add(NULL);
 #endif
 
+
     // Send async message to all connected clients that use websocket protocol every 10 seconds
     while (send_messages) {
 
+
 	vTaskDelay(HTTP_SERVER_WAKE_UP_TICK / portTICK_PERIOD_MS);
+
 
 	if (!*server) { // httpd might not have been created by now
 	    continue;
@@ -861,13 +854,16 @@ httpd_uri_t style_get = {
 	.user_ctx = NULL
 };
 
+extern httpd_uri_t about_get;
+
+#if 0
 httpd_uri_t about_get = {
 	.uri	  = "/about.html",
 	.method   = HTTP_GET,
 	.handler  = about_get_handler,
 	.user_ctx = NULL
 };
-
+#endif
 httpd_uri_t generator_get = {
 	.uri	  = "/generator.html",
 	.method   = HTTP_GET,
@@ -1003,7 +999,14 @@ esp_err_t http_server_init(void)
 		wss_keep_alive_set_user_ctx(keep_alive, http_server);
 
 	}
-	ws_server_send_data(&http_server);
+	//ws_server_send_data(&http_server);
+	  xTaskCreatePinnedToCore(ws_server_send_data, 
+		   "ws server send data", 
+		   configMINIMAL_STACK_SIZE, 
+		   &http_server,
+		   tskHTTP_SERVER,
+		   &xHandle_ws_send_msg,
+		   0);
 
 	return http_server == NULL ? ESP_FAIL : ESP_OK;
 }

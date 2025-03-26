@@ -8,6 +8,8 @@
 */
 #pragma once
 
+#define tskKEEP_ALIVE  tskHTTP_SERVER+1
+
 #define KEEP_ALIVE_PERIOD_MS_1ST_TIME 500
 #define NOT_ALIVE_AFTER_MS_1ST_TIME 600 
 #define KEEP_ALIVE_PERIOD_MS 5000
