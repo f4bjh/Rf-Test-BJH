@@ -39,6 +39,8 @@ extern const uint8_t wifi_html_end[] asm("_binary_wifi_html_end");
 
 extern TaskHandle_t xHandle_keep_alive;
 
+TaskHandle_t xHandle_ws_send_msg;
+
 struct async_resp_arg {
     httpd_handle_t hd;
     int fd;
@@ -541,9 +543,10 @@ static void ws_async_send(void *arg)
 }
 
 // Get all clients and send async message
-static void ws_server_send_data(httpd_handle_t* server)
+void ws_server_send_data(void* arg)
 {
     bool send_messages = true;
+    httpd_handle_t* server=arg;
     server_ctx_t *server_ctx = NULL;
     instance_meas_t  *instance_meas=NULL;
 
@@ -551,10 +554,13 @@ static void ws_server_send_data(httpd_handle_t* server)
     esp_task_wdt_add(NULL);
 #endif
 
+
     // Send async message to all connected clients that use websocket protocol every 10 seconds
     while (send_messages) {
 
+
 	vTaskDelay(HTTP_SERVER_WAKE_UP_TICK / portTICK_PERIOD_MS);
+
 
 	if (!*server) { // httpd might not have been created by now
 	    continue;
@@ -993,7 +999,14 @@ esp_err_t http_server_init(void)
 		wss_keep_alive_set_user_ctx(keep_alive, http_server);
 
 	}
-	ws_server_send_data(&http_server);
+	//ws_server_send_data(&http_server);
+	  xTaskCreatePinnedToCore(ws_server_send_data, 
+		   "ws server send data", 
+		   configMINIMAL_STACK_SIZE, 
+		   &http_server,
+		   tskHTTP_SERVER,
+		   &xHandle_ws_send_msg,
+		   0);
 
 	return http_server == NULL ? ESP_FAIL : ESP_OK;
 }
