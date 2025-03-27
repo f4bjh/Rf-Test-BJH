@@ -83,7 +83,7 @@ esp_err_t init_rf_gen(meas_t *measure)
 
     ADF4351_enable(&vfo); // power on the device
 
-    ADF4351_set_freq(&vfo, 440000000); // set output frequency to 440MHz
+    ADF4351_set_freq(&vfo, 100000000); // set output frequency to 440MHz
     ESP_LOGI(TAG, "Frequency set to 440Mhz");
 
    rf_gen_task_arg.vfo = vfo;
