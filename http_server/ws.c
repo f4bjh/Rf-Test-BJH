@@ -99,21 +99,31 @@ void ws_process_update_param(httpd_req_t *req, int num, int size, char* param_va
           return;
       }
 
-      instance_meas_temp = instance_meas+num;
-
       //convert char param_value into meas_param_in[8];
-    
-       value = strtol(param_value, &endptr, 10); // Base 10
+      switch (meas_num) {
+        case RF_GEN_STATUS:
+          if ((strncmp(param_value,rf_gen_on, strlen(rf_gen_on))==0))
+	    instance_meas->measures.meas_param_in[0] = 1;
+	  else
+ 	    instance_meas->measures.meas_param_in[0] = 0;
+	  break;
+        case RF_GEN_FREQ:
+          value = strtol(param_value, &endptr, 10); // Base 10
+          memcpy(&(instance_meas->measures.meas_param_in[1]), &value, 4);
+	  break;
+        case RF_GEN_POW:
+	  //TODO
+	  //fill measures.meas_param_in[5] with power value 0,1,2,3 but param_value is a char. strtol should make the trick
+	  break;
+	default:
+	  break;
 
-       // Vérification du dépassement
-       if (value > INT_MAX || value < INT_MIN) 
-         ESP_LOGE(TAG,"Erreur : valeur hors limites pour un int 32 bits.\n");
-       memcpy(instance_meas_temp->measures.meas_param_in, &value, 4);
 
-      ret = instance_meas_temp->measures.meas_update_func(&(instance_meas_temp->measures));
+      }
+
+      ret = instance_meas->measures.meas_update_func(&(instance_meas->measures));
       if (ret != ESP_OK)
-        ESP_LOGE(TAG, "error in meas_update (%d)",num);
-
+        ESP_LOGE(TAG, "error in meas_update (%d)",meas_num);
 
 }
 
@@ -171,9 +181,15 @@ void ws_process_received_json(httpd_req_t *req, httpd_ws_frame_t ws_pkt)
   	  	  case PAGE_ID_TAG:
 		    ws_process_received_page_id(req,l->valueint,v->valuestring);
 		    break;
-		  case POWER_LEVEL_TAG:
-		    //1st measure (0)
-		    ws_process_update_param(req, 0, l->valueint,v->valuestring);
+  		  case RF_GEN_STATUS_TAG:
+		    ws_process_update_param(req, RF_GEN_STATUS,l->valueint, v->valuestring);
+		    break;
+		  case RF_GEN_FREQ_TAG:
+		    ws_process_update_param(req, RF_GEN_FREQ, l->valueint, v->valuestring);
+		    break;
+		  case RF_GEN_LEVEL_TAG:
+		    ws_process_update_param(req, RF_GEN_POW, l->valueint, v->valuestring);
+		    break;
 		  default:
 		    break;
 		}

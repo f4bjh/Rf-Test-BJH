@@ -82,12 +82,12 @@ esp_err_t meas_state_init_func(instance_meas_t *instance_meas)
 {
     meas_action_t meas_action = { .event = MEAS_PULL, .meas_num = instance_meas->meas_num};
 
-      ESP_LOGI(TAG,"initialize measure %d", instance_meas->meas_num);
+      ESP_LOGI(TAG,"initialise measure %d", instance_meas->meas_num);
 
       if ( instance_meas->init_func_hw == NULL) {
         ESP_LOGI(TAG,"init_func_hw not defined for instance measure %d", instance_meas->meas_num);   
         instance_meas->measures.meas_func=NULL;
-	meas_action.event=MEAS_REMOVE;
+	//meas_action.event=MEAS_STATE_PENDING;
       } else if (instance_meas->init_func_hw(&(instance_meas->measures))!=ESP_OK) {
         ESP_LOGE(TAG,"init_func_hw error for instance measure %d", instance_meas->meas_num);    
       }

@@ -27,11 +27,21 @@ void rf_gen_task(void *arg)
 esp_err_t update_rf_gen(meas_t *measure)
 {
 
-  ESP_LOGI(TAG,"param=%02X %02X %02X %02X",
+  int freq;
+
+  freq = measure->meas_param_in[1];
+  freq |=  (measure->meas_param_in[2]&0xFF)<<8;
+  freq |=  (measure->meas_param_in[3]&0xFF)<<16;
+  freq |=  (measure->meas_param_in[4]&0xFF)<<24;
+
+
+
+  ESP_LOGI(TAG,"update status=%02X freq=%d pow=%02X",
 		  measure->meas_param_in[0],	
-		  measure->meas_param_in[1],	
-		  measure->meas_param_in[2],	
-		  measure->meas_param_in[3]);	
+		  freq,
+		  measure->meas_param_in[5]);	
+
+
 
 
   return ESP_OK;
@@ -45,10 +55,7 @@ esp_err_t init_rf_gen(meas_t *measure)
    measure->pdata = malloc(measure->size * sizeof(uint8_t));
    measure->pdata_cache = malloc(measure->size * sizeof(uint8_t));
    measure->meas_func = NULL;
-   //TODO add an update_func function
-   //wich, based on measure->meas_param_in will update RF generator output
-   //measure->update_func = update_func;
-   
+    
    rf_gen_task_arg.measure=measure;
 
 
