@@ -374,7 +374,6 @@ void ws_process_update_param(httpd_req_t *req, meas_number_t meas_num, int size,
 {
     server_ctx_t *server_ctx = NULL;
     instance_meas_t  *instance_meas=NULL;
-    char *endptr;
     uint32_t value;
     esp_err_t ret;
     const char *rf_gen_on="ON";
@@ -398,7 +397,7 @@ void ws_process_update_param(httpd_req_t *req, meas_number_t meas_num, int size,
  	    instance_meas->measures.meas_param_in[0] = 0;
 	  break;
         case RF_GEN_FREQ:
-          value = strtol(param_value, &endptr, 10); // Base 10
+          value = strtoul(param_value, NULL, 10); // Base 10
           memcpy(&(instance_meas->measures.meas_param_in[1]), &value, 4);
 	  break;
         case RF_GEN_POW:

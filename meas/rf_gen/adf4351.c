@@ -42,8 +42,10 @@ int ADF4351_set_freq(ADF4351_cfg_t *pcfg, uint32_t freq)
     // this will never trigger
     // if(freq > ADF_FREQ_MAX) 
     //     return -1;
-    if(freq < ADF_FREQ_MIN)
-        return -1;
+    if(freq < ADF_FREQ_MIN) {
+      ESP_LOGE(TAG,"output frequency too low");
+      return -1;
+    }
 
     // equation for RF_OUT
     // RF_OUT = [INT + (FRAC/MOD)] * (f_PFD/RF_DIVIDER)
@@ -271,7 +273,6 @@ void ADF4351_write_register(ADF4351_cfg_t *pcfg, uint32_t reg)
 
     spi_device_transmit(spi_handle, &t);
 
-
     gpio_set_level(pcfg->pins.gpio_le, 1);    // pull LE pin high to latch incoming word into register
     ets_delay_us(5);
     gpio_set_level(pcfg->pins.gpio_le, 0);    // pull LE pin to its default low
@@ -408,13 +409,13 @@ void ADF4351_initialise(ADF4351_cfg_t *pcfg)
 
     ESP_LOGI(TAG, "GPIO successfully initialised");
 
-	ret = spi_bus_initialize(SENDER_HOST, &buscfg, SPI_DMA_CH_AUTO);
+    ret = spi_bus_initialize(SENDER_HOST, &buscfg, SPI_DMA_CH_AUTO);
     assert(ret == ESP_OK);
 
     ESP_LOGI(TAG, "SPI bus successfully initialised");
 
-	ret = spi_bus_add_device(SENDER_HOST, &devcfg, &spi_handle);
-	assert(ret == ESP_OK);
+    ret = spi_bus_add_device(SENDER_HOST, &devcfg, &spi_handle);
+    assert(ret == ESP_OK);
 
     ESP_LOGI(TAG, "SPI device successfully attached");
     pcfg->_spi_initialised = true;

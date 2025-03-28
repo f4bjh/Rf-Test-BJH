@@ -52,7 +52,7 @@ instance_meas_per_html_page_t instance_meas_per_html_page[N_PAGES][N_MEAS+1] =
   //generator.html
   {
 	  //param default to set : rf status off + 100MHz + 5dBm
-    {RF_GEN_STATUS,           false, init_rf_gen,                  calc_rf_gen,                  {0,0x00,0x0F,0x42,0x40,3},  NULL,        stop_rf_gen,         update_rf_gen},
+    {RF_GEN_STATUS,           false, init_rf_gen,                  calc_rf_gen,                  {0,0x00,0xE1, 0xF5,0x05,3},  NULL,        stop_rf_gen,         update_rf_gen},
 #if 0
     {RF_GEN_FREQ,             false, NULL,                         NULL,                         {0},           NULL,        NULL,                update_rf_gen},
     {RF_GEN_POW,              false, NULL,                         NULL,                         {0},           NULL,        NULL,                update_rf_gen},
