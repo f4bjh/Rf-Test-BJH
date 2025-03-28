@@ -108,7 +108,7 @@ void ws_process_update_param(httpd_req_t *req, int num, int size, char* param_va
  	    instance_meas->measures.meas_param_in[0] = 0;
 	  break;
         case RF_GEN_FREQ:
-          value = strtol(param_value, &endptr, 10); // Base 10
+          value = strtoul(param_value, NULL, 10); // Base 10
           memcpy(&(instance_meas->measures.meas_param_in[1]), &value, 4);
 	  break;
         case RF_GEN_POW:
