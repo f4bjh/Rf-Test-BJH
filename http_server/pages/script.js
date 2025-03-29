@@ -148,7 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
             rf_gen_status.classList.remove("power-on");
             rf_gen_status.classList.add("power-off");
         }
-        send_rf_gen_status(rf_gen_status);
+        send_rf_gen_status(rf_gen_on);
     });
 
 });
