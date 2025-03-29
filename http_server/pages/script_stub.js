@@ -12,26 +12,16 @@ let frequency = `unknown`;
 let freq_digit=new Array(10).fill(0);
 let freq_range = `4MHz`; // Valeur par défaut
 
-function send_freq_range_update(freq_range) {
-    const jsonData = {
-        t: 0x0C,
-        l: freq_range.length,
-        v: freq_range
-    };
-    socket.send(JSON.stringify(jsonData));
-    console.log(`range envoyé: ${freq_range}`);
-}
+//function send_freq_range_update(freq_range) {
+//    const jsonData = {
+//        t: 0x0C,
+//        l: freq_range.length,
+//        v: freq_range
+//    };
+//    socket.send(JSON.stringify(jsonData));
+//    console.log(`range envoyé: ${freq_range}`);
+//}
 
-document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll("input[name='freq_range']").forEach(input => {
-        input.addEventListener("change", event => {
-            if (event.target.checked) {
-                freq_range = event.target.value;
-                send_freq_range_update(freq_range);
-            }
-        });
-    });
-});
 
 // Stub de WebSocket pour émuler la connexion
 function WebSocketStub(url) {
@@ -72,6 +62,154 @@ function WebSocketStub(url) {
     }
   };
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("input[name='freq_range']").forEach(input => {
+        input.addEventListener("change", event => {
+            if (event.target.checked) {
+                freq_range = event.target.value;
+                //send_freq_range_update(freq_range);
+            }
+        });
+    });
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+    //const rf_gen_freq_out = document.querySelectorAll("#frequency-display .s7s input");
+    const rf_gen_freq_out = document.getElementById('frequency-display');
+    const increase_freq = document.getElementById("increase");
+    const decrease_freq = document.getElementById("decrease");
+    const scale_freq = document.querySelectorAll("input[name='scale']");
+    const output_pwr = document.querySelectorAll("input[name='output_pwr']");
+    const rf_gen_status_toggle_btn = document.getElementById("rf-gen-status-toggle-btn");
+    let scale = 1;
+    let frequency = 1000000;
+    let rf_gen_on = false;
+	let power = 3;
+
+    function update_rf_gen_freq_display() {
+        let strFreq = frequency.toString().padStart(10, '0');
+       	for (let i = 0; i < 10; i++) {
+			freq_digit[i] = parseInt(strFreq[9-i]);
+		}
+        console.log("Affichage initialisé avec :", strFreq);
+		
+		rf_gen_freq_out.innerHTML = `
+			<div class='s7s'><input value='` + freq_digit[9] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+			<div class='entre-digit'>&nbsp</div>
+			<div class='s7s'><input value='` + freq_digit[8] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+			<div class='s7s'><input value='` + freq_digit[7] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+			<div class='s7s'><input value='` + freq_digit[6] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+			<div class='entre-digit'>&nbsp</div>
+			<div class='s7s'><input value='` + freq_digit[5] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+			<div class='s7s'><input value='` + freq_digit[4] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+			<div class='s7s'><input value='` + freq_digit[3] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+			<div class='entre-digit'>&nbsp</div>
+			<div class='s7s'><input value='` + freq_digit[2] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+			<div class='s7s'><input value='` + freq_digit[1] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+			<div class='s7s'><input value='` + freq_digit[0] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+			<div class='unit-Hz'>Hz</div>
+			`;
+		
+		
+    }
+
+    function getFrequencyFromInputs() {
+        return parseInt(Array.from(rf_gen_freq_out).map(input => input.value).join('')) || 0;
+    }
+
+    function send_rf_gen_freq() {
+        const jsonData = {
+            t: 0x02,
+            l: frequency.toString().length,
+            v: frequency.toString()
+        };
+        socket.send(JSON.stringify(jsonData));
+        console.log("Fréquence envoyée: ", jsonData);
+    }
+
+    function send_rf_gen_status() {
+        const jsonData = {
+            t: 0x03,
+            l: rf_gen_on ? 2 : 3,
+            v: rf_gen_on ? "ON" : "OFF"
+        };
+	if (rf_gen_on) {
+            send_rf_gen_freq();
+        socket.send(JSON.stringify(jsonData));
+        console.log("État envoyé: ", jsonData);
+        }
+    }
+
+    function send_rf_gen_power() {
+        const jsonData = {
+            t: 0x04,
+            l: power.toString().length,
+            v: power.toString()
+        };
+        socket.send(JSON.stringify(jsonData));
+        console.log("Power envoyé: ", jsonData);
+    }
+
+
+    increase_freq.addEventListener("click", () => {
+        frequency = Math.min(frequency + scale, 4294967295);
+        update_rf_gen_freq_display();
+        send_rf_gen_freq();
+    });
+
+    decrease_freq.addEventListener("click", () => {
+        frequency = Math.max(frequency - scale, 0);
+        update_rf_gen_freq_display();
+        send_rf_gen_freq();
+    });
+
+    scale_freq.forEach(checkbox => {
+        checkbox.addEventListener("change", (event) => {
+            if (event.target.checked) {
+                scale = parseInt(event.target.value);
+            }
+        });
+    });
+	
+	output_pwr.forEach(checkbox => {
+        checkbox.addEventListener("change", (event) => {
+            if (event.target.checked) {
+                power = parseInt(event.target.value);
+				send_rf_gen_power();
+            }
+        });
+    });
+
+
+    //rf_gen_freq_out.forEach(input => {
+    //    input.addEventListener("input", () => {
+    //        frequency = getFrequencyFromInputs();
+    //        update_rf_gen_freq_display();
+    //        send_rf_gen_freq();
+    //    });
+    //});
+
+    rf_gen_status_toggle_btn.addEventListener("click", () => {
+        rf_gen_on = !rf_gen_on;
+		let rf_gen_status = document.getElementById("rf-gen-status");
+        if (rf_gen_status.classList.contains("power-off")) {
+            rf_gen_status.textContent = "ON";
+            rf_gen_status.classList.remove("power-off");
+            rf_gen_status.classList.add("power-on");
+        } else {
+            rf_gen_status.textContent = "OFF";
+            rf_gen_status.classList.remove("power-on");
+            rf_gen_status.classList.add("power-off");
+        }
+        send_rf_gen_status();
+    });
+
+    setTimeout(update_rf_gen_freq_display, 100); // Assurer un rendu après chargement
+});
+
+
+
 
 // Remplacer WebSocket par le stub dans l'environnement de test (en local ou hors ligne)
 window.WebSocket = WebSocketStub;
@@ -134,8 +272,8 @@ socket.onmessage = function(event) {
 	console.log(`v : ${json_data.v}`);
 
 	// Récupérer l'élément HTML avec l'identifiant "message-container" de la page actuelle
-	const ChipInfo = document.getElementById('chip-information');
-	const PartitionInfo = document.getElementById('partition-info');
+	const chip_info = document.getElementById('chip-information');
+	const part_info = document.getElementById('partition-info');
 	const current_part_info = document.getElementById('current-part-info');
 	const next_part_info = document.getElementById('next-part-info');
 	const freq_digit = document.getElementById('freq-digit'); //MSB
@@ -205,11 +343,11 @@ socket.onmessage = function(event) {
 			}
 	      	}
 
-		ChipInfo.innerHTML = `CPU0 counter = ${cpu0_counter}`;
-		ChipInfo.innerHTML += ` | CPU1 counter = ${cpu1_counter}<br><br><br><br>`;
-		ChipInfo.innerHTML += `chip model : ${chip_model} - chip revision : ${chip_revision}<br><br><br><br>`;
+		chip_info.innerHTML = `CPU0 counter = ${cpu0_counter}`;
+		chip_info.innerHTML += ` | CPU1 counter = ${cpu1_counter}<br><br><br><br>`;
+		chip_info.innerHTML += `chip model : ${chip_model} - chip revision : ${chip_revision}<br><br><br><br>`;
 		
-		PartitionInfo.innerHTML =  `current partition : ${current_partition} | next partition    : ${next_partition}<br><br><br><br>`;
+		part_info.innerHTML =  `current partition : ${current_partition} | next partition    : ${next_partition}<br><br><br><br>`;
 
 		current_part_info.innerHTML = `${current_partition} : ${current_part_version} / ${current_part_build_date}<br>`;
 		next_part_info.innerHTML = `${next_partition}  : ${next_part_version} / ${next_part_build_date}<br>`;
@@ -225,8 +363,8 @@ socket.onmessage = function(event) {
 				next_partition = `${json_data.v}`;
 			}
 	      	}
-		PartitionInfo.innerHTML =  `current partition : ${current_partition}<br>`;
-		PartitionInfo.innerHTML += `next partition    : ${next_partition}<br>`;
+		part_info.innerHTML =  `current partition : ${current_partition}<br>`;
+		part_info.innerHTML += `next partition    : ${next_partition}<br>`;
 		break;
 	case 'frequencymeter.html':
 		if (json_data.t === 0xB) {
@@ -308,9 +446,7 @@ socket.onmessage = function(event) {
 		}
 		break;
 	case 'powermeter.html':
-	       if (json_data.t === 0x46 || json_data.t === 0xAB) {
-			messageContainer.innerHTML += `Valeur champ ${json_data.t} : ${json_data.v}<br>`;
-		}
+	    
 		break;
-        }
+    }
 };
