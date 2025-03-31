@@ -8,7 +8,7 @@
 #define ADF_REFIN_MAX   250000000       ///< Maximum Reference Frequency
 #define REF_FREQ_DEFAULT 100000000      ///< Default Reference Frequency
 
-#define SENDER_HOST SPI2_HOST
+#define SENDER_HOST SPI3_HOST
 
 typedef struct 
 {
