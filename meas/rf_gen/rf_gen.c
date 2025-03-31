@@ -20,7 +20,7 @@ static ADF4351_cfg_t vfo ={
     .gpio_le = GPIO_RF_GEN_LE, 
     .gpio_sclk = GPIO_RF_GEN_CLK,
     .gpio_mosi = GPIO_RF_GEN_DATA, 
-    .gpio_miso = 11, // dummy pin
+    .gpio_miso = -1, // dummy pin
     .gpio_ld = GPIO_RF_GEN_PLL_LOCKED,
   }
 };

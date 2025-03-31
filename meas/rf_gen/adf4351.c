@@ -343,10 +343,19 @@ void ADF4351_initialise(ADF4351_cfg_t *pcfg)
 	spi_bus_config_t buscfg = 
     {
 		.mosi_io_num = pcfg->pins.gpio_mosi,
-		.miso_io_num = pcfg->pins.gpio_miso,
+		.data0_io_num = -1,
+		.miso_io_num = -1,
+		.data1_io_num = -1,
 		.sclk_io_num = pcfg->pins.gpio_sclk,
 		.quadwp_io_num = -1,
-		.quadhd_io_num = -1
+		.data2_io_num = -1,
+		.quadhd_io_num = -1,
+		.data2_io_num = -1,
+		.data3_io_num = -1,
+		.data4_io_num = -1,
+		.data5_io_num = -1,
+		.data6_io_num = -1,
+		.data7_io_num = -1,
 	};
 
 	// Configuration for the SPI device on the other side of the bus
