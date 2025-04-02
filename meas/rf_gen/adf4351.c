@@ -347,7 +347,7 @@ void ADF4351_initialise(ADF4351_cfg_t *pcfg)
 	spi_bus_config_t buscfg = 
     {
 		.mosi_io_num = pcfg->pins.gpio_mosi,
-		.data0_io_num = -1,
+		//.data0_io_num = -1,
 		.miso_io_num = -1,
 		.data1_io_num = -1,
 		.sclk_io_num = pcfg->pins.gpio_sclk,
@@ -422,6 +422,7 @@ void ADF4351_initialise(ADF4351_cfg_t *pcfg)
 
     ESP_LOGI(TAG, "GPIO successfully initialised");
 
+    ESP_LOGI(TAG, "SPI bus initialisation Mode: %d, Clock speed: %d, MOSI GPIO: %d", devcfg.mode, devcfg.clock_speed_hz, buscfg.mosi_io_num);
     ret = spi_bus_initialize(SENDER_HOST, &buscfg, SPI_DMA_DISABLED);
     assert(ret == ESP_OK);
 
