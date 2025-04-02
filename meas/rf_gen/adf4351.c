@@ -257,6 +257,8 @@ int ADF4351_set_ref_freq(ADF4351_cfg_t *pcfg, uint32_t ref_freq)
 
 void ADF4351_write_register(ADF4351_cfg_t *pcfg, uint32_t reg)
 {
+    esp_err_t err;
+
     // ensure LE pin is low
     gpio_set_level(pcfg->pins.gpio_le, 0);
     ets_delay_us(5);
@@ -271,7 +273,9 @@ void ADF4351_write_register(ADF4351_cfg_t *pcfg, uint32_t reg)
     t.length = 32;
     t.rx_buffer = NULL;
 
-    spi_device_transmit(spi_handle, &t);
+    err = spi_device_transmit(spi_handle, &t);
+    if (err != ESP_OK)
+      ESP_LOGE(TAG,"spi device transmit error %d", err);
 
     gpio_set_level(pcfg->pins.gpio_le, 1);    // pull LE pin high to latch incoming word into register
     ets_delay_us(5);
@@ -418,7 +422,7 @@ void ADF4351_initialise(ADF4351_cfg_t *pcfg)
 
     ESP_LOGI(TAG, "GPIO successfully initialised");
 
-    ret = spi_bus_initialize(SENDER_HOST, &buscfg, SPI_DMA_CH_AUTO);
+    ret = spi_bus_initialize(SENDER_HOST, &buscfg, SPI_DMA_DISABLED);
     assert(ret == ESP_OK);
 
     ESP_LOGI(TAG, "SPI bus successfully initialised");
