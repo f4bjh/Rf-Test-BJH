@@ -38,6 +38,8 @@ if(CONFIG_FIRMWARE_OTA)
 	"../meas/chip_info/chip_info.c"
 	"../meas/part_info/part_info.c"
 	"../meas/freq/freq.c"
+	"../meas/rf_gen/rf_gen_v2.c"
+	"../meas/rf_gen/adf4351_v2.c"
     )
     list(APPEND EMBED_FILES 
 	../http_server/pages/about.html
