@@ -12,6 +12,8 @@ idf_component_register(
 	SRCS "../meas/chip_info/chip_info.c"
 	SRCS "../meas/part_info/part_info.c"
 	SRCS "../meas/freq/freq.c"
+	SRCS "../meas/rf_gen/rf_gen_v2.c"
+	SRCS "../meas/rf_gen/adf4351_v2.c"
 	INCLUDE_DIRS "../include"
 	EMBED_FILES ../http_server/pages/about.html
 	EMBED_FILES ../http_server/pages/frequencymeter.html
