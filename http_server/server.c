@@ -15,9 +15,10 @@ extern httpd_uri_t about_get;
 #if 0
 extern const uint8_t about_html_start[] asm("_binary_about_html_start");
 extern const uint8_t about_html_end[] asm("_binary_about_html_end");
-#endif
 extern const uint8_t frequencymeter_html_start[] asm("_binary_frequencymeter_html_start");
 extern const uint8_t frequencymeter_html_end[] asm("_binary_frequencymeter_html_end");
+#endif
+extern httpd_uri_t frequencymeter_get;
 extern const uint8_t generator_html_start[] asm("_binary_generator_html_start");
 extern const uint8_t generator_html_end[] asm("_binary_generator_html_end");
 extern const uint8_t jquery_gauge_css_start[] asm("_binary_jquery_gauge_css_start");
@@ -240,7 +241,6 @@ esp_err_t about_get_handler(httpd_req_t *req)
 	httpd_resp_send(req, (const char *) about_html_start, about_html_end - about_html_start);
 	return ESP_OK;
 }
-#endif
 
 esp_err_t frequencymeter_get_handler(httpd_req_t *req)
 {
@@ -253,6 +253,7 @@ httpd_uri_t frequencymeter_get = {
 	.handler  = frequencymeter_get_handler,
 	.user_ctx = NULL
 };
+#endif
 
 esp_err_t generator_get_handler(httpd_req_t *req)
 {
