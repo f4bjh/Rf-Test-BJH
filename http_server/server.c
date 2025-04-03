@@ -30,8 +30,11 @@ extern const uint8_t jquery_gauge_min_js_start[] asm("_binary_jquery_gauge_min_j
 extern const uint8_t jquery_gauge_min_js_end[] asm("_binary_jquery_gauge_min_js_end");
 extern const uint8_t jquery_min_js_start[] asm("_binary_jquery_min_js_start");
 extern const uint8_t jquery_min_js_end[] asm("_binary_jquery_min_js_end");
+extern httpd_uri_t powermeter_get;
+#if 0
 extern const uint8_t powermeter_html_start[] asm("_binary_powermeter_html_start");
 extern const uint8_t powermeter_html_end[] asm("_binary_powermeter_html_end");
+#endif
 extern const uint8_t script_js_start[] asm("_binary_script_js_start");
 extern const uint8_t script_js_end[] asm("_binary_script_js_end");
 extern httpd_uri_t upload_get;
@@ -270,12 +273,13 @@ esp_err_t script_js_get_handler(httpd_req_t *req)
 	return ESP_OK;
 }
 
+#if 0
 esp_err_t powermeter_get_handler(httpd_req_t *req)
 {
 	httpd_resp_send(req, (const char *) powermeter_html_start, powermeter_html_end - powermeter_html_start);
 	return ESP_OK;
 }
-
+#endif 
 // Get all clients and send async message
 void server_send_data_tsk(void* arg)
 {
@@ -351,7 +355,6 @@ httpd_uri_t generator_get = {
 	.handler  = generator_get_handler,
 	.user_ctx = NULL
 };
-#endif 
 
 httpd_uri_t powermeter_get = {
 	.uri	  = "/powermeter.html",
@@ -359,6 +362,7 @@ httpd_uri_t powermeter_get = {
 	.handler  = powermeter_get_handler,
 	.user_ctx = NULL
 };
+#endif 
 
 httpd_uri_t jquery_gauge_css_get = {
 	.uri	  = "/jquery.gauge.css",
