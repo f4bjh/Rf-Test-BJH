@@ -12,12 +12,6 @@ extern const uint8_t style_css_end[] asm("_binary_style_css_end");
 extern const uint8_t index_html_start[] asm("_binary_index_html_start");
 extern const uint8_t index_html_end[] asm("_binary_index_html_end");
 extern httpd_uri_t about_get;
-#if 0
-extern const uint8_t about_html_start[] asm("_binary_about_html_start");
-extern const uint8_t about_html_end[] asm("_binary_about_html_end");
-extern const uint8_t frequencymeter_html_start[] asm("_binary_frequencymeter_html_start");
-extern const uint8_t frequencymeter_html_end[] asm("_binary_frequencymeter_html_end");
-#endif
 extern httpd_uri_t frequencymeter_get;
 extern const uint8_t generator_html_start[] asm("_binary_generator_html_start");
 extern const uint8_t generator_html_end[] asm("_binary_generator_html_end");
@@ -36,17 +30,9 @@ extern const uint8_t script_js_end[] asm("_binary_script_js_end");
 extern httpd_uri_t upload_get;
 extern httpd_uri_t update_post ;
 extern httpd_uri_t reboot_after_upload_post;
-#if 0
-extern const uint8_t upload_html_start[] asm("_binary_upload_html_start");
-extern const uint8_t upload_html_end[] asm("_binary_upload_html_end");
-#endif
 extern httpd_uri_t wifi_get;
 extern httpd_uri_t set_wifi_uri_handler;
 extern httpd_uri_t reboot_post ;
-#if 0
-extern const uint8_t wifi_html_start[] asm("_binary_wifi_html_start");
-extern const uint8_t wifi_html_end[] asm("_binary_wifi_html_end");
-#endif
 
 extern TaskHandle_t xHandle_keep_alive;
 
@@ -241,26 +227,6 @@ httpd_uri_t index2_get = {
 	.user_ctx = NULL
 };
 
-#if 0
-esp_err_t about_get_handler(httpd_req_t *req)
-{
-	httpd_resp_send(req, (const char *) about_html_start, about_html_end - about_html_start);
-	return ESP_OK;
-}
-
-esp_err_t frequencymeter_get_handler(httpd_req_t *req)
-{
-	httpd_resp_send(req, (const char *) frequencymeter_html_start, frequencymeter_html_end - frequencymeter_html_start);
-	return ESP_OK;
-}
-httpd_uri_t frequencymeter_get = {
-	.uri	  = "/frequencymeter.html",
-	.method   = HTTP_GET,
-	.handler  = frequencymeter_get_handler,
-	.user_ctx = NULL
-};
-#endif
-
 esp_err_t generator_get_handler(httpd_req_t *req)
 {
 	httpd_resp_send(req, (const char *) generator_html_start, generator_html_end - generator_html_start);
@@ -307,109 +273,6 @@ esp_err_t powermeter_get_handler(httpd_req_t *req)
 	httpd_resp_send(req, (const char *) powermeter_html_start, powermeter_html_end - powermeter_html_start);
 	return ESP_OK;
 }
-
-#if 0
-esp_err_t upload_get_handler(httpd_req_t *req)
-{
-	httpd_resp_send(req, (const char *) upload_html_start, upload_html_end - upload_html_start);
-	return ESP_OK;
-}
-httpd_uri_t upload_get = {
-	.uri	  = "/upload.html",
-	.method   = HTTP_GET,
-	.handler  = upload_get_handler,
-	.user_ctx = NULL
-};
-#endif
-#if 0
-esp_err_t wifi_get_handler(httpd_req_t *req)
-{
-	httpd_resp_send(req, (const char *) wifi_html_start, wifi_html_end - wifi_html_start);
-	return ESP_OK;
-}
-#endif
-
-#if 0
-/*
- * Handle OTA file upload
- */
-esp_err_t update_post_handler(httpd_req_t *req)
-{
-	char buf[1000];
-	esp_ota_handle_t ota_handle;
-	int remaining = req->content_len;
-
-	const esp_partition_t *ota_partition = esp_ota_get_next_update_partition(NULL);
-	ESP_LOGI(TAG,"Received fw update request - download into partition: %s", ota_partition->label);
-
-       	vTaskSuspend( xHandle_keep_alive );
-
-	if (!ota_partition) {
-	 ESP_LOGE(TAG, "no ota partition found");
-	 return ESP_ERR_NOT_FOUND;
- 	}
-
-	ESP_ERROR_CHECK(esp_ota_begin(ota_partition, OTA_SIZE_UNKNOWN, &ota_handle));
-
-	while (remaining > 0) {
-		int recv_len = httpd_req_recv(req, buf, MIN(remaining, sizeof(buf)));
-
-		// Timeout Error: Just retry
-		if (recv_len == HTTPD_SOCK_ERR_TIMEOUT) {
-			continue;
-
-		// Serious Error: Abort OTA
-		} else if (recv_len <= 0) {
-			httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Protocol Error");
-			return ESP_FAIL;
-		}
-
-		// Successful Upload: Flash firmware chunk
-		if (esp_ota_write(ota_handle, (const void *)buf, recv_len) != ESP_OK) {
-			httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Flash Error");
-			return ESP_FAIL;
-		}
-
-		remaining -= recv_len;
-	}
-
-	// Validate new OTA image
-	if (esp_ota_end(ota_handle) != ESP_OK) {
-			httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Validation new OTA image  Error");
-			return ESP_FAIL;
-	}
-
-	//httpd_resp_sendstr(req, "Firmware update complete.\n");
-	ESP_LOGI(TAG,"Firmware update complete on %s", ota_partition->label);
-	vTaskResume (xHandle_keep_alive);
-	
-	return ESP_OK;
-}
-#endif
-#if 0
-esp_err_t reboot_after_upload_post_handler(httpd_req_t *req)
-{
-	const esp_partition_t *ota_partition = esp_ota_get_next_update_partition(NULL);
-	if (esp_ota_set_boot_partition(ota_partition) != ESP_OK) {
-		httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to set boot partition to next");
-		return ESP_FAIL;
-	}
-
-	ESP_LOGI(TAG,"Reboot requested to %s!!!", ota_partition->label);
-	esp_restart();
-
-	return ESP_OK;
-}
-#endif
-#if 0
-esp_err_t reboot_post_handler(httpd_req_t *req)
-{
-	ESP_LOGI(TAG,"Reboot requested !!!");
-	esp_restart();
-
-	return ESP_OK;
-}
-#endif
 
 esp_err_t open_instance_meas(httpd_handle_t hd, html_page_id_t pageId)
 {
@@ -750,90 +613,6 @@ void wss_close_fd(httpd_handle_t hd, int sockfd)
     close(sockfd);
 }
 
-#if 0
-// HTTP request handler for setting Wi-Fi credentials
-static esp_err_t set_wifi_post_handler(httpd_req_t *req)
-{
-
-    char buf[128];
-    int ret;
-    char param[EXAMPLE_HTTP_QUERY_KEY_MAX_LEN] = {0};
-    char ssid[32]= {0};
-    char password[64] = {0};
-    uint8_t wifi_credentials_set = WIFI_CREDENTIAL_NOT_SET_IN_FLASH;
-    size_t buf_len = req->content_len;
-    char *ptr;
-
-	if (buf_len>128) {
-            httpd_resp_send(req, "Invalid Wi-Fi credentials", HTTPD_RESP_USE_STRLEN);
-	    return ESP_FAIL;
-	}
-
-        // Read the data for the request
-        if ((ret = httpd_req_recv(req, buf, buf_len)) <= 0) {
-            if (ret == HTTPD_SOCK_ERR_TIMEOUT) {
-                httpd_resp_send_408(req);
-            }
-            return ESP_FAIL;
-        }
-
-        // Process the received data
-
-	ptr = malloc((buf_len+1) * sizeof(char));
-	strncpy(ptr,buf,buf_len);
-	ptr[buf_len]='\0';
-
-	httpd_query_key_value(ptr, "ssid", param, 32); 
-        example_uri_decode(ssid, param, strnlen(param, EXAMPLE_HTTP_QUERY_KEY_MAX_LEN));
-
-	httpd_query_key_value(ptr, "password", param, 64); 
-        example_uri_decode(password, param, strnlen(param, EXAMPLE_HTTP_QUERY_KEY_MAX_LEN));
-	
-	free(ptr);
-
- 	if (strlen(ssid)>32) {
-            httpd_resp_send(req, "Invalid ssid", HTTPD_RESP_USE_STRLEN);
-	    return ESP_FAIL;
-	}
-	if (strlen(password)>64) {
-            httpd_resp_send(req, "Invalid password", HTTPD_RESP_USE_STRLEN);
-	    return ESP_FAIL;
-	}
-
-
-	// Set Wi-Fi credentials
-        wifi_credentials_set = WIFI_CREDENTIAL_SET_IN_FLASH;
-        nvs_handle_t my_handle;
-        esp_err_t err = nvs_open("storage", NVS_READWRITE, &my_handle);
-        if (err != ESP_OK) {
-            ESP_LOGE(TAG, "Error (%s) opening NVS handle!\n", esp_err_to_name(err));
-        } else {
-            err = nvs_set_str(my_handle, NVS_KEY_SSID, ssid);
-            if (err != ESP_OK) {
-                ESP_LOGE(TAG, "Error (%s) writing ssid\n", esp_err_to_name(err));
-            }
-            err = nvs_set_str(my_handle, NVS_KEY_PASSWORD, password);
-            if (err != ESP_OK) {
-                ESP_LOGE(TAG, "Error (%s) writing password\n", esp_err_to_name(err));
-            }
-	    err = nvs_set_u8(my_handle, NVS_KEY_WIFI_SET_CREDENTIAL, wifi_credentials_set);
-            if (err != ESP_OK) {
-                ESP_LOGE(TAG, "Error (%s) writing wifi_credentials_set\n", esp_err_to_name(err));
-            }
-
-            nvs_close(my_handle);
-
-        }
-       
-       	if (err != ESP_OK) 
-	  httpd_resp_send(req, "Wi-Fi credentials set unsuccessfully in flash", HTTPD_RESP_USE_STRLEN);
-	else
-	  httpd_resp_send(req, "Wi-Fi credentials set successfully", HTTPD_RESP_USE_STRLEN);
-
-        return err; 
-}
-#endif
-
 httpd_uri_t style_get = {
 	.uri	  = "/style.css",
 	.method   = HTTP_GET,
@@ -841,16 +620,6 @@ httpd_uri_t style_get = {
 	.user_ctx = NULL
 };
 
-//extern httpd_uri_t about_get;
-
-#if 0
-httpd_uri_t about_get = {
-	.uri	  = "/about.html",
-	.method   = HTTP_GET,
-	.handler  = about_get_handler,
-	.user_ctx = NULL
-};
-#endif
 httpd_uri_t generator_get = {
 	.uri	  = "/generator.html",
 	.method   = HTTP_GET,
@@ -899,47 +668,6 @@ httpd_uri_t script_js_get = {
 	.handler  = script_js_get_handler,
 	.user_ctx = NULL
 };
-
-#if 0
-httpd_uri_t wifi_get = {
-	.uri	  = "/wifi.html",
-	.method   = HTTP_GET,
-	.handler  = wifi_get_handler,
-	.user_ctx = NULL
-};
-#endif
-
-#if 0
-httpd_uri_t update_post = {
-	.uri	  = "/update",
-	.method   = HTTP_POST,
-	.handler  = update_post_handler,
-	.user_ctx = NULL
-};
-
-httpd_uri_t reboot_after_upload_post = {
-	.uri	  = "/reboot_after_upload",
-	.method   = HTTP_POST,
-	.handler  = reboot_after_upload_post_handler,
-	.user_ctx = NULL
-};
-
-httpd_uri_t reboot_post = {
-	.uri	  = "/reboot",
-	.method   = HTTP_POST,
-	.handler  = reboot_post_handler,
-	.user_ctx = NULL
-};
-#endif
-#if 0
-// HTTP server URI handler structure
-httpd_uri_t set_wifi_uri_handler = {
-    .uri       = "/set_wifi",
-    .method    = HTTP_POST,
-    .handler   = set_wifi_post_handler,
-    .user_ctx  = NULL
-};
-#endif
 
 esp_err_t http_server_init(void)
 {
