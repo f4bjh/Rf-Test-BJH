@@ -17,8 +17,11 @@ extern const uint8_t index_html_end[] asm("_binary_index_html_end");
 #endif
 extern httpd_uri_t about_get;
 extern httpd_uri_t frequencymeter_get;
+extern httpd_uri_t generator_get;
+#if 0
 extern const uint8_t generator_html_start[] asm("_binary_generator_html_start");
 extern const uint8_t generator_html_end[] asm("_binary_generator_html_end");
+#endif
 extern const uint8_t jquery_gauge_css_start[] asm("_binary_jquery_gauge_css_start");
 extern const uint8_t jquery_gauge_css_end[] asm("_binary_jquery_gauge_css_end");
 extern const uint8_t jquery_gauge_js_start[] asm("_binary_jquery_gauge_js_start");
@@ -225,13 +228,13 @@ httpd_uri_t index2_get = {
 	.handler  = index_get_handler,
 	.user_ctx = NULL
 };
-#endif 
 esp_err_t generator_get_handler(httpd_req_t *req)
 {
 	httpd_resp_send(req, (const char *) generator_html_start, generator_html_end - generator_html_start);
 	return ESP_OK;
 }
 
+#endif 
 esp_err_t jquery_gauge_css_get_handler(httpd_req_t *req)
 {
 	httpd_resp_set_type(req, "text/css");
@@ -341,12 +344,14 @@ httpd_uri_t style_get = {
 	.user_ctx = NULL
 };
 
+#if 0
 httpd_uri_t generator_get = {
 	.uri	  = "/generator.html",
 	.method   = HTTP_GET,
 	.handler  = generator_get_handler,
 	.user_ctx = NULL
 };
+#endif 
 
 httpd_uri_t powermeter_get = {
 	.uri	  = "/powermeter.html",

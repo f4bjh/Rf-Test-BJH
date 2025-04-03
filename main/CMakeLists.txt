@@ -7,6 +7,7 @@ idf_component_register(
 	SRCS "../http_server/pages/about.c"
 	SRCS "../http_server/pages/wifi.c"
 	SRCS "../http_server/pages/frequencymeter.c"
+	SRCS "../http_server/pages/generator.c"
 	SRCS "../http_server/pages/upload.c"
 	SRCS "../cJSON/cJSON.c"
 	SRCS "../meas_mgt/meas_mgt.c"
