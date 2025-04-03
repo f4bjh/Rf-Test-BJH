@@ -100,3 +100,18 @@ httpd_uri_t upload_get = {
 	.handler  = reboot_after_upload_post_handler,
 	.user_ctx = NULL
 };
+
+extern const uint8_t upload_js_start[] asm("_binary_upload_js_start");
+extern const uint8_t upload_js_end[] asm("_binary_upload_js_end");
+esp_err_t upload_js_get_handler(httpd_req_t *req)
+{
+	httpd_resp_set_type(req, "text/javascript");
+	httpd_resp_send(req, (const char *) upload_js_start, upload_js_end - upload_js_start);
+	return ESP_OK;
+}
+httpd_uri_t upload_js_get = {
+	.uri	  = "/upload.js",
+	.method   = HTTP_GET,
+	.handler  = upload_js_get_handler,
+	.user_ctx = NULL
+};

@@ -23,7 +23,7 @@ idf_component_register(
 	INCLUDE_DIRS "../include"
 	EMBED_FILES ../http_server/pages/about.html
 	EMBED_FILES ../http_server/pages/frequencymeter.html
-	EMBED_FILES ../http_server/pages/frequency.js	
+	EMBED_FILES ../http_server/pages/frequencymeter.js	
 	EMBED_FILES ../http_server/pages/generator.html
 	EMBED_FILES ../http_server/pages/index.html
 	EMBED_FILES ../http_server/pages/index.js
