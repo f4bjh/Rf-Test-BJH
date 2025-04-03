@@ -32,5 +32,14 @@ typedef struct {
     wss_keep_alive_t keep_alive;
 } server_ctx_t;
 
+struct async_resp_arg {
+    httpd_handle_t hd;
+    int fd;
+    instance_meas_t *instance_meas;
+};
+
 esp_err_t http_server_init(void);
 void example_uri_decode(char *dest, const char *src, size_t len);
+void ws_async_send(void *arg);
+esp_err_t ws_open_fd(httpd_handle_t hd, int sockfd);
+void ws_close_fd(httpd_handle_t hd, int sockfd);
