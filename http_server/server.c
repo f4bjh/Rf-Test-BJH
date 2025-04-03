@@ -33,10 +33,16 @@ extern const uint8_t powermeter_html_start[] asm("_binary_powermeter_html_start"
 extern const uint8_t powermeter_html_end[] asm("_binary_powermeter_html_end");
 extern const uint8_t script_js_start[] asm("_binary_script_js_start");
 extern const uint8_t script_js_end[] asm("_binary_script_js_end");
+extern httpd_uri_t upload_get;
+extern httpd_uri_t update_post ;
+extern httpd_uri_t reboot_after_upload_post;
+#if 0
 extern const uint8_t upload_html_start[] asm("_binary_upload_html_start");
 extern const uint8_t upload_html_end[] asm("_binary_upload_html_end");
+#endif
 extern httpd_uri_t wifi_get;
 extern httpd_uri_t set_wifi_uri_handler;
+extern httpd_uri_t reboot_post ;
 #if 0
 extern const uint8_t wifi_html_start[] asm("_binary_wifi_html_start");
 extern const uint8_t wifi_html_end[] asm("_binary_wifi_html_end");
@@ -302,6 +308,7 @@ esp_err_t powermeter_get_handler(httpd_req_t *req)
 	return ESP_OK;
 }
 
+#if 0
 esp_err_t upload_get_handler(httpd_req_t *req)
 {
 	httpd_resp_send(req, (const char *) upload_html_start, upload_html_end - upload_html_start);
@@ -313,7 +320,7 @@ httpd_uri_t upload_get = {
 	.handler  = upload_get_handler,
 	.user_ctx = NULL
 };
-
+#endif
 #if 0
 esp_err_t wifi_get_handler(httpd_req_t *req)
 {
@@ -322,6 +329,7 @@ esp_err_t wifi_get_handler(httpd_req_t *req)
 }
 #endif
 
+#if 0
 /*
  * Handle OTA file upload
  */
@@ -377,8 +385,8 @@ esp_err_t update_post_handler(httpd_req_t *req)
 	
 	return ESP_OK;
 }
-
-
+#endif
+#if 0
 esp_err_t reboot_after_upload_post_handler(httpd_req_t *req)
 {
 	const esp_partition_t *ota_partition = esp_ota_get_next_update_partition(NULL);
@@ -392,7 +400,8 @@ esp_err_t reboot_after_upload_post_handler(httpd_req_t *req)
 
 	return ESP_OK;
 }
-
+#endif
+#if 0
 esp_err_t reboot_post_handler(httpd_req_t *req)
 {
 	ESP_LOGI(TAG,"Reboot requested !!!");
@@ -400,7 +409,7 @@ esp_err_t reboot_post_handler(httpd_req_t *req)
 
 	return ESP_OK;
 }
-
+#endif
 
 esp_err_t open_instance_meas(httpd_handle_t hd, html_page_id_t pageId)
 {
@@ -832,7 +841,7 @@ httpd_uri_t style_get = {
 	.user_ctx = NULL
 };
 
-extern httpd_uri_t about_get;
+//extern httpd_uri_t about_get;
 
 #if 0
 httpd_uri_t about_get = {
@@ -900,6 +909,7 @@ httpd_uri_t wifi_get = {
 };
 #endif
 
+#if 0
 httpd_uri_t update_post = {
 	.uri	  = "/update",
 	.method   = HTTP_POST,
@@ -920,7 +930,7 @@ httpd_uri_t reboot_post = {
 	.handler  = reboot_post_handler,
 	.user_ctx = NULL
 };
-
+#endif
 #if 0
 // HTTP server URI handler structure
 httpd_uri_t set_wifi_uri_handler = {
@@ -972,11 +982,11 @@ esp_err_t http_server_init(void)
 		httpd_register_uri_handler(http_server, &powermeter_get);
 		httpd_register_uri_handler(http_server, &script_js_get);
 		httpd_register_uri_handler(http_server, &upload_get);
-		httpd_register_uri_handler(http_server, &wifi_get);
-        httpd_register_uri_handler(http_server, &set_wifi_uri_handler);
-		httpd_register_uri_handler(http_server, &update_post);
+        httpd_register_uri_handler(http_server, &update_post);
 		httpd_register_uri_handler(http_server, &reboot_after_upload_post);
-		httpd_register_uri_handler(http_server, &reboot_post);
+		httpd_register_uri_handler(http_server, &wifi_get);
+        httpd_register_uri_handler(http_server, &reboot_post);
+        httpd_register_uri_handler(http_server, &set_wifi_uri_handler);
 		httpd_register_uri_handler(http_server, &ws);
 		wss_keep_alive_set_user_ctx(keep_alive, http_server);
 	}
