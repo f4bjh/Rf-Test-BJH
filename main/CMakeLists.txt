@@ -3,6 +3,7 @@ idf_component_register(
 	SRCS "../http_server/keep_alive.c"
 	SRCS "../http_server/server.c"
 	SRCS "../http_server/pages/about.c"
+	SRCS "../http_server/pages/wifi.c"
 	SRCS "../cJSON/cJSON.c"
 	SRCS "../meas_mgt/meas_mgt.c"
 	SRCS "../meas_mgt/fsm.c"

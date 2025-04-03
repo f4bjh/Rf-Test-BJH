@@ -33,3 +33,4 @@ typedef struct {
 } server_ctx_t;
 
 esp_err_t http_server_init(void);
+void example_uri_decode(char *dest, const char *src, size_t len);

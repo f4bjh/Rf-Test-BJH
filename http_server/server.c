@@ -34,8 +34,12 @@ extern const uint8_t script_js_start[] asm("_binary_script_js_start");
 extern const uint8_t script_js_end[] asm("_binary_script_js_end");
 extern const uint8_t upload_html_start[] asm("_binary_upload_html_start");
 extern const uint8_t upload_html_end[] asm("_binary_upload_html_end");
+extern httpd_uri_t wifi_get;
+extern httpd_uri_t set_wifi_uri_handler;
+#if 0
 extern const uint8_t wifi_html_start[] asm("_binary_wifi_html_start");
 extern const uint8_t wifi_html_end[] asm("_binary_wifi_html_end");
+#endif
 
 extern TaskHandle_t xHandle_keep_alive;
 
@@ -48,6 +52,116 @@ struct async_resp_arg {
 };
 
 static httpd_handle_t http_server = NULL;
+
+void ngx_unescape_uri(u_char **dst, u_char **src, size_t size, unsigned int type)
+{
+    u_char  *d, *s, ch, c, decoded;
+    enum {
+        sw_usual = 0,
+        sw_quoted,
+        sw_quoted_second
+    } state;
+
+    d = *dst;
+    s = *src;
+
+    state = 0;
+    decoded = 0;
+
+    while (size--) {
+        ch = *s++;
+        switch (state) {
+        case sw_usual:
+            if (ch == '?'
+                    && (type & (NGX_UNESCAPE_URI | NGX_UNESCAPE_REDIRECT))) {
+                *d++ = ch;
+                goto done;
+            }
+            if (ch == '%') {
+                state = sw_quoted;
+                break;
+            }
+            *d++ = ch;
+            break;
+        case sw_quoted:
+            if (ch >= '0' && ch <= '9') {
+                decoded = (u_char) (ch - '0');
+                state = sw_quoted_second;
+                break;
+            }
+            c = (u_char) (ch | 0x20);
+            if (c >= 'a' && c <= 'f') {
+                decoded = (u_char) (c - 'a' + 10);
+                state = sw_quoted_second;
+                break;
+            }
+            /* the invalid quoted character */
+            state = sw_usual;
+            *d++ = ch;
+            break;
+
+        case sw_quoted_second:
+            state = sw_usual;
+            if (ch >= '0' && ch <= '9') {
+                ch = (u_char) ((decoded << 4) + (ch - '0'));
+                if (type & NGX_UNESCAPE_REDIRECT) {
+                    if (ch > '%' && ch < 0x7f) {
+                        *d++ = ch;
+                        break;
+                    }
+                    *d++ = '%'; *d++ = *(s - 2); *d++ = *(s - 1);
+                    break;
+                }
+                *d++ = ch;
+                break;
+            }
+            c = (u_char) (ch | 0x20);
+            if (c >= 'a' && c <= 'f') {
+                ch = (u_char) ((decoded << 4) + (c - 'a') + 10);
+                if (type & NGX_UNESCAPE_URI) {
+                    if (ch == '?') {
+                        *d++ = ch;
+                        goto done;
+                    }
+                    *d++ = ch;
+                    break;
+                }
+                if (type & NGX_UNESCAPE_REDIRECT) {
+                    if (ch == '?') {
+                        *d++ = ch;
+                        goto done;
+                    }
+                    if (ch > '%' && ch < 0x7f) {
+                        *d++ = ch;
+                        break;
+                    }
+                    *d++ = '%'; *d++ = *(s - 2); *d++ = *(s - 1);
+                    break;
+                }
+                *d++ = ch;
+                break;
+            }
+            /* the invalid quoted character */
+            break;
+        }
+    }
+
+done:
+    *dst = d;
+    *src = s;
+}
+
+void example_uri_decode(char *dest, const char *src, size_t len)
+{
+    if (!src || !dest) {
+        return;
+    }
+
+    unsigned char *src_ptr = (unsigned char *)src;
+    unsigned char *dst_ptr = (unsigned char *)dest;
+    ngx_unescape_uri(&dst_ptr, &src_ptr, len, NGX_UNESCAPE_URI);
+}
+
 
 static void send_ping(void *arg)
 {
@@ -199,11 +313,13 @@ httpd_uri_t upload_get = {
 	.user_ctx = NULL
 };
 
+#if 0
 esp_err_t wifi_get_handler(httpd_req_t *req)
 {
 	httpd_resp_send(req, (const char *) wifi_html_start, wifi_html_end - wifi_html_start);
 	return ESP_OK;
 }
+#endif
 
 /*
  * Handle OTA file upload
@@ -624,147 +740,7 @@ void wss_close_fd(httpd_handle_t hd, int sockfd)
     close(sockfd);
 }
 
-
-
-
-void ngx_unescape_uri(u_char **dst, u_char **src, size_t size, unsigned int type)
-{
-    u_char  *d, *s, ch, c, decoded;
-    enum {
-        sw_usual = 0,
-        sw_quoted,
-        sw_quoted_second
-    } state;
-
-    d = *dst;
-    s = *src;
-
-    state = 0;
-    decoded = 0;
-
-    while (size--) {
-
-        ch = *s++;
-
-        switch (state) {
-        case sw_usual:
-            if (ch == '?'
-                    && (type & (NGX_UNESCAPE_URI | NGX_UNESCAPE_REDIRECT))) {
-                *d++ = ch;
-                goto done;
-            }
-
-            if (ch == '%') {
-                state = sw_quoted;
-                break;
-            }
-
-            *d++ = ch;
-            break;
-
-        case sw_quoted:
-
-            if (ch >= '0' && ch <= '9') {
-                decoded = (u_char) (ch - '0');
-                state = sw_quoted_second;
-                break;
-            }
-
-            c = (u_char) (ch | 0x20);
-            if (c >= 'a' && c <= 'f') {
-                decoded = (u_char) (c - 'a' + 10);
-                state = sw_quoted_second;
-                break;
-            }
-
-            /* the invalid quoted character */
-
-            state = sw_usual;
-
-            *d++ = ch;
-
-            break;
-
-        case sw_quoted_second:
-
-            state = sw_usual;
-
-            if (ch >= '0' && ch <= '9') {
-                ch = (u_char) ((decoded << 4) + (ch - '0'));
-
-                if (type & NGX_UNESCAPE_REDIRECT) {
-                    if (ch > '%' && ch < 0x7f) {
-                        *d++ = ch;
-                        break;
-                    }
-
-                    *d++ = '%'; *d++ = *(s - 2); *d++ = *(s - 1);
-
-                    break;
-                }
-
-                *d++ = ch;
-
-                break;
-            }
-
-            c = (u_char) (ch | 0x20);
-            if (c >= 'a' && c <= 'f') {
-                ch = (u_char) ((decoded << 4) + (c - 'a') + 10);
-
-                if (type & NGX_UNESCAPE_URI) {
-                    if (ch == '?') {
-                        *d++ = ch;
-                        goto done;
-                    }
-
-                    *d++ = ch;
-                    break;
-                }
-
-                if (type & NGX_UNESCAPE_REDIRECT) {
-                    if (ch == '?') {
-                        *d++ = ch;
-                        goto done;
-                    }
-
-                    if (ch > '%' && ch < 0x7f) {
-                        *d++ = ch;
-                        break;
-                    }
-
-                    *d++ = '%'; *d++ = *(s - 2); *d++ = *(s - 1);
-                    break;
-                }
-
-                *d++ = ch;
-
-                break;
-            }
-
-            /* the invalid quoted character */
-
-            break;
-        }
-    }
-
-done:
-
-    *dst = d;
-    *src = s;
-}
-
-void example_uri_decode(char *dest, const char *src, size_t len)
-{
-    if (!src || !dest) {
-        return;
-    }
-
-    unsigned char *src_ptr = (unsigned char *)src;
-    unsigned char *dst_ptr = (unsigned char *)dest;
-    ngx_unescape_uri(&dst_ptr, &src_ptr, len, NGX_UNESCAPE_URI);
-}
-
+#if 0
 // HTTP request handler for setting Wi-Fi credentials
 static esp_err_t set_wifi_post_handler(httpd_req_t *req)
 {
@@ -846,6 +822,7 @@ static esp_err_t set_wifi_post_handler(httpd_req_t *req)
 
         return err; 
 }
+#endif
 
 httpd_uri_t style_get = {
 	.uri	  = "/style.css",
@@ -913,12 +890,14 @@ httpd_uri_t script_js_get = {
 	.user_ctx = NULL
 };
 
+#if 0
 httpd_uri_t wifi_get = {
 	.uri	  = "/wifi.html",
 	.method   = HTTP_GET,
 	.handler  = wifi_get_handler,
 	.user_ctx = NULL
 };
+#endif
 
 httpd_uri_t update_post = {
 	.uri	  = "/update",
@@ -941,6 +920,7 @@ httpd_uri_t reboot_post = {
 	.user_ctx = NULL
 };
 
+#if 0
 // HTTP server URI handler structure
 httpd_uri_t set_wifi_uri_handler = {
     .uri       = "/set_wifi",
@@ -948,6 +928,7 @@ httpd_uri_t set_wifi_uri_handler = {
     .handler   = set_wifi_post_handler,
     .user_ctx  = NULL
 };
+#endif
 
 esp_err_t http_server_init(void)
 {
@@ -991,13 +972,12 @@ esp_err_t http_server_init(void)
 		httpd_register_uri_handler(http_server, &script_js_get);
 		httpd_register_uri_handler(http_server, &upload_get);
 		httpd_register_uri_handler(http_server, &wifi_get);
+        httpd_register_uri_handler(http_server, &set_wifi_uri_handler);
 		httpd_register_uri_handler(http_server, &update_post);
 		httpd_register_uri_handler(http_server, &reboot_after_upload_post);
 		httpd_register_uri_handler(http_server, &reboot_post);
 		httpd_register_uri_handler(http_server, &ws);
-		httpd_register_uri_handler(http_server, &set_wifi_uri_handler);
 		wss_keep_alive_set_user_ctx(keep_alive, http_server);
-
 	}
 	//ws_server_send_data(&http_server);
 	  xTaskCreatePinnedToCore(ws_server_send_data, 
