@@ -3,6 +3,7 @@ idf_component_register(
 	SRCS "../http_server/keep_alive.c"
 	SRCS "../http_server/server.c"
 	SRCS "../http_server/ws.c"
+	SRCS "../http_server/pages/index.c"
 	SRCS "../http_server/pages/about.c"
 	SRCS "../http_server/pages/wifi.c"
 	SRCS "../http_server/pages/frequencymeter.c"

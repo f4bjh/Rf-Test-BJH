@@ -9,8 +9,12 @@ static const size_t max_clients = 4;
 
 extern const uint8_t style_css_start[] asm("_binary_style_css_start");
 extern const uint8_t style_css_end[] asm("_binary_style_css_end");
+extern httpd_uri_t index_get;
+extern httpd_uri_t index2_get;
+#if 0
 extern const uint8_t index_html_start[] asm("_binary_index_html_start");
 extern const uint8_t index_html_end[] asm("_binary_index_html_end");
+#endif
 extern httpd_uri_t about_get;
 extern httpd_uri_t frequencymeter_get;
 extern const uint8_t generator_html_start[] asm("_binary_generator_html_start");
@@ -202,7 +206,7 @@ esp_err_t style_get_handler(httpd_req_t *req)
 	httpd_resp_send(req, (const char *) style_css_start, style_css_end - style_css_start);
 	return ESP_OK;
 }
-
+#if 0
 esp_err_t index_get_handler(httpd_req_t *req)
 {
 
@@ -221,7 +225,7 @@ httpd_uri_t index2_get = {
 	.handler  = index_get_handler,
 	.user_ctx = NULL
 };
-
+#endif 
 esp_err_t generator_get_handler(httpd_req_t *req)
 {
 	httpd_resp_send(req, (const char *) generator_html_start, generator_html_end - generator_html_start);
@@ -419,10 +423,6 @@ esp_err_t http_server_init(void)
 		httpd_register_uri_handler(http_server, &about_get);
 		httpd_register_uri_handler(http_server, &frequencymeter_get);
 		httpd_register_uri_handler(http_server, &generator_get);
-		httpd_register_uri_handler(http_server, &jquery_gauge_css_get);
-		httpd_register_uri_handler(http_server, &jquery_gauge_js_get);
-		httpd_register_uri_handler(http_server, &jquery_gauge_min_js_get);
-		httpd_register_uri_handler(http_server, &jquery_min_js_get);
 		httpd_register_uri_handler(http_server, &powermeter_get);
 		httpd_register_uri_handler(http_server, &script_js_get);
 		httpd_register_uri_handler(http_server, &upload_get);
@@ -432,7 +432,12 @@ esp_err_t http_server_init(void)
         httpd_register_uri_handler(http_server, &reboot_post);
         httpd_register_uri_handler(http_server, &set_wifi_uri_handler);
 		httpd_register_uri_handler(http_server, &ws);
-		wss_keep_alive_set_user_ctx(keep_alive, http_server);
+		httpd_register_uri_handler(http_server, &jquery_gauge_css_get);
+		httpd_register_uri_handler(http_server, &jquery_gauge_js_get);
+		httpd_register_uri_handler(http_server, &jquery_gauge_min_js_get);
+		httpd_register_uri_handler(http_server, &jquery_min_js_get);
+		httpd_register_uri_handler(http_server, &style_get);
+        wss_keep_alive_set_user_ctx(keep_alive, http_server);
 	}
 	//ws_server_send_data(&http_server);
 	  xTaskCreatePinnedToCore(server_send_data_tsk, 
