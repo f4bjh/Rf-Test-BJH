@@ -45,12 +45,6 @@
 					xhr.send(file);
 				}
 			}
-			function requestReboot() {
-				var xhr = new XMLHttpRequest();
-				xhr.open("POST", "/reboot_after_upload", true);
-				xhr.send(); // Envoie la requête
-			}	
-
 		</script>
 	
 	
@@ -94,7 +88,6 @@
 	<button id="upload" type="button" onclick="startUpload()">Upload</button>
   </div>
   <div id="progress"></div>
-  <button id="reboot" type="button" onclick="requestReboot()">Reboot</button>
 <br><br>
  
 

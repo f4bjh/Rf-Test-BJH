@@ -30,7 +30,7 @@ extern const uint8_t script_js_end[] asm("_binary_script_js_end");
 extern httpd_uri_t upload_get;
 extern httpd_uri_t upload_js_get;
 extern httpd_uri_t update_post ;
-extern httpd_uri_t reboot_after_upload_post;
+//extern httpd_uri_t reboot_after_upload_post;
 extern httpd_uri_t wifi_get;
 extern httpd_uri_t set_wifi_uri_handler;
 extern httpd_uri_t reboot_post ;
@@ -371,30 +371,30 @@ esp_err_t http_server_init(void)
 	if (httpd_start(&http_server, &config) == ESP_OK) {
 		httpd_register_uri_handler(http_server, &index_get);
 		httpd_register_uri_handler(http_server, &index2_get);
-        httpd_register_uri_handler(http_server, &index_js_get);
+	        httpd_register_uri_handler(http_server, &index_js_get);
 		httpd_register_uri_handler(http_server, &about_get);
 		httpd_register_uri_handler(http_server, &frequencymeter_get);
-        httpd_register_uri_handler(http_server, &frequencymeter_js_get);
+	        httpd_register_uri_handler(http_server, &frequencymeter_js_get);
 		httpd_register_uri_handler(http_server, &generator_get);
 		httpd_register_uri_handler(http_server, &powermeter_get);
 		httpd_register_uri_handler(http_server, &script_js_get);
 		httpd_register_uri_handler(http_server, &upload_get);
-        httpd_register_uri_handler(http_server, &upload_js_get);
-        httpd_register_uri_handler(http_server, &update_post);
-		httpd_register_uri_handler(http_server, &reboot_after_upload_post);
+	        httpd_register_uri_handler(http_server, &upload_js_get);
+	        httpd_register_uri_handler(http_server, &update_post);
+//		httpd_register_uri_handler(http_server, &reboot_after_upload_post);
 		httpd_register_uri_handler(http_server, &wifi_get);
-        httpd_register_uri_handler(http_server, &reboot_post);
-        httpd_register_uri_handler(http_server, &set_wifi_uri_handler);
+	        httpd_register_uri_handler(http_server, &reboot_post);
+	        httpd_register_uri_handler(http_server, &set_wifi_uri_handler);
 		httpd_register_uri_handler(http_server, &ws);
 		httpd_register_uri_handler(http_server, &jquery_gauge_css_get);
 		httpd_register_uri_handler(http_server, &jquery_gauge_js_get);
 		httpd_register_uri_handler(http_server, &jquery_gauge_min_js_get);
 		httpd_register_uri_handler(http_server, &jquery_min_js_get);
 		httpd_register_uri_handler(http_server, &style_get);
-        wss_keep_alive_set_user_ctx(keep_alive, http_server);
+        	wss_keep_alive_set_user_ctx(keep_alive, http_server);
 	}
-	//ws_server_send_data(&http_server);
-	  xTaskCreatePinnedToCore(server_send_data_tsk, 
+
+	xTaskCreatePinnedToCore(server_send_data_tsk, 
 		   "ws server send data", 
 		   configMINIMAL_STACK_SIZE, 
 		   &http_server,
