@@ -1,19 +1,4 @@
-
-#include <stdio.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/queue.h"
-#include <esp_ota_ops.h>
-#include <nvs_flash.h>
-#include "esp_log.h"
-#include <string.h>
-
 #include "main.h"
-#include "keep_alive.h"
-#include "meas_mgt.h"
-#include "http_server.h"
-#include "wifi.h"
-#include "lcd.h"
 
 static const char* TAG = "main";
 
@@ -69,10 +54,15 @@ void app_main(void) {
 	nvs_close(handle);
 
 	wifi_init();
+	ESP_LOGI(TAG,"WIFI initialised");
+
 	lcd_init();
+	ESP_LOGI(TAG,"LCD initialised");
+
 
 	ESP_ERROR_CHECK(http_server_init());
-	
+	ESP_LOGI(TAG,"HTTP server initialised");
+
 	esp_ota_img_states_t ota_state;
 	if (esp_ota_get_state_partition(partition, &ota_state) == ESP_OK) {
 		if (ota_state == ESP_OTA_IMG_PENDING_VERIFY) {

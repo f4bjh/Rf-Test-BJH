@@ -2,6 +2,14 @@ idf_component_register(
 	SRCS "main.c"
 	SRCS "../http_server/keep_alive.c"
 	SRCS "../http_server/server.c"
+	SRCS "../http_server/ws.c"
+	SRCS "../http_server/pages/index.c"
+	SRCS "../http_server/pages/about.c"
+	SRCS "../http_server/pages/wifi.c"
+	SRCS "../http_server/pages/frequencymeter.c"
+	SRCS "../http_server/pages/generator.c"
+	SRCS "../http_server/pages/powermeter.c"
+	SRCS "../http_server/pages/upload.c"
 	SRCS "../cJSON/cJSON.c"
 	SRCS "../meas_mgt/meas_mgt.c"
 	SRCS "../meas_mgt/fsm.c"
@@ -15,15 +23,19 @@ idf_component_register(
 	INCLUDE_DIRS "../include"
 	EMBED_FILES ../http_server/pages/about.html
 	EMBED_FILES ../http_server/pages/frequencymeter.html
+	EMBED_FILES ../http_server/pages/frequencymeter.js	
 	EMBED_FILES ../http_server/pages/generator.html
 	EMBED_FILES ../http_server/pages/index.html
+	EMBED_FILES ../http_server/pages/index.js
+	EMBED_FILES ../http_server/pages/upload.html
+	EMBED_FILES ../http_server/pages/upload.js
+	EMBED_FILES ../http_server/pages/wifi.html
+	EMBED_FILES ../http_server/pages/script.js
 	EMBED_FILES ../http_server/pages/jquery.gauge.css
 	EMBED_FILES ../http_server/pages/jquery.gauge.js
 	EMBED_FILES ../http_server/pages/jquery.gauge.min.js
 	EMBED_FILES ../http_server/pages/jquery.min.js
 	EMBED_FILES ../http_server/pages/powermeter.html
-	EMBED_FILES ../http_server/pages/script.js
 	EMBED_FILES ../http_server/pages/style.css
-	EMBED_FILES ../http_server/pages/upload.html
-	EMBED_FILES ../http_server/pages/wifi.html
+
 )
