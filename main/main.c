@@ -54,10 +54,15 @@ void app_main(void) {
 	nvs_close(handle);
 
 	wifi_init();
+	ESP_LOGI(TAG,"WIFI initialised");
+
 	lcd_init();
+	ESP_LOGI(TAG,"LCD initialised");
+
 
 	ESP_ERROR_CHECK(http_server_init());
-	
+	ESP_LOGI(TAG,"HTTP server initialised");
+
 	esp_ota_img_states_t ota_state;
 	if (esp_ota_get_state_partition(partition, &ota_state) == ESP_OK) {
 		if (ota_state == ESP_OTA_IMG_PENDING_VERIFY) {
