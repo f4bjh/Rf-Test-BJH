@@ -31,7 +31,7 @@ httpd_uri_t upload_get = {
      const esp_partition_t *ota_partition = esp_ota_get_next_update_partition(NULL);
      ESP_LOGI(TAG,"Received fw update request - download into partition: %s", ota_partition->label);
  
-            vTaskSuspend( xHandle_keep_alive );
+     vTaskSuspend( xHandle_keep_alive );
  
      if (!ota_partition) {
       ESP_LOGE(TAG, "no ota partition found");
@@ -68,10 +68,19 @@ httpd_uri_t upload_get = {
              return ESP_FAIL;
      }
  
-     //httpd_resp_sendstr(req, "Firmware update complete.\n");
      ESP_LOGI(TAG,"Firmware update complete on %s", ota_partition->label);
      vTaskResume (xHandle_keep_alive);
-     
+
+     if (esp_ota_set_boot_partition(ota_partition) != ESP_OK) {
+         httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to set boot partition to next");
+         return ESP_FAIL;
+     }
+ 
+     ESP_LOGI(TAG,"Reboot requested to %s!!!", ota_partition->label);
+     httpd_resp_send(req, "Firmware update complete - Rebooting...", HTTPD_RESP_USE_STRLEN);
+
+     esp_restart();
+      
      return ESP_OK;
  }
  httpd_uri_t update_post = {
@@ -80,7 +89,8 @@ httpd_uri_t upload_get = {
 	.handler  = update_post_handler,
 	.user_ctx = NULL
 };
- 
+
+#if 0
  esp_err_t reboot_after_upload_post_handler(httpd_req_t *req)
  {
      const esp_partition_t *ota_partition = esp_ota_get_next_update_partition(NULL);
@@ -94,12 +104,14 @@ httpd_uri_t upload_get = {
  
      return ESP_OK;
  }
+
  httpd_uri_t reboot_after_upload_post = {
 	.uri	  = "/reboot_after_upload",
 	.method   = HTTP_POST,
 	.handler  = reboot_after_upload_post_handler,
 	.user_ctx = NULL
 };
+#endif
 
 extern const uint8_t upload_js_start[] asm("_binary_upload_js_start");
 extern const uint8_t upload_js_end[] asm("_binary_upload_js_end");
