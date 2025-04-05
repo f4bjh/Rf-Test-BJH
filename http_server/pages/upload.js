@@ -2,7 +2,7 @@ let current_partition =  `unknown`;
 let next_partition =  `unknown`;
 
 // Gérer les messages reçus du serveur
-socket.addEventListener('message', (event) => {
+window.socket.addEventListener('message', (event) => {
 	if (!event.data || event.data.length === 0) {
           console.warn("Message vide reçu sur le WebSocket.");
           return;
