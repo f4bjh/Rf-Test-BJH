@@ -344,9 +344,10 @@ httpd_uri_t script_js_get = {
 
 esp_err_t http_server_init(void)
 {
-    server_ctx_t *server_ctx = calloc(1, sizeof(server_ctx_t));
+    	server_ctx_t *server_ctx = calloc(1, sizeof(server_ctx_t));
 	server_ctx->mutex = xSemaphoreCreateMutex();
 	server_ctx->instance_meas=NULL;
+	esp_err_t err;
 
 	// Prepare keep-alive engine
 	wss_keep_alive_config_t keep_alive_config = KEEP_ALIVE_CONFIG_DEFAULT();
@@ -368,7 +369,9 @@ esp_err_t http_server_init(void)
 	config.close_fn = ws_close_fd;
 	config.task_priority = tskHTTP_SERVER;
 
-	if (httpd_start(&http_server, &config) == ESP_OK) {
+	err = httpd_start(&http_server, &config);
+	if (err == ESP_OK) {
+		httpd_register_uri_handler(http_server, &ws);
 		httpd_register_uri_handler(http_server, &index_get);
 		httpd_register_uri_handler(http_server, &index2_get);
 	        httpd_register_uri_handler(http_server, &index_js_get);
@@ -385,13 +388,16 @@ esp_err_t http_server_init(void)
 		httpd_register_uri_handler(http_server, &wifi_get);
 	        httpd_register_uri_handler(http_server, &reboot_post);
 	        httpd_register_uri_handler(http_server, &set_wifi_uri_handler);
-		httpd_register_uri_handler(http_server, &ws);
+		//httpd_register_uri_handler(http_server, &ws);
 		httpd_register_uri_handler(http_server, &jquery_gauge_css_get);
 		httpd_register_uri_handler(http_server, &jquery_gauge_js_get);
 		httpd_register_uri_handler(http_server, &jquery_gauge_min_js_get);
 		httpd_register_uri_handler(http_server, &jquery_min_js_get);
 		httpd_register_uri_handler(http_server, &style_get);
         	wss_keep_alive_set_user_ctx(keep_alive, http_server);
+	} else {
+	  ESP_LOGE(TAG,"failed to start httpd");
+	  return err;
 	}
 
 	xTaskCreatePinnedToCore(server_send_data_tsk, 
