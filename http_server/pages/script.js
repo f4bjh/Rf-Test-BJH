@@ -1,5 +1,5 @@
 var serverIp = window.location.hostname;
-socket = new WebSocket("ws://" + serverIp + "/ws");
+window.socket = new WebSocket("ws://" + serverIp + "/ws");
 
 socket.onopen = function () {
         // Extraire le paramètre d'identification de la page
