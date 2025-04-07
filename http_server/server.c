@@ -25,12 +25,9 @@ extern const uint8_t jquery_gauge_min_js_end[] asm("_binary_jquery_gauge_min_js_
 extern const uint8_t jquery_min_js_start[] asm("_binary_jquery_min_js_start");
 extern const uint8_t jquery_min_js_end[] asm("_binary_jquery_min_js_end");
 extern httpd_uri_t powermeter_get;
-//extern const uint8_t script_js_start[] asm("_binary_script_js_start");
-//extern const uint8_t script_js_end[] asm("_binary_script_js_end");
 extern httpd_uri_t upload_get;
 extern httpd_uri_t upload_js_get;
 extern httpd_uri_t update_post ;
-//extern httpd_uri_t reboot_after_upload_post;
 extern httpd_uri_t wifi_get;
 extern httpd_uri_t set_wifi_uri_handler;
 extern httpd_uri_t reboot_post ;
@@ -231,14 +228,7 @@ esp_err_t jquery_min_js_get_handler(httpd_req_t *req)
 	httpd_resp_send(req, (const char *) jquery_min_js_start, jquery_min_js_end - jquery_min_js_start);
 	return ESP_OK;
 }
-#if 0
-esp_err_t script_js_get_handler(httpd_req_t *req)
-{
-	httpd_resp_set_type(req, "text/javascript");
-	httpd_resp_send(req, (const char *) script_js_start, script_js_end - script_js_start);
-	return ESP_OK;
-}
-#endif
+
 // Get all clients and send async message
 void server_send_data_tsk(void* arg)
 {
@@ -335,14 +325,6 @@ httpd_uri_t jquery_min_js_get = {
 	.user_ctx = NULL
 };
 
-#if 0
-httpd_uri_t script_js_get = {
-	.uri	  = "/script.js",
-	.method   = HTTP_GET,
-	.handler  = script_js_get_handler,
-	.user_ctx = NULL
-};
-#endif
 esp_err_t http_server_init(void)
 {
     	server_ctx_t *server_ctx = calloc(1, sizeof(server_ctx_t));
@@ -381,15 +363,12 @@ esp_err_t http_server_init(void)
 	        httpd_register_uri_handler(http_server, &frequencymeter_js_get);
 		httpd_register_uri_handler(http_server, &generator_get);
 		httpd_register_uri_handler(http_server, &powermeter_get);
-		//httpd_register_uri_handler(http_server, &script_js_get);
 		httpd_register_uri_handler(http_server, &upload_get);
 	        httpd_register_uri_handler(http_server, &upload_js_get);
 	        httpd_register_uri_handler(http_server, &update_post);
-//		httpd_register_uri_handler(http_server, &reboot_after_upload_post);
 		httpd_register_uri_handler(http_server, &wifi_get);
 	        httpd_register_uri_handler(http_server, &reboot_post);
 	        httpd_register_uri_handler(http_server, &set_wifi_uri_handler);
-		//httpd_register_uri_handler(http_server, &ws);
 		httpd_register_uri_handler(http_server, &jquery_gauge_css_get);
 		httpd_register_uri_handler(http_server, &jquery_gauge_js_get);
 		httpd_register_uri_handler(http_server, &jquery_gauge_min_js_get);
