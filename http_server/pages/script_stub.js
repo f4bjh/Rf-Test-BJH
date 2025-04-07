@@ -45,7 +45,7 @@ function WebSocketStub(url) {
   };
 }
 
-socket.onopen = function () {
+window.socket.onopen = function () {
         // Extraire le paramètre d'identification de la page
 	const url = window.location.href;
 	const pageId = url.split('/').pop();
@@ -68,19 +68,5 @@ socket.onopen = function () {
 
         // Envoi via WebSocket
         //socket.send(jsonString);
-		
-		if (pageId === "index.html" || pageId === "" ) {
-			import("index.js");
-		}
-		if (pageId === "frequencymeter.html") {
-			import("./frequencymeter.js")
-  			.then((module) => {
-				module.setupSocket(socket);
-  			})
-  			.catch((err) => console.error("Erreur d'importation de frequencymeter.js", err));
-		}
-		if (pageId === "upload.html") {
-			import("upload.js");
-		}
 };
 
