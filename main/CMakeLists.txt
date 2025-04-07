@@ -30,7 +30,6 @@ idf_component_register(
 	EMBED_FILES ../http_server/pages/upload.html
 	EMBED_FILES ../http_server/pages/upload.js
 	EMBED_FILES ../http_server/pages/wifi.html
-	EMBED_FILES ../http_server/pages/script.js
 	EMBED_FILES ../http_server/pages/jquery.gauge.css
 	EMBED_FILES ../http_server/pages/jquery.gauge.js
 	EMBED_FILES ../http_server/pages/jquery.gauge.min.js
