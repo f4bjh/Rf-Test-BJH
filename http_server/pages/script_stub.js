@@ -3,7 +3,7 @@ window.WebSocket = WebSocketStub;
 
 var serverIp = window.location.hostname;
 //socket = new WebSocket("ws://" + serverIp + "/ws");
-socket = new WebSocket("ws://localhost:8080");
+window.socket = new WebSocket("ws://localhost:8080");
 
 // Stub de WebSocket pour émuler la connexion
 function WebSocketStub(url) {
