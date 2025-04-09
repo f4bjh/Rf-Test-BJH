@@ -28,6 +28,7 @@ idf_component_register(
 	EMBED_FILES ../http_server/pages/index.html
 	EMBED_FILES ../http_server/pages/index.js
 	EMBED_FILES ../http_server/pages/upload.html
+	EMBED_FILES ../http_server/pages/factory.html
 	EMBED_FILES ../http_server/pages/upload.js
 	EMBED_FILES ../http_server/pages/wifi.html
 	EMBED_FILES ../http_server/pages/jquery.gauge.css
