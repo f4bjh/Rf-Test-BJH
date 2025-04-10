@@ -275,6 +275,30 @@ bool check_client_alive_cb(wss_keep_alive_t h, int fd)
     
 }
 
+#ifdef CONFIG_FIRMWARE_FACTORY
+esp_err_t open_fd(httpd_handle_t hd, int sockfd)
+{
+    server_ctx_t *server_ctx = httpd_get_global_user_ctx(hd);
+    wss_keep_alive_t wss_keep_alive;
+
+    ESP_LOGI(TAG, "New client connected %d", sockfd);
+ 
+    wss_keep_alive = server_ctx->keep_alive;
+    return wss_keep_alive_add_client(wss_keep_alive, sockfd);
+}
+
+void close_fd(httpd_handle_t hd, int sockfd)
+{
+    server_ctx_t *server_ctx = httpd_get_global_user_ctx(hd);
+    wss_keep_alive_t wss_keep_alive;
+
+    ESP_LOGI(TAG, "Client disconnected %d", sockfd);
+    wss_keep_alive = server_ctx->keep_alive;
+    wss_keep_alive_remove_client(wss_keep_alive, sockfd);
+    close(sockfd);
+}
+#endif
+
 // Get all clients and send async message
 void server_send_data_tsk(void* arg)
 {
@@ -359,8 +383,16 @@ esp_err_t http_server_init(void)
 
 	config.max_open_sockets = max_clients;
 	config.global_user_ctx = server_ctx;
+
+#ifdef CONFIG_FIRMWARE_FACTORY
+	config.open_fn = open_fd;
+	config.close_fn = close_fd;
+#endif
+#ifdef CONFIG_FIRMWARE_OTA
 	config.open_fn = ws_open_fd;
 	config.close_fn = ws_close_fd;
+#endif
+
 	config.task_priority = tskHTTP_SERVER;
 
 	err = httpd_start(&http_server, &config);
@@ -374,9 +406,7 @@ esp_err_t http_server_init(void)
 #ifdef CONFIG_FIRMWARE_OTA
 		httpd_register_uri_handler(http_server, &about_get);
 		httpd_register_uri_handler(http_server, &index_get);
-		httpd_register_uri_handler(http_server, &index2_factory_get);
-		httpd_register_uri_handler(http_server, &upload_get);
-	        httpd_register_uri_handler(http_server, &update_post);
+		httpd_register_uri_handler(http_server, &index2_get);
 		httpd_register_uri_handler(http_server, &wifi_get);
 	        httpd_register_uri_handler(http_server, &reboot_post);
 	        httpd_register_uri_handler(http_server, &set_wifi_uri_handler);
@@ -398,6 +428,7 @@ esp_err_t http_server_init(void)
 	  return err;
 	}
 
+#ifdef CONFIG_FIRMWARE_OTA
 	xTaskCreatePinnedToCore(server_send_data_tsk, 
 		   "ws server send data", 
 		   configMINIMAL_STACK_SIZE, 
@@ -405,6 +436,7 @@ esp_err_t http_server_init(void)
 		   tskHTTP_SERVER,
 		   &xHandle_ws_send_msg,
 		   0);
+#endif
 
 	return http_server == NULL ? ESP_FAIL : ESP_OK;
 }
