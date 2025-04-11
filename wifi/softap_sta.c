@@ -202,7 +202,21 @@ void wifi_init(void)
 
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_APSTA));
 
-   if (!wifi_credentials_set) {
+#ifdef CONFIG_FIRMWARE_FACTORY
+   
+      /* Initialize AP */
+      ESP_LOGI(TAG_AP, "ESP_WIFI_MODE_AP");
+      esp_netif_ap = wifi_init_softap();
+
+      /* Start WiFi */
+      ESP_ERROR_CHECK(esp_wifi_start() );
+
+      wifi_mode |= (1<<WIFI_MODE_AP_BIT);
+ 
+#endif
+#ifdef CONFIG_FIRMWARE_OTA
+
+   if (!wifi_credentials_set) { //or user has chosen AP mode in wifi page
   
       /* Initialize AP */
       ESP_LOGI(TAG_AP, "ESP_WIFI_MODE_AP");
@@ -248,6 +262,7 @@ void wifi_init(void)
       } else if (bits & WIFI_FAIL_BIT) {
         ESP_LOGI(TAG_STA, "Failed to connect to SSID:%s, password:%s",
                  ssid,password);
+	// should try AP mode then
       } else {
         ESP_LOGE(TAG_STA, "UNEXPECTED EVENT");
         return;
@@ -256,6 +271,7 @@ void wifi_init(void)
     /* Set sta as the default interface */
     esp_netif_set_default_netif(esp_netif_sta);
     }
+#endif
 
 #if 0
     to check, what is it for ?

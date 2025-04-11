@@ -35,6 +35,10 @@ void app_main(void) {
 	ESP_LOGI(TAG,"Compile time=%s",app_desc.time);
 	ESP_LOGI(TAG,"Compile date=%s",app_desc.date);
 	ESP_LOGI(TAG,"Version IDF=%s",app_desc.idf_ver);
+#ifdef CONFIG_FIRMWARE_FACTORY
+	wifi_credentials_set  = false;
+#endif
+#ifdef CONFIG_FIRMWARE_OTA
 
 	nvs_handle_t handle;
 	ret = nvs_open("storage", NVS_READWRITE, &handle);
@@ -60,6 +64,7 @@ void app_main(void) {
 	  ESP_LOGI(TAG,"wifi credentials not set");
 
 	nvs_close(handle);
+#endif
 
 	wifi_init();
 	ESP_LOGI(TAG,"WIFI initialised");
