@@ -52,8 +52,8 @@ httpd_uri_t upload2_get = {
 /*
  * Handle OTA file upload
  */
- esp_err_t update_post_handler(httpd_req_t *req)
- {
+esp_err_t update_post_handler(httpd_req_t *req)
+{
      char buf[1000];
      esp_ota_handle_t ota_handle;
      int remaining = req->content_len;
@@ -105,43 +105,16 @@ httpd_uri_t upload2_get = {
          httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to set boot partition to next");
          return ESP_FAIL;
      }
- 
-     ESP_LOGI(TAG,"Reboot requested to %s!!!", ota_partition->label);
-     httpd_resp_send(req, "Firmware update complete - Rebooting...", HTTPD_RESP_USE_STRLEN);
 
-     esp_restart();
-      
      return ESP_OK;
- }
- httpd_uri_t update_post = {
+}
+httpd_uri_t update_post = {
 	.uri	  = "/update",
 	.method   = HTTP_POST,
 	.handler  = update_post_handler,
 	.user_ctx = NULL
 };
 
-#if 0
- esp_err_t reboot_after_upload_post_handler(httpd_req_t *req)
- {
-     const esp_partition_t *ota_partition = esp_ota_get_next_update_partition(NULL);
-     if (esp_ota_set_boot_partition(ota_partition) != ESP_OK) {
-         httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to set boot partition to next");
-         return ESP_FAIL;
-     }
- 
-     ESP_LOGI(TAG,"Reboot requested to %s!!!", ota_partition->label);
-     esp_restart();
- 
-     return ESP_OK;
- }
-
- httpd_uri_t reboot_after_upload_post = {
-	.uri	  = "/reboot_after_upload",
-	.method   = HTTP_POST,
-	.handler  = reboot_after_upload_post_handler,
-	.user_ctx = NULL
-};
-#endif
 #ifdef CONFIG_FIRMWARE_OTA
 extern const uint8_t upload_js_start[] asm("_binary_upload_js_start");
 extern const uint8_t upload_js_end[] asm("_binary_upload_js_end");
@@ -156,5 +129,72 @@ httpd_uri_t upload_js_get = {
 	.method   = HTTP_GET,
 	.handler  = upload_js_get_handler,
 	.user_ctx = NULL
+};
+
+esp_err_t set_boot_partition_handler(httpd_req_t *req)
+{
+    char query[64];
+    esp_err_t ret;
+
+    // Lire les paramètres de l’URL
+    if ((ret = httpd_req_get_url_query_str(req, query, sizeof(query))) == ESP_OK) {
+        char partition[16];
+        if ((ret = httpd_query_key_value(query, "partition", partition, sizeof(partition))) == ESP_OK) {
+            const esp_partition_t *target = NULL;
+
+            if (strcmp(partition, "ota_0") == 0) {
+                target = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_OTA_0, NULL);
+            } else if (strcmp(partition, "ota_1") == 0) {
+                target = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_OTA_1, NULL);
+            } else {
+                httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Partition inconnue");
+                return ESP_FAIL;
+            }
+
+            if (target != NULL) {
+                if (esp_ota_set_boot_partition(target) == ESP_OK) {
+                    httpd_resp_sendstr(req, "Partition de boot mise à jour");
+                    return ESP_OK;
+                } else {
+                    httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Erreur set_boot_partition");
+                    return ESP_FAIL;
+                }
+            }
+        }
+    }
+
+    httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Paramètre 'partition' manquant");
+    return ESP_FAIL;
+}
+
+httpd_uri_t uri_boot_partition = {
+    .uri      = "/set_boot_partition",
+    .method   = HTTP_GET,
+    .handler  = set_boot_partition_handler,
+};
+
+esp_err_t reboot_handler(httpd_req_t *req) {
+    httpd_resp_send(req, "Rebooting...", HTTPD_RESP_USE_STRLEN);
+    vTaskDelay(100 / portTICK_PERIOD_MS);  // Laisse le temps de finir la réponse
+    esp_restart();
+    return ESP_OK;
+}
+
+httpd_uri_t uri_reboot = {
+    .uri      = "/reboot",
+    .method   = HTTP_GET,
+    .handler  = reboot_handler,
+};
+
+esp_err_t get_boot_partition_handler(httpd_req_t *req)
+{
+    const esp_partition_t *boot = esp_ota_get_boot_partition();
+    httpd_resp_sendstr(req, boot->label);
+    return ESP_OK;
+}
+httpd_uri_t uri_get_boot_partition = {
+    .uri      = "/boot_partition",
+    .method   = HTTP_GET,
+    .handler  = get_boot_partition_handler,
 };
 #endif
