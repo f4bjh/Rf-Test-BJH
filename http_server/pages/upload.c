@@ -1,9 +1,16 @@
 #include "http_server.h"
 
-static const char* TAG = "upload_uri_handler";
-
 extern TaskHandle_t xHandle_keep_alive;
 
+#ifdef CONFIG_FIRMWARE_OTA
+static const char* TAG = "upload_uri_handler";
+#endif
+#ifdef CONFIG_FIRMWARE_FACTORY
+static const char* TAG = "factory_uri_handler";
+#endif
+
+
+#ifdef CONFIG_FIRMWARE_OTA
 extern const uint8_t upload_html_start[] asm("_binary_upload_html_start");
 extern const uint8_t upload_html_end[] asm("_binary_upload_html_end");
 
@@ -18,6 +25,29 @@ httpd_uri_t upload_get = {
 	.handler  = upload_get_handler,
 	.user_ctx = NULL
 };
+#endif
+#ifdef CONFIG_FIRMWARE_FACTORY
+extern const uint8_t factory_html_start[] asm("_binary_factory_html_start");
+extern const uint8_t factory_html_end[] asm("_binary_factory_html_end");
+esp_err_t upload_get_handler(httpd_req_t *req)
+{
+	httpd_resp_send(req, (const char *) factory_html_start, factory_html_end - factory_html_start);
+	return ESP_OK;
+}
+httpd_uri_t upload_get = {
+	.uri	  = "/index.html",
+	.method   = HTTP_GET,
+	.handler  = upload_get_handler,
+	.user_ctx = NULL
+};
+httpd_uri_t upload2_get = {
+	.uri	  = "/",
+	.method   = HTTP_GET,
+	.handler  = upload_get_handler,
+	.user_ctx = NULL
+};
+#endif
+
 
 /*
  * Handle OTA file upload
@@ -112,7 +142,7 @@ httpd_uri_t upload_get = {
 	.user_ctx = NULL
 };
 #endif
-
+#ifdef CONFIG_FIRMWARE_OTA
 extern const uint8_t upload_js_start[] asm("_binary_upload_js_start");
 extern const uint8_t upload_js_end[] asm("_binary_upload_js_end");
 esp_err_t upload_js_get_handler(httpd_req_t *req)
@@ -127,3 +157,4 @@ httpd_uri_t upload_js_get = {
 	.handler  = upload_js_get_handler,
 	.user_ctx = NULL
 };
+#endif

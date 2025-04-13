@@ -147,10 +147,11 @@ esp_netif_t *wifi_init_sta(void)
     strcpy((char*)wifi_sta_config.sta.ssid, (const char*)ssid);
     strcpy((char*)wifi_sta_config.sta.password, (const char*)password);
 
+
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_sta_config) );
 
     ESP_LOGI(TAG_STA, "wifi_init_sta finished.");
-    
+
     return esp_netif_sta;
 }
 
@@ -167,8 +168,11 @@ void softap_set_dns_addr(esp_netif_t *esp_netif_ap,esp_netif_t *esp_netif_sta)
 
 void wifi_init(void)
 {
-   esp_netif_t *esp_netif_ap, *esp_netif_sta ;
+   esp_netif_t *esp_netif_ap;
+#ifdef CONFIG_FIRMWARE_OTA
+   esp_netif_t *esp_netif_sta ;
    char *hostname;
+#endif
 
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
@@ -202,69 +206,69 @@ void wifi_init(void)
 
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_APSTA));
 
-   if (!wifi_credentials_set) {
-  
-      /* Initialize AP */
+
+     /* Initialize AP */
       ESP_LOGI(TAG_AP, "ESP_WIFI_MODE_AP");
       esp_netif_ap = wifi_init_softap();
 
-      /* Start WiFi */
-      ESP_ERROR_CHECK(esp_wifi_start() );
-
-      wifi_mode |= (1<<WIFI_MODE_AP_BIT);
-    } else {
-
+#ifdef CONFIG_FIRMWARE_OTA
+   if (wifi_credentials_set) { 
+  
       /* Initialize STA */
       ESP_LOGI(TAG_STA, "ESP_WIFI_MODE_STA");
       esp_netif_sta = wifi_init_sta();
-    
-      /* Start WiFi */
-     
-      ESP_ERROR_CHECK(esp_wifi_start() );
-      wifi_mode |= (1<<WIFI_MODE_STA_BIT);	   
-      esp_netif_get_hostname(esp_netif_sta, (const char**)&hostname);
-      ESP_LOGI(TAG_AP, "hostname: %s", hostname);
-
-      /*
-       * Wait until either the connection is established (WIFI_CONNECTED_BIT) or
-       * connection failed for the maximum number of re-tries (WIFI_FAIL_BIT).
-       * The bits are set by event_handler() (see above)
-       */
-      EventBits_t bits = xEventGroupWaitBits(s_wifi_event_group,
-                                           WIFI_CONNECTED_BIT | WIFI_FAIL_BIT,
-                                           pdFALSE,
-                                           pdFALSE,
-                                           portMAX_DELAY);
-
-      /* xEventGroupWaitBits() returns the bits before the call returned,
-       * hence we can test which event actually happened. */
-      if (bits & WIFI_CONNECTED_BIT) {
-        ESP_LOGV(TAG_STA, "connected to ap SSID:%s password:%s",
-                 ssid, password);
-#if 0
-	to check, what is it for ?
-        softap_set_dns_addr(esp_netif_ap,esp_netif_sta);
-#endif
-      } else if (bits & WIFI_FAIL_BIT) {
-        ESP_LOGI(TAG_STA, "Failed to connect to SSID:%s, password:%s",
-                 ssid,password);
-      } else {
-        ESP_LOGE(TAG_STA, "UNEXPECTED EVENT");
-        return;
-      }
-
-    /* Set sta as the default interface */
-    esp_netif_set_default_netif(esp_netif_sta);
-    }
-
-#if 0
-    to check, what is it for ?
-    if (!wifi_credentials_set) {
-      /* Enable napt on the AP netif */
-      if (esp_netif_napt_enable(esp_netif_ap) != ESP_OK) {
-        ESP_LOGE(TAG_STA, "NAPT not enabled on the ap netif: %p", esp_netif_ap);
-      }
-    }
+   } else {
+      esp_netif_sta = NULL;
+   }
 #endif
 
+    /* Start WiFi */
+    ESP_ERROR_CHECK(esp_wifi_start() );
+
+#ifdef CONFIG_FIRMWARE_OTA
+   if (wifi_credentials_set && esp_netif_sta) { 
+	    wifi_mode |= (1<<WIFI_MODE_STA_BIT);	   
+	    esp_netif_get_hostname(esp_netif_sta, (const char**)&hostname);
+	    ESP_LOGI(TAG_AP, "hostname: %s", hostname);
+
+	    /*
+	     * Wait until either the connection is established (WIFI_CONNECTED_BIT) or
+	     * connection failed for the maximum number of re-tries (WIFI_FAIL_BIT).
+	     * The bits are set by event_handler() (see above)
+	     */
+	    EventBits_t bits = xEventGroupWaitBits(s_wifi_event_group,
+						   WIFI_CONNECTED_BIT | WIFI_FAIL_BIT,
+						   pdFALSE,
+						   pdFALSE,
+						   portMAX_DELAY);
+
+	    /* xEventGroupWaitBits() returns the bits before the call returned,
+	     * hence we can test which event actually happened. */
+	    if (bits & WIFI_CONNECTED_BIT) {
+		ESP_LOGV(TAG_STA, "connected to ap SSID:%s password:%s",
+			 ssid, password);
+#if 0
+		to check, what is it for ?
+		softap_set_dns_addr(esp_netif_ap,esp_netif_sta);
+#endif
+	    } else if (bits & WIFI_FAIL_BIT) {
+		ESP_LOGI(TAG_STA, "Failed to connect to SSID:%s, password:%s",
+			 ssid,password);
+		// should apply AP rescue mode then
+		// but, in fact even if network is not reacheable, we do not 
+		// reach this part of code (issue #100)
+	    } else {
+		ESP_LOGE(TAG_STA, "UNEXPECTED EVENT");
+		return;
+	    }
+
+	    /* Set sta as the default interface */
+	    esp_netif_set_default_netif(esp_netif_sta);
+
+	    /* Enable napt on the AP netif */
+	    if (esp_netif_napt_enable(esp_netif_ap) != ESP_OK) {
+		ESP_LOGE(TAG_STA, "NAPT not enabled on the netif: %p", esp_netif_ap);
+	    }
+   }
+#endif
 }

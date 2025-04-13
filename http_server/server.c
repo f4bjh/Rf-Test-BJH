@@ -9,13 +9,31 @@ static const size_t max_clients = 4;
 
 extern const uint8_t style_css_start[] asm("_binary_style_css_start");
 extern const uint8_t style_css_end[] asm("_binary_style_css_end");
+extern httpd_uri_t upload_get;
+extern httpd_uri_t update_post ;
+
+#ifdef CONFIG_FIRMWARE_FACTORY
+extern httpd_uri_t upload2_get;
+#endif
+
+#ifdef CONFIG_FIRMWARE_OTA
 extern httpd_uri_t index_get;
 extern httpd_uri_t index2_get;
 extern httpd_uri_t index_js_get;
 extern httpd_uri_t about_get;
+extern httpd_uri_t upload_get;
+extern httpd_uri_t update_post ;
+extern httpd_uri_t wifi_get;
+extern httpd_uri_t set_wifi_uri_handler;
+extern httpd_uri_t reboot_post ;
+extern httpd_uri_t ws ;
+extern httpd_uri_t index_js_get;
+extern httpd_uri_t upload_js_get;
 extern httpd_uri_t frequencymeter_get;
 extern httpd_uri_t frequencymeter_js_get;
 extern httpd_uri_t generator_get;
+extern httpd_uri_t powermeter_get;
+extern httpd_uri_t upload_js_get;
 extern const uint8_t jquery_gauge_css_start[] asm("_binary_jquery_gauge_css_start");
 extern const uint8_t jquery_gauge_css_end[] asm("_binary_jquery_gauge_css_end");
 extern const uint8_t jquery_gauge_js_start[] asm("_binary_jquery_gauge_js_start");
@@ -24,20 +42,84 @@ extern const uint8_t jquery_gauge_min_js_start[] asm("_binary_jquery_gauge_min_j
 extern const uint8_t jquery_gauge_min_js_end[] asm("_binary_jquery_gauge_min_js_end");
 extern const uint8_t jquery_min_js_start[] asm("_binary_jquery_min_js_start");
 extern const uint8_t jquery_min_js_end[] asm("_binary_jquery_min_js_end");
-extern httpd_uri_t powermeter_get;
-extern httpd_uri_t upload_get;
-extern httpd_uri_t upload_js_get;
-extern httpd_uri_t update_post ;
-extern httpd_uri_t wifi_get;
-extern httpd_uri_t set_wifi_uri_handler;
-extern httpd_uri_t reboot_post ;
-extern httpd_uri_t ws ;
+#endif
 
 extern TaskHandle_t xHandle_keep_alive;
 
 TaskHandle_t xHandle_ws_send_msg;
 
 static httpd_handle_t http_server = NULL;
+
+esp_err_t style_get_handler(httpd_req_t *req)
+{
+	httpd_resp_set_type(req, "text/css");
+	httpd_resp_send(req, (const char *) style_css_start, style_css_end - style_css_start);
+	return ESP_OK;
+}
+httpd_uri_t style_get = {
+	.uri	  = "/style.css",
+	.method   = HTTP_GET,
+	.handler  = style_get_handler,
+	.user_ctx = NULL
+};
+
+#ifdef CONFIG_FIRMWARE_OTA
+esp_err_t jquery_gauge_css_get_handler(httpd_req_t *req)
+{
+	httpd_resp_set_type(req, "text/css");
+	httpd_resp_send(req, (const char *) jquery_gauge_css_start, jquery_gauge_css_end - jquery_gauge_css_start);
+	return ESP_OK;
+}
+
+esp_err_t jquery_gauge_js_get_handler(httpd_req_t *req)
+{
+	httpd_resp_set_type(req, "text/javascript");
+	httpd_resp_send(req, (const char *) jquery_gauge_js_start, jquery_gauge_js_end - jquery_gauge_js_start);
+	return ESP_OK;
+}
+
+esp_err_t jquery_gauge_min_js_get_handler(httpd_req_t *req)
+{
+	httpd_resp_set_type(req, "text/javascript");
+	httpd_resp_send(req, (const char *) jquery_gauge_min_js_start, jquery_gauge_min_js_end - jquery_gauge_min_js_start);
+	return ESP_OK;
+}
+
+esp_err_t jquery_min_js_get_handler(httpd_req_t *req)
+{
+	httpd_resp_set_type(req, "text/javascript");
+	httpd_resp_send(req, (const char *) jquery_min_js_start, jquery_min_js_end - jquery_min_js_start);
+	return ESP_OK;
+}
+
+httpd_uri_t jquery_gauge_css_get = {
+	.uri	  = "/jquery.gauge.css",
+	.method   = HTTP_GET,
+	.handler  = jquery_gauge_css_get_handler,
+	.user_ctx = NULL
+};
+
+httpd_uri_t jquery_gauge_js_get = {
+	.uri	  = "/jquery.gauge.js",
+	.method   = HTTP_GET,
+	.handler  = jquery_gauge_js_get_handler,
+	.user_ctx = NULL
+};
+
+httpd_uri_t jquery_gauge_min_js_get = {
+	.uri	  = "/jquery.gauge.min.js",
+	.method   = HTTP_GET,
+	.handler  = jquery_gauge_min_js_get_handler,
+	.user_ctx = NULL
+};
+
+httpd_uri_t jquery_min_js_get = {
+	.uri	  = "/jquery.min.js",
+	.method   = HTTP_GET,
+	.handler  = jquery_min_js_get_handler,
+	.user_ctx = NULL
+};
+#endif
 
 void ngx_unescape_uri(u_char **dst, u_char **src, size_t size, unsigned int type)
 {
@@ -148,7 +230,6 @@ void example_uri_decode(char *dest, const char *src, size_t len)
     ngx_unescape_uri(&dst_ptr, &src_ptr, len, NGX_UNESCAPE_URI);
 }
 
-
 static void send_ping(void *arg)
 {
     struct async_resp_arg *resp_arg = arg;
@@ -194,40 +275,29 @@ bool check_client_alive_cb(wss_keep_alive_t h, int fd)
     
 }
 
-esp_err_t style_get_handler(httpd_req_t *req)
+#ifdef CONFIG_FIRMWARE_FACTORY
+esp_err_t open_fd(httpd_handle_t hd, int sockfd)
 {
-	httpd_resp_set_type(req, "text/css");
-	httpd_resp_send(req, (const char *) style_css_start, style_css_end - style_css_start);
-	return ESP_OK;
+    server_ctx_t *server_ctx = httpd_get_global_user_ctx(hd);
+    wss_keep_alive_t wss_keep_alive;
+
+    ESP_LOGI(TAG, "New client connected %d", sockfd);
+ 
+    wss_keep_alive = server_ctx->keep_alive;
+    return wss_keep_alive_add_client(wss_keep_alive, sockfd);
 }
 
-esp_err_t jquery_gauge_css_get_handler(httpd_req_t *req)
+void close_fd(httpd_handle_t hd, int sockfd)
 {
-	httpd_resp_set_type(req, "text/css");
-	httpd_resp_send(req, (const char *) jquery_gauge_css_start, jquery_gauge_css_end - jquery_gauge_css_start);
-	return ESP_OK;
-}
+    server_ctx_t *server_ctx = httpd_get_global_user_ctx(hd);
+    wss_keep_alive_t wss_keep_alive;
 
-esp_err_t jquery_gauge_js_get_handler(httpd_req_t *req)
-{
-	httpd_resp_set_type(req, "text/javascript");
-	httpd_resp_send(req, (const char *) jquery_gauge_js_start, jquery_gauge_js_end - jquery_gauge_js_start);
-	return ESP_OK;
+    ESP_LOGI(TAG, "Client disconnected %d", sockfd);
+    wss_keep_alive = server_ctx->keep_alive;
+    wss_keep_alive_remove_client(wss_keep_alive, sockfd);
+    close(sockfd);
 }
-
-esp_err_t jquery_gauge_min_js_get_handler(httpd_req_t *req)
-{
-	httpd_resp_set_type(req, "text/javascript");
-	httpd_resp_send(req, (const char *) jquery_gauge_min_js_start, jquery_gauge_min_js_end - jquery_gauge_min_js_start);
-	return ESP_OK;
-}
-
-esp_err_t jquery_min_js_get_handler(httpd_req_t *req)
-{
-	httpd_resp_set_type(req, "text/javascript");
-	httpd_resp_send(req, (const char *) jquery_min_js_start, jquery_min_js_end - jquery_min_js_start);
-	return ESP_OK;
-}
+#endif
 
 // Get all clients and send async message
 void server_send_data_tsk(void* arg)
@@ -290,41 +360,6 @@ void server_send_data_tsk(void* arg)
 
 }
 
-httpd_uri_t style_get = {
-	.uri	  = "/style.css",
-	.method   = HTTP_GET,
-	.handler  = style_get_handler,
-	.user_ctx = NULL
-};
-
-httpd_uri_t jquery_gauge_css_get = {
-	.uri	  = "/jquery.gauge.css",
-	.method   = HTTP_GET,
-	.handler  = jquery_gauge_css_get_handler,
-	.user_ctx = NULL
-};
-
-httpd_uri_t jquery_gauge_js_get = {
-	.uri	  = "/jquery.gauge.js",
-	.method   = HTTP_GET,
-	.handler  = jquery_gauge_js_get_handler,
-	.user_ctx = NULL
-};
-
-httpd_uri_t jquery_gauge_min_js_get = {
-	.uri	  = "/jquery.gauge.min.js",
-	.method   = HTTP_GET,
-	.handler  = jquery_gauge_min_js_get_handler,
-	.user_ctx = NULL
-};
-
-httpd_uri_t jquery_min_js_get = {
-	.uri	  = "/jquery.min.js",
-	.method   = HTTP_GET,
-	.handler  = jquery_min_js_get_handler,
-	.user_ctx = NULL
-};
-
 esp_err_t http_server_init(void)
 {
     	server_ctx_t *server_ctx = calloc(1, sizeof(server_ctx_t));
@@ -348,38 +383,52 @@ esp_err_t http_server_init(void)
 
 	config.max_open_sockets = max_clients;
 	config.global_user_ctx = server_ctx;
+
+#ifdef CONFIG_FIRMWARE_FACTORY
+	config.open_fn = open_fd;
+	config.close_fn = close_fd;
+#endif
+#ifdef CONFIG_FIRMWARE_OTA
 	config.open_fn = ws_open_fd;
 	config.close_fn = ws_close_fd;
+#endif
+
 	config.task_priority = tskHTTP_SERVER;
 
 	err = httpd_start(&http_server, &config);
 	if (err == ESP_OK) {
-		httpd_register_uri_handler(http_server, &ws);
+		httpd_register_uri_handler(http_server, &upload_get);
+		httpd_register_uri_handler(http_server, &style_get);
+		httpd_register_uri_handler(http_server, &update_post);
+#ifdef CONFIG_FIRMWARE_FACTORY
+		httpd_register_uri_handler(http_server, &upload2_get);
+#endif
+#ifdef CONFIG_FIRMWARE_OTA
+		httpd_register_uri_handler(http_server, &about_get);
 		httpd_register_uri_handler(http_server, &index_get);
 		httpd_register_uri_handler(http_server, &index2_get);
+		httpd_register_uri_handler(http_server, &wifi_get);
+	        httpd_register_uri_handler(http_server, &reboot_post);
+	        httpd_register_uri_handler(http_server, &set_wifi_uri_handler);
+		httpd_register_uri_handler(http_server, &ws);
 	        httpd_register_uri_handler(http_server, &index_js_get);
-		httpd_register_uri_handler(http_server, &about_get);
 		httpd_register_uri_handler(http_server, &frequencymeter_get);
 	        httpd_register_uri_handler(http_server, &frequencymeter_js_get);
 		httpd_register_uri_handler(http_server, &generator_get);
 		httpd_register_uri_handler(http_server, &powermeter_get);
-		httpd_register_uri_handler(http_server, &upload_get);
 	        httpd_register_uri_handler(http_server, &upload_js_get);
-	        httpd_register_uri_handler(http_server, &update_post);
-		httpd_register_uri_handler(http_server, &wifi_get);
-	        httpd_register_uri_handler(http_server, &reboot_post);
-	        httpd_register_uri_handler(http_server, &set_wifi_uri_handler);
 		httpd_register_uri_handler(http_server, &jquery_gauge_css_get);
 		httpd_register_uri_handler(http_server, &jquery_gauge_js_get);
 		httpd_register_uri_handler(http_server, &jquery_gauge_min_js_get);
 		httpd_register_uri_handler(http_server, &jquery_min_js_get);
-		httpd_register_uri_handler(http_server, &style_get);
+#endif
         	wss_keep_alive_set_user_ctx(keep_alive, http_server);
 	} else {
 	  ESP_LOGE(TAG,"failed to start httpd");
 	  return err;
 	}
 
+#ifdef CONFIG_FIRMWARE_OTA
 	xTaskCreatePinnedToCore(server_send_data_tsk, 
 		   "ws server send data", 
 		   configMINIMAL_STACK_SIZE, 
@@ -387,6 +436,7 @@ esp_err_t http_server_init(void)
 		   tskHTTP_SERVER,
 		   &xHandle_ws_send_msg,
 		   0);
+#endif
 
 	return http_server == NULL ? ESP_FAIL : ESP_OK;
 }

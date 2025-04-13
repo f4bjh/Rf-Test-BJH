@@ -16,6 +16,14 @@ void app_main(void) {
 	}
 	ESP_ERROR_CHECK(ret);
 
+#ifdef CONFIG_FIRMWARE_FACTORY
+        ESP_LOGI(TAG,"Currently running a factory fw");
+#endif
+
+#ifdef CONFIG_FIRMWARE_OTA
+         ESP_LOGI(TAG,"Currently running an ota fw");
+#endif
+
 	const esp_partition_t *partition = esp_ota_get_running_partition();
 	ESP_LOGI(TAG, "Currently running partition: %s", partition->label);
 	ret = esp_ota_get_partition_description(partition, &app_desc);
@@ -27,6 +35,10 @@ void app_main(void) {
 	ESP_LOGI(TAG,"Compile time=%s",app_desc.time);
 	ESP_LOGI(TAG,"Compile date=%s",app_desc.date);
 	ESP_LOGI(TAG,"Version IDF=%s",app_desc.idf_ver);
+#ifdef CONFIG_FIRMWARE_FACTORY
+	wifi_credentials_set  = false;
+#endif
+#ifdef CONFIG_FIRMWARE_OTA
 
 	nvs_handle_t handle;
 	ret = nvs_open("storage", NVS_READWRITE, &handle);
@@ -52,6 +64,7 @@ void app_main(void) {
 	  ESP_LOGI(TAG,"wifi credentials not set");
 
 	nvs_close(handle);
+#endif
 
 	wifi_init();
 	ESP_LOGI(TAG,"WIFI initialised");

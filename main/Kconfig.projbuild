@@ -33,3 +33,19 @@ menu "Example Configuration"
     endif
 
 endmenu
+
+menu "Firmware Type"
+
+choice
+    prompt "Firmware type"
+    default FIRMWARE_OTA
+
+config FIRMWARE_FACTORY
+    bool "Build factory firmware"
+
+config FIRMWARE_OTA
+    bool "Build OTA firmware"
+
+endchoice
+
+endmenu
