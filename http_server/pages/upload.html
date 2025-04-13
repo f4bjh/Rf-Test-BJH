@@ -9,6 +9,19 @@
     <title>Firmware update</title>
 	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
 		<script>
+			// Cette fonction est appelée au chargement de la page
+			window.onload = function () {
+			    fetch("/boot_partition")
+			    .then(response => response.text())
+			    .then(current => {
+			    const radio = document.querySelector(`input[name="partition"][value="${current.trim()}"]`);
+		            if (radio) {
+		                radio.checked = true;
+		            }
+		        })
+		        .catch(err => console.warn("Impossible de récupérer la partition active"));
+			}
+			
 			function startUpload() {
 				var otafile = document.getElementById("otafile").files;
 
@@ -44,9 +57,25 @@
 					xhr.send(file);
 				}
 			}
+
+			function setBootPartition() {
+			    const selected = document.querySelector('input[name="partition"]:checked');
+			    if (!selected) return;
+
+				    fetch("/set_boot_partition?partition=" + selected.value)
+				    .then(response => response.text())
+				    .then(data => console.log("Partition set: " + selected.value))
+				    .catch(error => console.error("Erreur : " + error));
+			    }
+			
+
+		 	function reboot() {
+			    fetch("/reboot")
+			    .then(response => alert("Reboot en cours..."))
+			   .catch(error => alert("Erreur de reboot : " + error));
+			}
+
 		</script>
-	
-	
 </head>
 
 <body>
@@ -78,16 +107,35 @@
   <h2>fw update</h2>
 
   <div id="partition-info"></div>
+  
+  <br><br>
 
-  <br><br><br><br>
+  <!-- Choix de la partition -->
+  <div style="text-align: left; margin-top: 2em;">
+    <label><strong>Next partition to boot:</strong></label>
+    <label style="display: inline-flex; align-items: center; margin-right: 1em;">
+      <input type="radio" name="partition" value="ota_0" onchange="setBootPartition()"> ota_0
+    </label>
+    <label style="display: inline-flex; align-items: center;">
+      <input type="radio" name="partition" value="ota_1" onchange="setBootPartition()"> ota_1
+    </label>
+  </div>
+
+  <br><br>
 
   <div>
 	<label for="otafile">Firmware file:</label>
 	<input type="file" id="otafile" name="otafile" />
 	<button id="upload" type="button" onclick="startUpload()">Upload</button>
   </div>
+
   <div id="progress"></div>
-<br><br>
+
+  <br><br>
+
+  <!-- Reboot -->
+  <button onclick="reboot()">Reboot ESP32</button>
+   
  
 
 <div id="progress"></div>

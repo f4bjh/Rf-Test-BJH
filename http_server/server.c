@@ -29,11 +29,13 @@ extern httpd_uri_t reboot_post ;
 extern httpd_uri_t ws ;
 extern httpd_uri_t index_js_get;
 extern httpd_uri_t upload_js_get;
+extern httpd_uri_t uri_boot_partition; 
+extern httpd_uri_t uri_reboot; 
+extern httpd_uri_t uri_get_boot_partition;
 extern httpd_uri_t frequencymeter_get;
 extern httpd_uri_t frequencymeter_js_get;
 extern httpd_uri_t generator_get;
 extern httpd_uri_t powermeter_get;
-extern httpd_uri_t upload_js_get;
 extern const uint8_t jquery_gauge_css_start[] asm("_binary_jquery_gauge_css_start");
 extern const uint8_t jquery_gauge_css_end[] asm("_binary_jquery_gauge_css_end");
 extern const uint8_t jquery_gauge_js_start[] asm("_binary_jquery_gauge_js_start");
@@ -195,8 +197,8 @@ void ngx_unescape_uri(u_char **dst, u_char **src, size_t size, unsigned int type
                     break;
                 }
                 if (type & NGX_UNESCAPE_REDIRECT) {
-                    if (ch == '?') {
-                        *d++ = ch;
+if (ch == '?') {
+                      *d++ = ch;
                         goto done;
                     }
                     if (ch > '%' && ch < 0x7f) {
@@ -417,6 +419,9 @@ esp_err_t http_server_init(void)
 		httpd_register_uri_handler(http_server, &generator_get);
 		httpd_register_uri_handler(http_server, &powermeter_get);
 	        httpd_register_uri_handler(http_server, &upload_js_get);
+	        httpd_register_uri_handler(http_server, &uri_boot_partition);
+	        httpd_register_uri_handler(http_server, &uri_reboot);
+	        httpd_register_uri_handler(http_server, &uri_get_boot_partition);
 		httpd_register_uri_handler(http_server, &jquery_gauge_css_get);
 		httpd_register_uri_handler(http_server, &jquery_gauge_js_get);
 		httpd_register_uri_handler(http_server, &jquery_gauge_min_js_get);
