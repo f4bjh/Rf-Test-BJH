@@ -35,6 +35,7 @@ extern httpd_uri_t uri_get_boot_partition;
 extern httpd_uri_t frequencymeter_get;
 extern httpd_uri_t frequencymeter_js_get;
 extern httpd_uri_t generator_get;
+extern httpd_uri_t generator_js_get;
 extern httpd_uri_t powermeter_get;
 extern const uint8_t jquery_gauge_css_start[] asm("_binary_jquery_gauge_css_start");
 extern const uint8_t jquery_gauge_css_end[] asm("_binary_jquery_gauge_css_end");
@@ -417,6 +418,7 @@ esp_err_t http_server_init(void)
 		httpd_register_uri_handler(http_server, &frequencymeter_get);
 	        httpd_register_uri_handler(http_server, &frequencymeter_js_get);
 		httpd_register_uri_handler(http_server, &generator_get);
+	        httpd_register_uri_handler(http_server, &generator_js_get);
 		httpd_register_uri_handler(http_server, &powermeter_get);
 	        httpd_register_uri_handler(http_server, &upload_js_get);
 	        httpd_register_uri_handler(http_server, &uri_boot_partition);

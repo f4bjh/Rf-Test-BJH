@@ -46,6 +46,7 @@ if(CONFIG_FIRMWARE_OTA)
 	../http_server/pages/frequencymeter.html
 	../http_server/pages/frequencymeter.js	
 	../http_server/pages/generator.html
+	../http_server/pages/generator.js
 	../http_server/pages/index.html
 	../http_server/pages/index.js
 	../http_server/pages/upload.html
