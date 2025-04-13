@@ -80,13 +80,12 @@ void close_instance_meas(httpd_handle_t hd)
     }
 }
 
-void ws_process_update_param(httpd_req_t *req, int num, int size, char* param_value)
+void ws_process_update_param(httpd_req_t *req, meas_number_t meas_num, int size, char* param_value)
 {
     server_ctx_t *server_ctx = NULL;
     instance_meas_t  *instance_meas=NULL;
-    instance_meas_t  *instance_meas_temp=NULL;
-    char *endptr;
     uint32_t value;
+    const char *rf_gen_on="ON";
     esp_err_t ret;
 
       server_ctx = (server_ctx_t *) httpd_get_global_user_ctx(req->handle);

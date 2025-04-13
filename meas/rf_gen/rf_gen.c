@@ -1,3 +1,11 @@
+#include <freertos/FreeRTOS.h>
+#include <esp_http_server.h>
+#include <freertos/task.h>
+#include <esp_ota_ops.h>
+#include "esp_log.h"
+#include <sys/param.h>
+
+#include "meas_mgt.h"
 #include "meas.h"
 
 static char TAG[] = "rf_gen";

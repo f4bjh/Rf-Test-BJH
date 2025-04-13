@@ -1,24 +1,3 @@
-#include <stdio.h>
-#include <stdint.h>
-#include <stddef.h>
-#include <string.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/semphr.h"
-#include "freertos/queue.h"
-#include "freertos/event_groups.h"
-#include "esp_timer.h"
-#include "esp_log.h"
-#include "esp_system.h"
-#include <esp_http_server.h>
-#include <sys/param.h>
-#include "driver/spi_master.h"
-#include "driver/gpio.h"
-#include "driver/gptimer.h"
-#include "driver/pulse_cnt.h"
-
-#include "meas_mgt.h"
-#include "gpio.h"
 #include "adf4351_v2.h"
 
 esp_err_t init_chip_info_model(meas_t *measure);

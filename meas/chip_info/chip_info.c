@@ -1,6 +1,11 @@
+#include <freertos/FreeRTOS.h>
+#include <esp_http_server.h>
+#include <freertos/task.h>
 #include <esp_ota_ops.h>
+#include "esp_log.h"
 #include "esp_chip_info.h"
 
+#include "meas_mgt.h"
 #include "meas.h"
 
 //standalone task on cpu1

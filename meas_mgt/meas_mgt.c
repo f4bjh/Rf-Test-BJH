@@ -1,7 +1,4 @@
-//#include <stdio.h>
-//#include <assert.h>
 #include <string.h>
-
 #include <freertos/FreeRTOS.h>
 #include <esp_http_server.h>
 #include <freertos/task.h>
