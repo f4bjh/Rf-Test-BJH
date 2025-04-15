@@ -106,7 +106,13 @@ esp_err_t update_post_handler(httpd_req_t *req)
          return ESP_FAIL;
      }
 
-     return ESP_OK;
+#ifdef CONFIG_FIRMWARE_FACTORY
+    httpd_resp_send(req, "Rebooting...", HTTPD_RESP_USE_STRLEN);
+    vTaskDelay(100 / portTICK_PERIOD_MS);  // Laisse le temps de finir la réponse
+    esp_restart();
+#endif     
+     
+    return ESP_OK;
 }
 httpd_uri_t update_post = {
 	.uri	  = "/update",
