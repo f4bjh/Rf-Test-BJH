@@ -45,7 +45,6 @@ void init_pcnt()
         .edge_gpio_num = PCNT_INPUT_GPIO,
         .level_gpio_num = -1, // Pas de signal de contrôle de niveau
     };
-    pcnt_channel_handle_t pcnt_chan = NULL;
     ESP_ERROR_CHECK(pcnt_new_channel(pcnt_unit, &chan_config, &pcnt_chan));
 
     ESP_ERROR_CHECK(pcnt_channel_set_edge_action(pcnt_chan, 
@@ -113,6 +112,11 @@ esp_err_t stop_frequencymeter(meas_t *measure)
   ESP_ERROR_CHECK(gptimer_del_timer(timer));   // Supprimer le timer
 
   ESP_ERROR_CHECK(pcnt_unit_remove_watch_point(pcnt_unit,32767));
+  
+  ESP_ERROR_CHECK(pcnt_del_channel(pcnt_chan));
+  ESP_ERROR_CHECK(pcnt_unit_stop(pcnt_unit));
+  ESP_ERROR_CHECK(pcnt_unit_disable(pcnt_unit));
+  ESP_ERROR_CHECK(pcnt_del_unit(pcnt_unit));
 
   return ESP_OK;
 }
