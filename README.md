@@ -50,7 +50,7 @@ Rf-Test-BJH is an amateur radio project of a universal radio test bench.
 
 ## Developpement documentation
 
-[Firmware architecture](./doc/archi-sw-new.jpg)
+[Firmware architecture](./doc/archi-sw-new2.drawio.svg)
 
 [Partition table](./doc/partition-table.drawio.svg)
 
