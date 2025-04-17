@@ -210,6 +210,7 @@ void wifi_init(void)
      /* Initialize AP */
       ESP_LOGI(TAG_AP, "ESP_WIFI_MODE_AP");
       esp_netif_ap = wifi_init_softap();
+      wifi_mode |= (1<<WIFI_MODE_AP_BIT);
 
 #ifdef CONFIG_FIRMWARE_OTA
    if (wifi_credentials_set) { 
