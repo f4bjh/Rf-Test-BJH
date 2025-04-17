@@ -125,7 +125,7 @@ void lcd_display(void)
     }
 }
 
-void lcd_init(void)
+esp_err_t lcd_init(void)
 {
     esp_err_t ret;
 
@@ -142,7 +142,7 @@ void lcd_init(void)
     ret = i2c_new_master_bus(&bus_config, &i2c_bus);
     if (ret != ESP_OK) {
       ESP_LOGE(TAG, "Failed to initialize I2C bus");
-      return;
+      return ret;
     }
 
 
@@ -167,7 +167,7 @@ void lcd_init(void)
     ret = esp_lcd_new_panel_io_i2c(i2c_bus, &io_config, &io_handle);
     if (ret != ESP_OK) {
       ESP_LOGE(TAG, "Failed to install panel IO");
-      return;
+      return ret;
     }
 
     ESP_LOGI(TAG, "Install SSD1306 panel driver");
@@ -184,7 +184,7 @@ void lcd_init(void)
     ret = esp_lcd_new_panel_ssd1306(io_handle, &panel_config, &panel_handle);
     if (ret != ESP_OK) {
       ESP_LOGE(TAG, "Failed to initialize SSD 1306");
-      return;
+      return ret;
     }
 #elif CONFIG_EXAMPLE_LCD_CONTROLLER_SH1107
     ESP_ERROR_CHECK(esp_lcd_new_panel_sh1107(io_handle, &panel_config, &panel_handle));
@@ -193,18 +193,18 @@ void lcd_init(void)
     ret= esp_lcd_panel_reset(panel_handle);
     if (ret != ESP_OK) {
       ESP_LOGE(TAG, "Failed to reset panel");
-      return;
+      return ret;
     }
 
     ret= esp_lcd_panel_init(panel_handle);
     if (ret != ESP_OK) {
       ESP_LOGE(TAG, "Failed to init panel");
-      return;
+      return ret;
     }
     ret=esp_lcd_panel_disp_on_off(panel_handle, true);
     if (ret != ESP_OK) {
       ESP_LOGE(TAG, "Failed to on-off display");
-      return;
+      return ret;
     }
 
 #if CONFIG_EXAMPLE_LCD_CONTROLLER_SH1107
@@ -233,4 +233,6 @@ void lcd_init(void)
 
     /* Rotation of the screen */
     lv_disp_set_rotation(disp, LV_DISP_ROT_NONE);
+
+    return ESP_OK;
 }

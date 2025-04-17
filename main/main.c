@@ -8,11 +8,14 @@ bool wifi_credentials_set=false;
 
 void app_main(void) {
 	esp_err_t ret = nvs_flash_init();
+	esp_err_t ret_lcd;
 	esp_app_desc_t app_desc;
 
-	lcd_init();
-	lcd_clear_screen();
-	ESP_LOGI(TAG,"LCD initialised");
+	ret_lcd = lcd_init();
+	if (ret_lcd == ESP_OK) {
+	  lcd_clear_screen();
+	  ESP_LOGI(TAG,"LCD initialised");
+	}
 
 	if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
 		ESP_ERROR_CHECK(nvs_flash_erase());
@@ -83,7 +86,8 @@ void app_main(void) {
 		}
 	}
 
-	lcd_display();
+	if (ret_lcd == ESP_OK) 
+	  lcd_display();
 
 	while(1) vTaskDelay(10);
 }
