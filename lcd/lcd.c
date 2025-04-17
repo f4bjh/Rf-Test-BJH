@@ -16,6 +16,9 @@
 #include "lvgl.h"
 #include "lcd.h"
 #include "gpio.h"
+#include "esp_netif.h"
+
+#include "wifi.h"
 
 #if CONFIG_EXAMPLE_LCD_CONTROLLER_SH1107
 #include "esp_lcd_sh1107.h"
@@ -23,7 +26,8 @@
 #include "esp_lcd_panel_vendor.h"
 #endif
 
-static const char *TAG = "example";
+static const char *TAG = "lcd";
+extern uint8_t  wifi_mode;
 
 #define I2C_BUS_PORT  0
 
@@ -46,7 +50,59 @@ static const char *TAG = "example";
 #define EXAMPLE_LCD_CMD_BITS           8
 #define EXAMPLE_LCD_PARAM_BITS         8
 
-extern void example_lvgl_demo_ui(lv_disp_t *disp);
+void lcd_display_at_boot(lv_disp_t *disp)
+{
+    lv_obj_t *scr = lv_disp_get_scr_act(disp);
+    lv_obj_t *label = lv_label_create(scr);
+    esp_netif_ip_info_t ip_info_ap, ip_info_sta;
+    esp_netif_t* netif_ap, *netif_sta = NULL;
+
+    //for Wifi AP mode
+    if (wifi_mode & (1<<WIFI_MODE_AP_BIT)) {
+      netif_ap = esp_netif_get_handle_from_ifkey("WIFI_AP_DEF");  
+      esp_netif_get_ip_info(netif_ap,&ip_info_ap);
+    } else 
+      ip_info_ap.ip.addr = 0;
+    
+    ESP_LOGI(TAG, "AP ip : "IPSTR ,IP2STR(&ip_info_ap.ip));  
+
+    ip_info_sta.ip.addr = 0;
+
+#ifdef CONFIG_FIRMWARE_OTA
+    //for Wifi station mode
+    if (wifi_mode & (1<<WIFI_MODE_STA_BIT)) {
+      netif_sta = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");  
+      esp_netif_get_ip_info(netif_sta,&ip_info_sta);
+    }
+#endif
+
+    ESP_LOGI(TAG, "STA ip : "IPSTR ,IP2STR(&ip_info_sta.ip));  
+ 
+
+#if 0
+    const esp_partition_t *partition = esp_ota_get_running_partition();
+    ret = esp_ota_get_partition_description(partition, &app_desc);
+    ESP_ERROR_CHECK(ret);
+#endif
+
+    lv_label_set_long_mode(label, LV_LABEL_LONG_SCROLL_CIRCULAR); /* Circular scroll */
+    
+    if (wifi_mode & (1<<WIFI_MODE_AP_BIT)) {
+    	lv_label_set_text_fmt(label, "Rf-Test-BJH AP\n"IPSTR , IP2STR(&ip_info_ap.ip));
+    }
+
+#ifdef CONFIG_FIRMWARE_OTA
+    //for Wifi station mode
+    if (wifi_mode & (1<<WIFI_MODE_STA_BIT)) {
+	lv_label_set_text_fmt(label, "Rf-Test-BJH STA\n"IPSTR ,IP2STR(&ip_info_sta.ip));
+    }
+#endif
+ 
+    /* Size of the screen (if you use rotation 90 or 270, please set disp->driver->ver_res) */
+    lv_obj_set_width(label, disp->driver->hor_res);
+    lv_obj_align(label, LV_ALIGN_TOP_LEFT, 0, 0);
+
+}
 
 void lcd_init(void)
 {
@@ -160,7 +216,7 @@ void lcd_init(void)
     ESP_LOGI(TAG, "Display LVGL Scroll Text");
     // Lock the mutex due to the LVGL APIs are not thread-safe
     if (lvgl_port_lock(0)) {
-        example_lvgl_demo_ui(disp);
+        lcd_display_at_boot(disp);
         // Release the mutex
         lvgl_port_unlock();
     }
