@@ -28,6 +28,7 @@
 
 static const char *TAG = "lcd";
 extern uint8_t  wifi_mode;
+lv_disp_t *disp;
 
 #define I2C_BUS_PORT  0
 
@@ -50,7 +51,16 @@ extern uint8_t  wifi_mode;
 #define EXAMPLE_LCD_CMD_BITS           8
 #define EXAMPLE_LCD_PARAM_BITS         8
 
-void lcd_display_at_boot(lv_disp_t *disp)
+void lcd_clear_screen()
+{
+
+  lv_obj_clean(lv_scr_act());
+  lv_obj_set_style_bg_color(lv_scr_act(), lv_color_black(), LV_PART_MAIN);
+  lv_refr_now(NULL);
+
+}
+
+void lcd_display_at_boot()
 {
     lv_obj_t *scr = lv_disp_get_scr_act(disp);
     lv_obj_t *label = lv_label_create(scr);
@@ -102,6 +112,17 @@ void lcd_display_at_boot(lv_disp_t *disp)
     lv_obj_set_width(label, disp->driver->hor_res);
     lv_obj_align(label, LV_ALIGN_TOP_LEFT, 0, 0);
 
+}
+
+void lcd_display(void)
+{
+
+    // Lock the mutex due to the LVGL APIs are not thread-safe
+    if (lvgl_port_lock(0)) {
+        lcd_display_at_boot(disp);
+        // Release the mutex
+        lvgl_port_unlock();
+    }
 }
 
 void lcd_init(void)
@@ -208,16 +229,8 @@ void lcd_init(void)
             .mirror_y = false,
         }
     };
-    lv_disp_t *disp = lvgl_port_add_disp(&disp_cfg);
+    disp = lvgl_port_add_disp(&disp_cfg);
 
     /* Rotation of the screen */
     lv_disp_set_rotation(disp, LV_DISP_ROT_NONE);
-
-    ESP_LOGI(TAG, "Display LVGL Scroll Text");
-    // Lock the mutex due to the LVGL APIs are not thread-safe
-    if (lvgl_port_lock(0)) {
-        lcd_display_at_boot(disp);
-        // Release the mutex
-        lvgl_port_unlock();
-    }
 }
