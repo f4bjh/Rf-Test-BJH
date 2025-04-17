@@ -14,40 +14,45 @@
 #define MEASURE_PERIOD_US    1000000 // Période d'échantillonnage (1s) - periode de declenchement de l'IT timer
 
 static gptimer_handle_t gptimer = NULL;
-static int pulse_count = 0;
+static pcnt_channel_handle_t pcnt_chan = NULL;
 static pcnt_unit_handle_t pcnt_unit = NULL;  // Déclaration du handle PCNT
 
-static bool IRAM_ATTR timer_callback(gptimer_handle_t timer, const gptimer_alarm_event_data_t *edata, void *user_ctx) {
+static bool IRAM_ATTR timer_callback(gptimer_handle_t timer, const gptimer_alarm_event_data_t *edata, void *user_ctx) 
+{
     int count = 0;
+
     pcnt_unit_get_count(pcnt_unit, &count);
-    pulse_count = count;
-    pcnt_unit_clear_count(pcnt_unit);  // Réinitialisation du compteur
+
+    pcnt_unit_clear_count(pcnt_unit);
 
     meas_t *measure=user_ctx;
-    memcpy(measure->pdata, &pulse_count, measure->size);
+    memcpy(measure->pdata, &count, measure->size);
     measure->ready=true;
 
     return true;  // Demande au timer de relancer l'interruption
 }
 
-void init_pcnt() {
+void init_pcnt() 
+{
     pcnt_unit_config_t unit_config = {
         .high_limit = 32767,
         .low_limit = -32768,
+	.flags.accum_count = true
     };
-    ESP_ERROR_CHECK(pcnt_new_unit(&unit_config, &pcnt_unit)); // Correct
+    ESP_ERROR_CHECK(pcnt_new_unit(&unit_config, &pcnt_unit));
 
     pcnt_chan_config_t chan_config = {
         .edge_gpio_num = PCNT_INPUT_GPIO,
         .level_gpio_num = -1, // Pas de signal de contrôle de niveau
     };
-    pcnt_channel_handle_t pcnt_chan = NULL;
     ESP_ERROR_CHECK(pcnt_new_channel(pcnt_unit, &chan_config, &pcnt_chan));
 
     ESP_ERROR_CHECK(pcnt_channel_set_edge_action(pcnt_chan, 
       PCNT_CHANNEL_EDGE_ACTION_INCREASE,  // Action sur le front montant
       PCNT_CHANNEL_EDGE_ACTION_HOLD       // Action sur le front descendant
     ));
+
+    ESP_ERROR_CHECK(pcnt_unit_add_watch_point(pcnt_unit, 32767));
 
     ESP_ERROR_CHECK(pcnt_unit_enable(pcnt_unit));
     ESP_ERROR_CHECK(pcnt_unit_clear_count(pcnt_unit));
@@ -105,6 +110,13 @@ esp_err_t stop_frequencymeter(meas_t *measure)
   ESP_ERROR_CHECK(gptimer_stop(timer));  // Arrêter le timer
   ESP_ERROR_CHECK(gptimer_disable(timer));
   ESP_ERROR_CHECK(gptimer_del_timer(timer));   // Supprimer le timer
+
+  ESP_ERROR_CHECK(pcnt_unit_remove_watch_point(pcnt_unit,32767));
+  
+  ESP_ERROR_CHECK(pcnt_del_channel(pcnt_chan));
+  ESP_ERROR_CHECK(pcnt_unit_stop(pcnt_unit));
+  ESP_ERROR_CHECK(pcnt_unit_disable(pcnt_unit));
+  ESP_ERROR_CHECK(pcnt_del_unit(pcnt_unit));
 
   return ESP_OK;
 }
