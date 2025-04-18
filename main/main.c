@@ -12,10 +12,12 @@ void app_main(void) {
 	esp_app_desc_t app_desc;
 
 	ret_lcd = lcd_init();
+#if 0	
 	if (ret_lcd == ESP_OK) {
 	  lcd_clear_screen();
 	  ESP_LOGI(TAG,"LCD initialised");
 	}
+#endif
 
 	if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
 		ESP_ERROR_CHECK(nvs_flash_erase());
