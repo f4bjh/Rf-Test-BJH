@@ -38,12 +38,15 @@ if(CONFIG_FIRMWARE_OTA)
 	"../meas/chip_info/chip_info.c"
 	"../meas/part_info/part_info.c"
 	"../meas/freq/freq.c"
+	"../meas/rf_gen/rf_gen_v2.c"
+	"../meas/rf_gen/adf4351_v2.c"
     )
     list(APPEND EMBED_FILES 
 	../http_server/pages/about.html
 	../http_server/pages/frequencymeter.html
 	../http_server/pages/frequencymeter.js	
 	../http_server/pages/generator.html
+	../http_server/pages/generator.js
 	../http_server/pages/index.html
 	../http_server/pages/index.js
 	../http_server/pages/upload.html

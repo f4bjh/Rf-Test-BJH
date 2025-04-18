@@ -102,7 +102,15 @@ Set log level verbosity
 default log verbosity = <choose level>  
 maximum log verbosity = same as default  
 
+- version stubée du script java
 
+ouvrir l'une des pages html (frequencymeter.html par exemple) dans un navigateur.  
+il faut modifier le fichier source de cette page, pour qu'il embarque `script_stub.js` à la place de `script.js`  
+depuis la console du debuger du navigateur : 
+```
+> const jsonData = {t: 0x0B,l: 4,v: "1234512"};jsonString = JSON.stringify(jsonData);socket.send(jsonString);
+```
+cette commande permet d'envoyer un JSON, comme si c'était le serveur qui l'envoyait. Ca permet de debuger le script java.  
 
 - troubleshooting
 

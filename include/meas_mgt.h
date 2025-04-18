@@ -31,13 +31,16 @@ typedef enum {
   CURRENT_PART_BUILD_DATE_TAG,
   NEXT_PART_VERSION_TAG,
   NEXT_PART_BUILD_DATE_TAG,
-  FREQUENCY_TAG
+  FREQUENCY_TAG,
+  RF_GEN_TAG, //not sure there will be some data to display in html page from rf_gen
 } data_to_client_tag_t;
 
 typedef enum {
   NO_DATA_TAG2,
   PAGE_ID_TAG,
-  POWER_LEVEL_TAG,
+  RF_GEN_STATUS_TAG,
+  RF_GEN_FREQ_TAG,
+  RF_GEN_LEVEL_TAG, //set power level of rf_gen
 } data_from_client_tag_t;  
 
 typedef enum {
@@ -52,6 +55,9 @@ typedef enum {
 	NEXT_PART_VERSION,
 	NEXT_PART_BUILD_DATE,
 	FREQUENCY,
+	RF_GEN_STATUS,
+	RF_GEN_FREQ,
+	RF_GEN_POW,
 	N_MEAS
 } meas_number_t;
 #define LAST_MEAS -1
@@ -95,7 +101,8 @@ typedef esp_err_t (meas_func_proto)(meas_t *);
 typedef meas_func_proto* meas_func_t;
 typedef esp_err_t (meas_stop_func_proto)(meas_t *);
 typedef meas_stop_func_proto* meas_stop_func_t;
-
+typedef esp_err_t (meas_update_func_proto)(meas_t *);
+typedef meas_update_func_proto* meas_update_func_t;
 
 typedef struct meas_s {
   bool ready;   //measure is ready (set by cup1, reset by fsm)
@@ -103,10 +110,10 @@ typedef struct meas_s {
   uint8_t *pdata;  //pointer to ram with measures result (set and fill by cpu1)
   uint8_t *pdata_cache;  //cache of pdata
   meas_func_t	  meas_func;
-  uint8_t  meas_param_in[8];
+  uint8_t  meas_param_in[16];
   void *  handle;
   meas_stop_func_t meas_stop_func;
-  //TaskHandle_t task_handle;
+  meas_update_func_t meas_update_func;
 } meas_t;
 
 typedef struct {
@@ -162,6 +169,7 @@ typedef struct instance_meas_per_html_page_s {
   uint8_t meas_param_in[8];
   void* handle;
   meas_stop_func_t meas_stop_func;
+  meas_update_func_t meas_update_func;
 } instance_meas_per_html_page_t;
 
 typedef  esp_err_t (*state_func)(instance_meas_t *);
