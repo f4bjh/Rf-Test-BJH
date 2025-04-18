@@ -6,7 +6,6 @@ if(CONFIG_FIRMWARE_FACTORY)
 	"../http_server/server.c"
 	"../http_server/pages/upload.c"
 	"../lcd/lcd.c"
-	"../lcd/lvgl.c"
 	"../wifi/softap_sta.c"
     ) 
     list(APPEND EMBED_FILES 
@@ -32,7 +31,6 @@ if(CONFIG_FIRMWARE_OTA)
 	"../meas_mgt/meas_mgt.c"
 	"../meas_mgt/fsm.c"
 	"../lcd/lcd.c"
-	"../lcd/lvgl.c"
 	"../wifi/softap_sta.c"
 	"../meas/counter/counter.c"
 	"../meas/chip_info/chip_info.c"

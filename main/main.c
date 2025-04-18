@@ -8,7 +8,16 @@ bool wifi_credentials_set=false;
 
 void app_main(void) {
 	esp_err_t ret = nvs_flash_init();
+	esp_err_t ret_lcd;
 	esp_app_desc_t app_desc;
+
+	ret_lcd = lcd_init();
+#if 0	
+	if (ret_lcd == ESP_OK) {
+	  lcd_clear_screen();
+	  ESP_LOGI(TAG,"LCD initialised");
+	}
+#endif
 
 	if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
 		ESP_ERROR_CHECK(nvs_flash_erase());
@@ -69,10 +78,6 @@ void app_main(void) {
 	wifi_init();
 	ESP_LOGI(TAG,"WIFI initialised");
 
-	lcd_init();
-	ESP_LOGI(TAG,"LCD initialised");
-
-
 	ESP_ERROR_CHECK(http_server_init());
 	ESP_LOGI(TAG,"HTTP server initialised");
 
@@ -82,6 +87,9 @@ void app_main(void) {
 			esp_ota_mark_app_valid_cancel_rollback();
 		}
 	}
+
+	if (ret_lcd == ESP_OK) 
+	  lcd_display();
 
 	while(1) vTaskDelay(10);
 }
