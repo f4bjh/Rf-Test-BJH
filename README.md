@@ -38,24 +38,24 @@ Rf-Test-BJH is an amateur radio project of a universal radio test bench.
 
 ## User manuals : 
 
-[How to setup wifi](./doc/setup-wifi.md)
+[How to setup wifi](./doc/Rf-Test-BJH/setup-wifi.md)
 
-[How to upload firware](./doc/update-fw.md)
+[How to upload firware](./doc/Rf-Test-BJH/update-fw.md)
 
-[User guide for developpers](./doc/for_developpers.md)
+[User guide for developpers](./doc/Rf-Test-BJH/for_developpers.md)
 
 ## Screenshot
 
-![Index](./doc/index.gif)
+![Index](./doc/Rf-Test-BJH/index.gif)
 
 ## Developpement documentation
 
-[Firmware architecture](./doc/archi-sw-new2.drawio.svg)
+[Firmware architecture](./doc/Rf-Test-BJH/archi-sw-new2.drawio.svg)
 
-[Partition table](./doc/partition-table.drawio.svg)
+[Partition table](./doc/Rf-Test-BJH/partition-table.drawio.svg)
 
-[Hardware architecture](./doc/hw-synoptique-3.drawio.svg)
+[Hardware architecture](./doc/Rf-Test-BJH/hw-synoptique-3.drawio.svg)
 
-[Frequencymeter architecture](./doc/rf-freq-archi.drawio.svg)
+[Frequencymeter architecture](./doc/Rf-Test-BJH/rf-freq-archi.drawio.svg)
 
 Note : in doc folder of this repo, you will find pdf version of this documentation
