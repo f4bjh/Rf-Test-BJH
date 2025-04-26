@@ -6,7 +6,6 @@
 <title>Frequency meter</title>
 
 <script type = "text/javascript" src="frequencymeter.js"></script>
-
  
 <style type="text/css">
 html, body {
@@ -69,19 +68,18 @@ html, body {
 
     <h2>Frequency-meter</h2>
     <br><br><br>
-	<div style="position: absolute;left:33%;">
+	<div style="position: absolute;left:0%;">
 
-		<div class="frequency-range-selection">
+		<div class="range-selection">
 			<h3>Frequency range selection</h3>
 			<label><input type="radio" name="freq_range" value="4MHz" checked> 4MHz</label>
 			<label><input type="radio" name="freq_range" value="250MHz"> 250MHz</label>
 			<label><input type="radio" name="freq_range" value="4GHz"> 4GHz</label>
 		</div>
-		
-		<div id="freq-digit"></div>
-		
+	
     </div>    
-		
+
+    <div id="freq-digit" style="position: absolute;left:33%;"></div>		
 
 <footer>
    <p class='bas_de_page'>F4BJH - return to <a href="/">Home</a></p>

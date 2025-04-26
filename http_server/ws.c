@@ -80,6 +80,52 @@ void close_instance_meas(httpd_handle_t hd)
     }
 }
 
+void ws_process_update_param(httpd_req_t *req, meas_number_t meas_num, int size, char* param_value)
+{
+    server_ctx_t *server_ctx = NULL;
+    instance_meas_t  *instance_meas=NULL;
+    uint32_t value;
+    const char *rf_gen_on="ON";
+    esp_err_t ret;
+
+      server_ctx = (server_ctx_t *) httpd_get_global_user_ctx(req->handle);
+
+      if (xSemaphoreTake(server_ctx->mutex, portMAX_DELAY)) {
+          instance_meas = server_ctx->instance_meas;
+          xSemaphoreGive(server_ctx->mutex);
+      } else {
+          ESP_LOGE(TAG, "failed to take semaphore to get instance_meas in server_ctx");
+          return;
+      }
+
+      //convert char param_value into meas_param_in[8];
+      switch (meas_num) {
+        case RF_GEN_STATUS:
+          if ((strncmp(param_value,rf_gen_on, strlen(rf_gen_on))==0))
+	    instance_meas->measures.meas_param_in[0] = 1;
+	  else
+ 	    instance_meas->measures.meas_param_in[0] = 0;
+	  break;
+        case RF_GEN_FREQ:
+          value = strtoul(param_value, NULL, 10); // Base 10
+          memcpy(&(instance_meas->measures.meas_param_in[1]), &value, 4);
+	  break;
+        case RF_GEN_POW:
+	  //TODO
+	  //fill measures.meas_param_in[5] with power value 0,1,2,3 but param_value is a char. strtol should make the trick
+	  break;
+	default:
+	  break;
+
+
+      }
+
+      ret = instance_meas->measures.meas_update_func(&(instance_meas->measures));
+      if (ret != ESP_OK)
+        ESP_LOGE(TAG, "error in meas_update (%d)",meas_num);
+
+}
+
 void ws_process_received_page_id(httpd_req_t *req, int size, char* received_page_id)
 {
   const char *page_name;
@@ -102,7 +148,11 @@ void ws_process_received_page_id(httpd_req_t *req, int size, char* received_page
     if (strncmp(received_page_id,page_name, strlen(page_name))==0) {
         pageId = FREQUENCYMETER_HTML_PAGE_ID; //define ou enum;
     }
-    
+    page_name=&(generator_get.uri[1]);
+    if (strncmp(received_page_id,page_name, strlen(page_name))==0) {
+        pageId = GENERATOR_HTML_PAGE_ID; //define ou enum;
+    }
+
     open_instance_meas(req->handle, pageId);
     return ;
 
@@ -129,6 +179,15 @@ void ws_process_received_json(httpd_req_t *req, httpd_ws_frame_t ws_pkt)
 		switch (t->valueint) {
   	  	  case PAGE_ID_TAG:
 		    ws_process_received_page_id(req,l->valueint,v->valuestring);
+		    break;
+  		  case RF_GEN_STATUS_TAG:
+		    ws_process_update_param(req, RF_GEN_STATUS,l->valueint, v->valuestring);
+		    break;
+		  case RF_GEN_FREQ_TAG:
+		    ws_process_update_param(req, RF_GEN_FREQ, l->valueint, v->valuestring);
+		    break;
+		  case RF_GEN_LEVEL_TAG:
+		    ws_process_update_param(req, RF_GEN_POW, l->valueint, v->valuestring);
 		    break;
 		  default:
 		    break;
