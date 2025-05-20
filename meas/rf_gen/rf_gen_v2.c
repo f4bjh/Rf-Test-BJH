@@ -171,21 +171,6 @@ esp_err_t init_rf_gen(meas_t *measure)
 
     vfo.adf4351_device = adf4351_device;
 
-#if 0
-    if(adf4351_set_ref_freq(&vfo, 25000000) != 0)
-        ESP_LOGE(TAG, "Reference frequency input invalid");
-
-    //adf4351_enable(&vfo); // power on the device
-
-   ESP_LOGI(TAG, "init frequency set to %dHz",freq);
-   err = adf4351_set_freq(&vfo, freq);
-    if (err!=0)
-      ESP_LOGE(TAG,"failed to update output frequency");
-
-
-    ESP_LOGI(TAG, "init frequency set to %dHz",freq);
-#endif
-
    rf_gen_task_arg.vfo = vfo;
 
     //create a rf_gen on CPU1
@@ -219,12 +204,6 @@ esp_err_t stop_rf_gen(meas_t *measure)
 esp_err_t calc_rf_gen(instance_meas_t *instance_meas)
 {
 	//TO DO
-#if 0
-    meas_t measure=instance_meas->measures;
-    memset(instance_meas->calc_value, 0, CALC_VALUE_SIZE*sizeof(char));
- 
-    sprintf(instance_meas->calc_value,"%d", *(measure.pdata_cache)/10 );
-#endif
    
     return ESP_OK;
 }
