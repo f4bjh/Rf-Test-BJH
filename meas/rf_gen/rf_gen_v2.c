@@ -211,6 +211,7 @@ esp_err_t stop_rf_gen(meas_t *measure)
     vTaskDelete(task_handle);
 
   adf4351_disable(&vfo);
+  adf4351_remove(&vfo);
 
   return ESP_OK;
 }

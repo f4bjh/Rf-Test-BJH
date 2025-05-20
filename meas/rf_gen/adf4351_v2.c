@@ -815,7 +815,40 @@ void adf4351_initialise(adf4351_cfg_t *pcfg)
     ret = spi_bus_add_device(SENDER_HOST, &devcfg, &spi_handle);
     assert(ret == ESP_OK);
 
-    ESP_LOGI(TAG, "SPI device successfully attached");
+    ESP_LOGI(TAG, "ADF4351 successfully attached");
     pcfg->_spi_initialised = true;
+}
+
+
+void adf4351_remove(adf4351_cfg_t *pcfg)
+{
+    esp_err_t ret;
+
+    // Réinitialiser les GPIO
+    if (pcfg->_le_initialised) {
+        gpio_reset_pin(pcfg->pins.gpio_le);
+        pcfg->_le_initialised = false;
+    }
+
+    if (pcfg->_ld_initialised) {
+        gpio_reset_pin(pcfg->pins.gpio_ld);
+        pcfg->_ld_initialised = false;
+    }
+
+    // Réinitialiser les autres champs
+    pcfg->_reffreq = 0.0;
+    pcfg->_cfreq = 0.0;
+    pcfg->_enabled = false;
+
+    // Supprimer le périphérique SPI
+    if (pcfg->_spi_initialised) {
+        spi_bus_remove_device(spi_handle);
+        spi_bus_free(SENDER_HOST);
+        pcfg->_spi_initialised = false;
+    }
+
+
+
+    ESP_LOGI(TAG, "ADF4351 successfully dettached");
 }
 
