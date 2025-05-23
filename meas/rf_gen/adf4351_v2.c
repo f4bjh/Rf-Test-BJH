@@ -40,7 +40,7 @@
 #include "meas_mgt.h"
 #include "meas.h"
 
-static char TAG[] = "PLL";
+static char TAG[] = "adf4351";
 
 uint32_t ADF4351_steps[] = {100, 500, 10000, 50000, 100000, 500000, 1000000};
 
@@ -447,26 +447,33 @@ int32_t adf4351_out_altvoltage0_powerdown(adf4351_dev *dev,
 
 void adf4351_enable(adf4351_cfg_t *pcfg)
 {
+ 
     // check if CE pin was initialised
-    if(pcfg->_ce_initialised)
+    if (!pcfg->_ce_initialised ) {
+        ESP_LOGE(TAG, "Attempting to toggle CE pin without initialisation");
+	return;
+    }
+
+    if(!pcfg->_enabled)
     {
         gpio_set_level(pcfg->pins.gpio_ce, 1);
         pcfg->_enabled = true;
     }
-    else
-        ESP_LOGE(TAG, "Attempting to toggle CE pin without initialisation");
 }
 
 void adf4351_disable(adf4351_cfg_t *pcfg)
 {
     // check if CE pin was initialised
-    if(pcfg->_ce_initialised)
+    if (!pcfg->_ce_initialised ) {
+        ESP_LOGE(TAG, "Attempting to toggle CE pin without initialisation");
+	return;
+    }
+
+    if(pcfg->_enabled)
     {
         gpio_set_level(pcfg->pins.gpio_ce, 0);
         pcfg->_enabled = false;
     }
-    else
-        ESP_LOGE(TAG, "Attempting to toggle CE pin without initialisation");
 }
 
 void adf4351_initialise(adf4351_cfg_t *pcfg)
@@ -476,9 +483,9 @@ void adf4351_initialise(adf4351_cfg_t *pcfg)
     pcfg->_reffreq = REF_FREQ_DEFAULT;
     pcfg->_cfreq = 0.0;
 
-	// Step1, initalise SPI perpheral and GPIO
-	// Configuration for the SPI bus
-	spi_bus_config_t buscfg = 
+    // Step1, initalise SPI perpheral and GPIO
+    // Configuration for the SPI bus
+    spi_bus_config_t buscfg = 
     {
 		.mosi_io_num = pcfg->pins.gpio_mosi,
 		//.data0_io_num = -1,
@@ -494,9 +501,9 @@ void adf4351_initialise(adf4351_cfg_t *pcfg)
 		.data5_io_num = -1,
 		.data6_io_num = -1,
 		.data7_io_num = -1,
-	};
+    };
 
-	// Configuration for the SPI device on the other side of the bus
+    // Configuration for the SPI device on the other side of the bus
     spi_device_interface_config_t devcfg = 
     {
         .command_bits = 0,
