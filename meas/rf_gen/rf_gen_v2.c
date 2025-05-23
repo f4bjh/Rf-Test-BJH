@@ -100,25 +100,26 @@ esp_err_t update_rf_gen(meas_t *measure)
   freq |=  (measure->meas_param_in[3]&0xFF)<<16;
   freq |=  (measure->meas_param_in[4]&0xFF)<<24;
 
-  //
-  //set output frequency
-  //
-  ESP_LOGI(TAG, "update frequency to %dHz",freq);
-  calc_freq=adf4351_set_freq(vfo.adf4351_device, freq); // set output frequency to 440MHz
-  ESP_LOGI(TAG, "set frequency to %lluHz",calc_freq);
-  
 
-  //
-  // set power level (TO DO)
-  // measure->meas_param_in[5] direct in register
+  if ( measure->meas_param_in[0] == 1) { //chip is enabled, or will be
 
-  //
-  // enable/disable device
-  //
-  ESP_LOGI(TAG, "%s ADF5351 device",measure->meas_param_in[0] == 1 ? "enable": "disable");
-  if ( measure->meas_param_in[0] == 1)
+    //
+    //set output frequency
+    //
+    calc_freq=adf4351_set_freq(vfo.adf4351_device, freq); // set output frequency to 440MHz
+    ESP_LOGI(TAG, "set frequency to %lluHz",calc_freq);
+ 
+    //
+    // set power level (TO DO)
+    // measure->meas_param_in[5] direct in register
+    //
+
+    //
+    // enable/disable device
+    //
+    ESP_LOGI(TAG, "%s ADF5351 device",measure->meas_param_in[0] == 1 ? "enable": "disable");
     adf4351_enable(&vfo); // power on the device
-  else
+  } else
     adf4351_disable(&vfo);
 
 
@@ -135,12 +136,15 @@ esp_err_t init_rf_gen(meas_t *measure)
    measure->pdata = malloc(measure->size * sizeof(uint8_t));
    measure->pdata_cache = malloc(measure->size * sizeof(uint8_t));
    measure->meas_func = NULL;
+
+#if 0
    int freq;
 
    freq = measure->meas_param_in[1];
    freq |=  (measure->meas_param_in[2]&0xFF)<<8;
    freq |=  (measure->meas_param_in[3]&0xFF)<<16;
    freq |=  (measure->meas_param_in[4]&0xFF)<<24;
+#endif
 
    rf_gen_task_arg.measure=measure;
 
@@ -167,30 +171,15 @@ esp_err_t init_rf_gen(meas_t *measure)
     adf4351_out_altvoltage0_frequency_resolution(adf4351_device,adf4351_device->pdata->channel_spacing);
     adf4351_out_altvoltage0_frequency(adf4351_device, adf4351_device->pdata->power_up_frequency);
 
-
-
     vfo.adf4351_device = adf4351_device;
 
-#if 0
-    if(adf4351_set_ref_freq(&vfo, 25000000) != 0)
-        ESP_LOGE(TAG, "Reference frequency input invalid");
+    rf_gen_task_arg.vfo = vfo;
 
-    //adf4351_enable(&vfo); // power on the device
-
-   ESP_LOGI(TAG, "init frequency set to %dHz",freq);
-   err = adf4351_set_freq(&vfo, freq);
-    if (err!=0)
-      ESP_LOGE(TAG,"failed to update output frequency");
-
-
-    ESP_LOGI(TAG, "init frequency set to %dHz",freq);
-#endif
-
-   rf_gen_task_arg.vfo = vfo;
+    adf4351_disable(&vfo);
 
     //create a rf_gen on CPU1
-   //CPU number set in measure->meas_param_in[0]
-   xTaskCreatePinnedToCore(rf_gen_task, 
+    //CPU number set in measure->meas_param_in[0]
+    xTaskCreatePinnedToCore(rf_gen_task, 
 		   "rf_gen task", 
 		   configMINIMAL_STACK_SIZE, 
 		   &rf_gen_task_arg,
@@ -211,6 +200,7 @@ esp_err_t stop_rf_gen(meas_t *measure)
     vTaskDelete(task_handle);
 
   adf4351_disable(&vfo);
+  adf4351_remove(&vfo);
 
   return ESP_OK;
 }
@@ -218,12 +208,6 @@ esp_err_t stop_rf_gen(meas_t *measure)
 esp_err_t calc_rf_gen(instance_meas_t *instance_meas)
 {
 	//TO DO
-#if 0
-    meas_t measure=instance_meas->measures;
-    memset(instance_meas->calc_value, 0, CALC_VALUE_SIZE*sizeof(char));
- 
-    sprintf(instance_meas->calc_value,"%d", *(measure.pdata_cache)/10 );
-#endif
    
     return ESP_OK;
 }
