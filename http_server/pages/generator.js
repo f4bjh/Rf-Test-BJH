@@ -28,47 +28,6 @@ function update_rf_gen_freq_display(rf_gen_freq,rf_gen_freq_out) {
 			`;
 }
 
-var serverIp = window.location.hostname;
-socket = new WebSocket("ws://" + serverIp + "/ws");
-
-socket.onopen = function () {
-        // Extraire le paramètre d'identification de la page
-	const url = window.location.href;
-	const pageId = url.split('/').pop();
-
-        // Conversion en chaîne binaire pour estimer la longueur en octets (UTF-8)
-        const encoder = new TextEncoder();
-        const vEncoded = encoder.encode(pageId);
-        const l = vEncoded.length; // Longueur en octets
-
-        // Création de l'objet JSON
-        const jsonData = {
-        t: 0x01,
-        l: l,
-        v: pageId
-        };
-
-        // Conversion en JSON
-        const jsonString = JSON.stringify(jsonData);
-        console.log(jsonString); // {"t":0,"l":3,"v":"123"}
- 
-        const rf_gen_freq_out = document.getElementById('frequency-display');
- 	update_rf_gen_freq_display(rf_gen_freq,rf_gen_freq_out);
-
-        // Envoi via WebSocket
-        socket.send(jsonString);
-};
-
-// Gérer les erreurs de connexion
-socket.addEventListener('error', (event) => {
-	console.error('Erreur de connexion WebSocket : ', event);
-});
-
-// Gérer la fermeture de la connexion
-socket.addEventListener('close', (event) => {
-	console.log('Connexion WebSocket fermée');
-});
-
 function send_rf_gen_freq(rf_gen_freq) {
         const jsonData = {
             t: 0x03,
@@ -101,6 +60,46 @@ function send_rf_gen_power(power) {
         socket.send(JSON.stringify(jsonData));
         console.log("Power envoyé: ", jsonData);
 }
+
+var serverIp = window.location.hostname;
+socket = new WebSocket("ws://" + serverIp + "/ws");
+
+socket.onopen = function () {
+        // Extraire le paramètre d'identification de la page
+	const url = window.location.href;
+	const pageId = url.split('/').pop();
+
+        // Conversion en chaîne binaire pour estimer la longueur en octets (UTF-8)
+        const encoder = new TextEncoder();
+        const vEncoded = encoder.encode(pageId);
+        const l = vEncoded.length; // Longueur en octets
+
+        // Création de l'objet JSON
+        const jsonData = {
+        t: 0x01,
+        l: l,
+        v: pageId
+        };
+
+        // Conversion en JSON
+        const jsonString = JSON.stringify(jsonData);
+        console.log(jsonString); // {"t":0,"l":3,"v":"123"}
+        // Envoi via WebSocket
+        socket.send(jsonString);
+
+        const rf_gen_freq_out = document.getElementById('frequency-display');
+ 	update_rf_gen_freq_display(rf_gen_freq,rf_gen_freq_out);
+};
+
+// Gérer les erreurs de connexion
+socket.addEventListener('error', (event) => {
+	console.error('Erreur de connexion WebSocket : ', event);
+});
+
+// Gérer la fermeture de la connexion
+socket.addEventListener('close', (event) => {
+	console.log('Connexion WebSocket fermée');
+});
 
 document.addEventListener("DOMContentLoaded", () => {
     //const rf_gen_freq_out = document.querySelectorAll("#frequency-display .s7s input");
@@ -147,6 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
             rf_gen_status.textContent = "ON";
             rf_gen_status.classList.remove("power-off");
             rf_gen_status.classList.add("power-on");
+	    send_rf_gen_freq(rf_gen_freq);
         } else {
             rf_gen_status.textContent = "OFF";
             rf_gen_status.classList.remove("power-on");
