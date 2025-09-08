@@ -6,3 +6,4 @@ dependencies.lock
 .*
 ~*lck
 *auto_*
+*.zip
