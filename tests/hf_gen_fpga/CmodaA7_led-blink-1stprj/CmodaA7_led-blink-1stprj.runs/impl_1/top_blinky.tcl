@@ -106,6 +106,7 @@ set ACTIVE_STEP write_bitstream
 set rc [catch {
   create_msg_db write_bitstream.pb
   set_param chipscope.maxJobs 4
+  set_param xicom.use_bs_reader 1
   set_param runs.launchOptions { -jobs 8  }
   open_checkpoint top_blinky_routed.dcp
   set_property webtalk.parent_dir /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/CmodaA7_led-blink-1stprj/CmodaA7_led-blink-1stprj.cache/wt [current_project]

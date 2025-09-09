@@ -1,12 +1,12 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 ---------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2024.2 (lin64) Build 5239630 Fri Nov 08 22:34:34 MST 2024
-| Date         : Tue Sep  9 22:57:08 2025
+| Date         : Tue Sep  9 23:45:58 2025
 | Host         : f4bjh-minipc running 64-bit Ubuntu 24.04.3 LTS
 | Command      : report_clock_utilization -file top_blinky_clock_utilization_routed.rpt
 | Design       : top_blinky
 | Device       : 7a35t-cpg236
-| Speed File   : -3  PRODUCTION 1.23 2018-06-13
+| Speed File   : -1  PRODUCTION 1.23 2018-06-13
 | Design State : Routed
 ---------------------------------------------------------------------------------------------------------------------------------------------
 

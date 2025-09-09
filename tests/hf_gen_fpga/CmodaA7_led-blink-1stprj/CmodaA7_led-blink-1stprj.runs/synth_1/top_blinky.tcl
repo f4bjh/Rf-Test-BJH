@@ -59,7 +59,7 @@ OPTRACE "synth_1" START { ROLLUP_AUTO }
 set_param chipscope.maxJobs 4
 set_param xicom.use_bs_reader 1
 OPTRACE "Creating in-memory project" START { }
-create_project -in_memory -part xc7a35tcpg236-3
+create_project -in_memory -part xc7a35tcpg236-1
 
 set_param project.singleFileAddWarning.threshold 0
 set_param project.compositeFile.enableAutoGeneration 0
@@ -98,7 +98,7 @@ read_checkpoint -auto_incremental -incremental /home/f4bjh/devel/Rf-Test-BJH/tes
 close [open __synthesis_is_running__ w]
 
 OPTRACE "synth_design" START { }
-synth_design -top top_blinky -part xc7a35tcpg236-3
+synth_design -top top_blinky -part xc7a35tcpg236-1
 OPTRACE "synth_design" END { }
 if { [get_msg_config -count -severity {CRITICAL WARNING}] > 0 } {
  send_msg_id runtcl-6 info "Synthesis results are not added to the cache due to CRITICAL_WARNING"
