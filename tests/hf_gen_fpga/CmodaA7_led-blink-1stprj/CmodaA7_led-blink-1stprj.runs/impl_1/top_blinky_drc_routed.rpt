@@ -1,12 +1,12 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 ---------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2024.2 (lin64) Build 5239630 Fri Nov 08 22:34:34 MST 2024
-| Date         : Tue Sep  9 22:57:06 2025
+| Date         : Tue Sep  9 23:45:57 2025
 | Host         : f4bjh-minipc running 64-bit Ubuntu 24.04.3 LTS
 | Command      : report_drc -file top_blinky_drc_routed.rpt -pb top_blinky_drc_routed.pb -rpx top_blinky_drc_routed.rpx
 | Design       : top_blinky
-| Device       : xc7a35tcpg236-3
-| Speed File   : -3
+| Device       : xc7a35tcpg236-1
+| Speed File   : -1
 | Design State : Fully Routed
 ---------------------------------------------------------------------------------------------------------------------------------------------
 
