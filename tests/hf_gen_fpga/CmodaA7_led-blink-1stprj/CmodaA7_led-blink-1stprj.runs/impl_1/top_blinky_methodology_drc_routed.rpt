@@ -1,0 +1,42 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2024.2 (lin64) Build 5239630 Fri Nov 08 22:34:34 MST 2024
+| Date         : Tue Sep  9 22:57:07 2025
+| Host         : f4bjh-minipc running 64-bit Ubuntu 24.04.3 LTS
+| Command      : report_methodology -file top_blinky_methodology_drc_routed.rpt -pb top_blinky_methodology_drc_routed.pb -rpx top_blinky_methodology_drc_routed.rpx
+| Design       : top_blinky
+| Device       : xc7a35tcpg236-3
+| Speed File   : -3
+| Design State : Fully Routed
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Report Methodology
+
+Table of Contents
+-----------------
+1. REPORT SUMMARY
+2. REPORT DETAILS
+
+1. REPORT SUMMARY
+-----------------
+            Netlist: netlist
+          Floorplan: design_1
+      Design limits: <entire design considered>
+             Max checks: <unlimited>
+             Checks found: 1
++--------+----------+--------------------------------------------------------+--------+
+| Rule   | Severity | Description                                            | Checks |
++--------+----------+--------------------------------------------------------+--------+
+| XDCC-7 | Warning  | Scoped Clock constraint overwritten on the same source | 1      |
++--------+----------+--------------------------------------------------------+--------+
+
+2. REPORT DETAILS
+-----------------
+XDCC-7#1 Warning
+Scoped Clock constraint overwritten on the same source  
+A new clock constraint create_clock overrides a previous scoped clock constraint defined on the same source. It is not recommended to override a scoped (typically an IP) clock constraint and could result in unexpected behaviors.
+New: create_clock -period 83.333 -name sys_clk -waveform {0.000 41.666} [get_ports clk_pin] (Source: /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/CmodaA7_led-blink-1stprj/CmodaA7_led-blink-1stprj.srcs/constrs_1/new/cmod_a7.xdc (Line: 4))
+Previous: create_clock -period 83.333 [get_ports clk_pin] (Source: /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/CmodaA7_led-blink-1stprj/CmodaA7_led-blink-1stprj.gen/sources_1/ip/clk_wiz_0/clk_wiz_0.xdc (Line: 53))
+Related violations: <none>
+
+
