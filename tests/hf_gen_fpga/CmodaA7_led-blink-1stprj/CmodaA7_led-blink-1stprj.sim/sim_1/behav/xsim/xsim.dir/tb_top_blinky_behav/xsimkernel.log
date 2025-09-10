@@ -1,0 +1,4 @@
+Running: xsim.dir/tb_top_blinky_behav/xsimk -simmode gui -wdb tb_top_blinky_behav.wdb -simrunnum 0 -socket 54413
+Design successfully loaded
+Design Loading Memory Usage: 183920 KB (Peak: 183920 KB)
+Design Loading CPU Usage: 1030 ms
