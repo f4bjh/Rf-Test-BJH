@@ -1,0 +1,6 @@
+Time resolution is 1 ps
+Stopped at time : 1037500 ps : File "/home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/CmodaA7_led-blink-1stprj/CmodaA7_led-blink-1stprj.srcs/sim_1/new/tb_top_blinky.vhdl" Line 29
+Failure: Fin de la simulation
+Time: 10 ms  Iteration: 0  Process: /tb_top_blinky/stim_proc  File: /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/CmodaA7_led-blink-1stprj/CmodaA7_led-blink-1stprj.srcs/sim_1/new/tb_top_blinky.vhdl
+$finish called at time : 10 ms : File "/home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/CmodaA7_led-blink-1stprj/CmodaA7_led-blink-1stprj.srcs/sim_1/new/tb_top_blinky.vhdl" Line 51
+INFO: xsimkernel Simulation Memory Usage: 274376 KB (Peak: 323188 KB), Simulation CPU Usage: 27330 ms

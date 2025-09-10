@@ -1,0 +1,16 @@
+{
+   "ActiveEmotionalView":"Default View",
+   "Default View_ScaleFactor":"1.0",
+   "Default View_TopLeft":"-931,-128",
+   "ExpandedHierarchyInLayout":"",
+   "guistr":"# # String gsaved with Nlview 7.8.0 2024-04-26 e1825d835c VDI=44 GEI=38 GUI=JA:21.0 TLS
+#  -string -flagsOSRD
+preplace inst Stimu_0 -pg 1 -lvl 1 -x -480 -y 120 -defaultsOSRD
+preplace inst hf_gen_fpga_0 -pg 1 -lvl 2 -x -220 -y 100 -defaultsOSRD
+preplace netloc Stimu_0_tb_clock12M 1 1 1 N 90
+preplace netloc Stimu_0_tb_reset 1 1 1 N 110
+levelinfo -pg 1 -590 -480 -220 110
+pagesize -pg 1 -db -bbox -sgen -590 -130 220 230
+"
+}
+

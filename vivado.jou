@@ -71,3 +71,90 @@ step
 add_bp {/home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/CmodaA7_led-blink-1stprj/CmodaA7_led-blink-1stprj.srcs/sim_1/new/tb_top_blinky.vhdl} 27
 remove_bps -file {/home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/CmodaA7_led-blink-1stprj/CmodaA7_led-blink-1stprj.srcs/sim_1/new/tb_top_blinky.vhdl} -line 27
 run all
+close_sim
+close_project
+open_project /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.xpr
+update_compile_order -fileset sources_1
+file mkdir /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sim_1/new
+set_property SOURCE_SET sources_1 [get_filesets sim_1]
+close [ open /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sim_1/new/tb_hf_gen_fpga.vhdl w ]
+add_files -fileset sim_1 /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sim_1/new/tb_hf_gen_fpga.vhdl
+update_compile_order -fileset sim_1
+launch_simulation
+source hf_gen_fpga.tcl
+set_property SOURCE_SET sources_1 [get_filesets sim_1]
+close [ open /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sim_1/new/toto.vhd w ]
+add_files -fileset sim_1 /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sim_1/new/toto.vhd
+update_compile_order -fileset sim_1
+export_ip_user_files -of_objects  [get_files /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sim_1/new/tb_hf_gen_fpga.vhdl] -no_script -reset -force -quiet
+remove_files  -fileset sim_1 /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sim_1/new/tb_hf_gen_fpga.vhdl
+file delete -force /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sim_1/new/tb_hf_gen_fpga.vhdl
+set_property SOURCE_SET sources_1 [get_filesets sim_1]
+close [ open /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sim_1/new/tb_hf_gen_fpga.vhd w ]
+add_files -fileset sim_1 /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sim_1/new/tb_hf_gen_fpga.vhd
+update_compile_order -fileset sim_1
+create_bd_design "tb_design_1"
+update_compile_order -fileset sources_1
+create_bd_cell -type module -reference hf_gen_fpga hf_gen_fpga_0
+export_ip_user_files -of_objects  [get_files /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sim_1/new/tb_hf_gen_fpga.vhd] -no_script -reset -force -quiet
+remove_files  -fileset sim_1 /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sim_1/new/tb_hf_gen_fpga.vhd
+add_files -norecurse /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sim_1/new/tb_hf_gen_fpga.vhd
+update_compile_order -fileset sources_1
+create_bd_cell -type module -reference Stimu Stimu_0
+delete_bd_objs [get_bd_cells Stimu_0]
+create_bd_cell -type module -reference Stimu Stimu_0
+delete_bd_objs [get_bd_cells Stimu_0]
+report_ip_status -name ip_status 
+report_ip_status -name ip_status 
+save_bd_design
+create_bd_cell -type module -reference Stimu Stimu_0
+create_bd_design "tb_design_2"
+update_compile_order -fileset sources_1
+export_ip_user_files -of_objects  [get_files /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sources_1/bd/tb_design_1/tb_design_1.bd] -no_script -reset -force -quiet
+remove_files  /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sources_1/bd/tb_design_1/tb_design_1.bd
+file delete -force /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sources_1/bd/tb_design_1
+file delete -force /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.gen/sources_1/bd/tb_design_1
+open_bd_design {/home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sources_1/bd/tb_design_2/tb_design_2.bd}
+create_bd_cell -type module -reference Stimu Stimu_0
+export_ip_user_files -of_objects  [get_files /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sim_1/new/tb_hf_gen_fpga.vhd] -no_script -reset -force -quiet
+remove_files  /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sim_1/new/tb_hf_gen_fpga.vhd
+export_ip_user_files -of_objects  [get_files /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sources_1/bd/tb_design_2/tb_design_2.bd] -no_script -reset -force -quiet
+remove_files  /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sources_1/bd/tb_design_2/tb_design_2.bd
+file delete -force /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sources_1/bd/tb_design_2
+file delete -force /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.gen/sources_1/bd/tb_design_2
+close [ open /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sources_1/new/tb_hf_gen_fpga.vhd w ]
+add_files /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sources_1/new/tb_hf_gen_fpga.vhd
+update_compile_order -fileset sources_1
+create_bd_design "tb_design_1"
+update_compile_order -fileset sources_1
+create_bd_cell -type module -reference Stimu Stimu_0
+set_property location {0.5 -225 18} [get_bd_cells Stimu_0]
+create_bd_cell -type module -reference hf_gen_fpga hf_gen_fpga_0
+set_property location {0.5 -481 110} [get_bd_cells Stimu_0]
+open_bd_design {/home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sources_1/bd/tb_design_1/tb_design_1.bd}
+set_property location {1 -477 131} [get_bd_cells Stimu_0]
+set_property location {1 -434 120} [get_bd_cells Stimu_0]
+connect_bd_net [get_bd_pins hf_gen_fpga_0/clk_pin] [get_bd_pins Stimu_0/tb_clock12M]
+connect_bd_net [get_bd_pins Stimu_0/tb_reset] [get_bd_pins hf_gen_fpga_0/reset]
+generate_target all [get_files  /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sources_1/bd/tb_design_1/tb_design_1.bd]
+export_ip_user_files -of_objects [get_files /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sources_1/bd/tb_design_1/tb_design_1.bd] -no_script -sync -force -quiet
+create_ip_run [get_files -of_objects [get_fileset sources_1] /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sources_1/bd/tb_design_1/tb_design_1.bd]
+launch_runs tb_design_1_Stimu_0_0_synth_1 tb_design_1_hf_gen_fpga_0_0_synth_1 -jobs 8
+wait_on_run tb_design_1_Stimu_0_0_synth_1
+wait_on_run tb_design_1_hf_gen_fpga_0_0_synth_1
+export_simulation -lib_map_path [list {modelsim=/home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.cache/compile_simlib/modelsim} {questa=/home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.cache/compile_simlib/questa} {xcelium=/home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.cache/compile_simlib/xcelium} {vcs=/home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.cache/compile_simlib/vcs} {riviera=/home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.cache/compile_simlib/riviera}] -of_objects [get_files /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sources_1/bd/tb_design_1/tb_design_1.bd] -directory /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.ip_user_files/sim_scripts -ip_user_files_dir /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.ip_user_files -ipstatic_source_dir /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.ip_user_files/ipstatic -use_ip_compiled_libs -force -quiet
+close_sim
+launch_simulation
+source hf_gen_fpga.tcl
+close_sim
+launch_simulation
+source hf_gen_fpga.tcl
+close_sim
+launch_simulation
+source hf_gen_fpga.tcl
+run all
+run 1000 ns
+run 1000 ns
+close_sim
+launch_simulation
+source hf_gen_fpga.tcl
