@@ -1,0 +1,56 @@
+#-----------------------------------------------------------
+# Vivado v2024.2 (64-bit)
+# SW Build 5239630 on Fri Nov 08 22:34:34 MST 2024
+# IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
+# SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
+# Start of session at: Wed Sep 10 22:55:40 2025
+# Process ID         : 26344
+# Current directory  : /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.runs/tb_design_1_Stimu_0_0_synth_1
+# Command line       : vivado -log tb_design_1_Stimu_0_0.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source tb_design_1_Stimu_0_0.tcl
+# Log file           : /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.runs/tb_design_1_Stimu_0_0_synth_1/tb_design_1_Stimu_0_0.vds
+# Journal file       : /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.runs/tb_design_1_Stimu_0_0_synth_1/vivado.jou
+# Running On         : f4bjh-minipc
+# Platform           : Ubuntu
+# Operating System   : Ubuntu 24.04.3 LTS
+# Processor Detail   : AMD Ryzen 7 5700U with Radeon Graphics
+# CPU Frequency      : 1840.857 MHz
+# CPU Physical cores : 8
+# CPU Logical cores  : 16
+# Host memory        : 33021 MB
+# Swap memory        : 2147 MB
+# Total Virtual      : 35169 MB
+# Available Virtual  : 27169 MB
+#-----------------------------------------------------------
+source tb_design_1_Stimu_0_0.tcl -notrace
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1704] No user IP repositories specified
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository '/home/f4bjh/Xilinx/Vivado/2024.2/data/ip'.
+Command: synth_design -top tb_design_1_Stimu_0_0 -part xc7a35tcpg236-1 -incremental_mode off -mode out_of_context
+Starting synth_design
+Attempting to get a license for feature 'Synthesis' and/or device 'xc7a35t'
+INFO: [Common 17-349] Got license for feature 'Synthesis' and/or device 'xc7a35t'
+INFO: [Device 21-403] Loading part xc7a35tcpg236-1
+INFO: [Synth 8-7079] Multithreading enabled for synth_design using a maximum of 7 processes.
+INFO: [Synth 8-7078] Launching helper process for spawning children vivado processes
+INFO: [Synth 8-7075] Helper process launched with PID 26559
+---------------------------------------------------------------------------------
+Starting RTL Elaboration : Time (s): cpu = 00:00:04 ; elapsed = 00:00:04 . Memory (MB): peak = 1925.547 ; gain = 419.828 ; free physical = 11006 ; free virtual = 23680
+---------------------------------------------------------------------------------
+INFO: [Synth 8-6157] synthesizing module 'tb_design_1_Stimu_0_0' [/home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.gen/sources_1/bd/tb_design_1/ip/tb_design_1_Stimu_0_0/synth/tb_design_1_Stimu_0_0.v:53]
+INFO: [Synth 8-638] synthesizing module 'Stimu' [/home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sources_1/new/tb_hf_gen_fpga.vhd:11]
+WARNING: [Synth 8-312] ignoring unsynthesizable construct: wait statement with no conditon [/home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sources_1/new/tb_hf_gen_fpga.vhd:20]
+WARNING: [Synth 8-312] ignoring unsynthesizable construct: wait statement with no conditon [/home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sources_1/new/tb_hf_gen_fpga.vhd:29]
+WARNING: [Synth 8-312] ignoring unsynthesizable construct: wait statement with no conditon [/home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sources_1/new/tb_hf_gen_fpga.vhd:31]
+INFO: [Synth 8-256] done synthesizing module 'Stimu' (0#1) [/home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sources_1/new/tb_hf_gen_fpga.vhd:11]
+ERROR: [Synth 8-11365] for the instance 'inst' of module 'Stimu' declared at '/home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sources_1/new/tb_hf_gen_fpga.vhd:4', named port connection 'tb_sw_overlap' does not exist [/home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.gen/sources_1/bd/tb_design_1/ip/tb_design_1_Stimu_0_0/synth/tb_design_1_Stimu_0_0.v:76]
+ERROR: [Synth 8-11365] for the instance 'inst' of module 'Stimu' declared at '/home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sources_1/new/tb_hf_gen_fpga.vhd:4', named port connection 'tb_sw' does not exist [/home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.gen/sources_1/bd/tb_design_1/ip/tb_design_1_Stimu_0_0/synth/tb_design_1_Stimu_0_0.v:77]
+ERROR: [Synth 8-6156] failed synthesizing module 'tb_design_1_Stimu_0_0' [/home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.gen/sources_1/bd/tb_design_1/ip/tb_design_1_Stimu_0_0/synth/tb_design_1_Stimu_0_0.v:53]
+---------------------------------------------------------------------------------
+Finished RTL Elaboration : Time (s): cpu = 00:00:05 ; elapsed = 00:00:06 . Memory (MB): peak = 1997.516 ; gain = 491.797 ; free physical = 10875 ; free virtual = 23549
+---------------------------------------------------------------------------------
+RTL Elaboration failed
+INFO: [Common 17-83] Releasing license: Synthesis
+12 Infos, 3 Warnings, 0 Critical Warnings and 4 Errors encountered.
+synth_design failed
+ERROR: [Common 17-69] Command failed: Synthesis failed - please see the console or run log file for details
+INFO: [Common 17-206] Exiting Vivado at Wed Sep 10 22:55:55 2025...
