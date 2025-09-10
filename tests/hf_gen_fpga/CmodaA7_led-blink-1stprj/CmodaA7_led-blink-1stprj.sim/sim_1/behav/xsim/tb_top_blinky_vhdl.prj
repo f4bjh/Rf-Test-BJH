@@ -1,0 +1,7 @@
+# compile vhdl design source files
+vhdl xil_defaultlib  \
+"../../../../CmodaA7_led-blink-1stprj.srcs/sources_1/new/top_blinky.vhd" \
+"../../../../CmodaA7_led-blink-1stprj.srcs/sim_1/new/tb_top_blinky.vhdl" \
+
+# Do not sort compile order
+nosort
