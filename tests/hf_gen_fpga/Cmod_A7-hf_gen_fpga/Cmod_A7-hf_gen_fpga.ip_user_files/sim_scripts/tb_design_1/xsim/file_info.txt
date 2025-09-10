@@ -1,0 +1,4 @@
+tb_design_1_Stimu_0_0.v,verilog,xil_defaultlib,../../../bd/tb_design_1/ip/tb_design_1_Stimu_0_0/sim/tb_design_1_Stimu_0_0.v,
+tb_design_1_hf_gen_fpga_0_0.v,verilog,xil_defaultlib,../../../bd/tb_design_1/ip/tb_design_1_hf_gen_fpga_0_0/sim/tb_design_1_hf_gen_fpga_0_0.v,
+tb_design_1.v,verilog,xil_defaultlib,../../../bd/tb_design_1/sim/tb_design_1.v,
+glbl.v,Verilog,xil_defaultlib,glbl.v
