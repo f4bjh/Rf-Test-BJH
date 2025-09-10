@@ -8,3 +8,5 @@ dependencies.lock
 *auto_*
 *.zip
 *.bak
+*backup*
+*.str
