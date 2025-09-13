@@ -1,4 +1,0 @@
-Running: xsim.dir/hf_gen_fpga_behav/xsimk -simmode gui -wdb hf_gen_fpga_behav.wdb -simrunnum 0 -socket 44971
-Design successfully loaded
-Design Loading Memory Usage: 183920 KB (Peak: 183920 KB)
-Design Loading CPU Usage: 1050 ms

@@ -1,0 +1,24 @@
+#-----------------------------------------------------------
+# Vivado v2024.2 (64-bit)
+# SW Build 5239630 on Fri Nov 08 22:34:34 MST 2024
+# IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
+# SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
+# Start of session at: Sat Sep 13 17:12:25 2025
+# Process ID         : 450642
+# Current directory  : /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.runs/design_1_Stimu2_0_0_synth_1
+# Command line       : vivado -log design_1_Stimu2_0_0.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source design_1_Stimu2_0_0.tcl
+# Log file           : /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.runs/design_1_Stimu2_0_0_synth_1/design_1_Stimu2_0_0.vds
+# Journal file       : /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.runs/design_1_Stimu2_0_0_synth_1/vivado.jou
+# Running On         : f4bjh-minipc
+# Platform           : Ubuntu
+# Operating System   : Ubuntu 24.04.3 LTS
+# Processor Detail   : AMD Ryzen 7 5700U with Radeon Graphics
+# CPU Frequency      : 4341.007 MHz
+# CPU Physical cores : 8
+# CPU Logical cores  : 16
+# Host memory        : 33021 MB
+# Swap memory        : 2147 MB
+# Total Virtual      : 35169 MB
+# Available Virtual  : 23322 MB
+#-----------------------------------------------------------
+source design_1_Stimu2_0_0.tcl -notrace
