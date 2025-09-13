@@ -1,18 +1,16 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
-entity Stimu is  
+entity Stimu2 is  
 Port ( 
    tb_clock12M : out std_logic;
    tb_reset : out std_logic
 );
-end Stimu;
+end Stimu2;
 
-architecture Behavioral of Stimu is
+architecture Behavioral of Stimu2 is
     constant  clock12M: time := 83 ns;   -- clock constant
-    
 begin
-
 -- Clock
 clock12M_process: process
 begin
@@ -26,9 +24,12 @@ end process;
 stim_proc: process
 begin        
   tb_reset <= '0';
-  wait for 100 ns;    
-    tb_reset <= '1';
+  wait for 1ns;
+  tb_reset <= '1';
+  wait for clock12M*100;    
+  tb_reset <= '0';
   wait for clock12M*10;
   wait;
 end process;
+
 end Behavioral;
