@@ -3,8 +3,8 @@
 # SW Build 5239630 on Fri Nov 08 22:34:34 MST 2024
 # IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
 # SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
-# Start of session at: Sat Sep 13 17:45:19 2025
-# Process ID         : 457884
+# Start of session at: Sat Sep 13 18:55:42 2025
+# Process ID         : 466888
 # Current directory  : /home/f4bjh/devel/Rf-Test-BJH
 # Command line       : vivado
 # Log file           : /home/f4bjh/devel/Rf-Test-BJH/vivado.log
@@ -13,58 +13,55 @@
 # Platform           : Ubuntu
 # Operating System   : Ubuntu 24.04.3 LTS
 # Processor Detail   : AMD Ryzen 7 5700U with Radeon Graphics
-# CPU Frequency      : 400.000 MHz
+# CPU Frequency      : 4340.517 MHz
 # CPU Physical cores : 8
 # CPU Logical cores  : 16
 # Host memory        : 33021 MB
 # Swap memory        : 2147 MB
 # Total Virtual      : 35169 MB
-# Available Virtual  : 24416 MB
+# Available Virtual  : 23943 MB
 #-----------------------------------------------------------
 start_gui
 open_project /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.xpr
-launch_simulation
-source design_1_wrapper.tcl
 update_compile_order -fileset sources_1
-report_ip_status -name ip_status 
-update_module_reference [get_ips  design_1_oscillator2_0_0]
-generate_target all [get_files  /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sources_1/bd/design_1/design_1.bd]
-export_ip_user_files -of_objects [get_files /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sources_1/bd/design_1/design_1.bd] -no_script -sync -force -quiet
-create_ip_run [get_files -of_objects [get_fileset sources_1] /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sources_1/bd/design_1/design_1.bd]
-launch_runs design_1_oscillator2_0_0_synth_1 -jobs 8
-wait_on_run design_1_oscillator2_0_0_synth_1
-export_simulation -lib_map_path [list {modelsim=/home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.cache/compile_simlib/modelsim} {questa=/home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.cache/compile_simlib/questa} {xcelium=/home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.cache/compile_simlib/xcelium} {vcs=/home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.cache/compile_simlib/vcs} {riviera=/home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.cache/compile_simlib/riviera}] -of_objects [get_files /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sources_1/bd/design_1/design_1.bd] -directory /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.ip_user_files/sim_scripts -ip_user_files_dir /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.ip_user_files -ipstatic_source_dir /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.ip_user_files/ipstatic -use_ip_compiled_libs -force -quiet
-report_ip_status -name ip_status 
-update_module_reference [get_ips  design_1_oscillator2_0_0]
-generate_target all [get_files  /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sources_1/bd/design_1/design_1.bd]
-export_ip_user_files -of_objects [get_files /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sources_1/bd/design_1/design_1.bd] -no_script -sync -force -quiet
-create_ip_run [get_files -of_objects [get_fileset sources_1] /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sources_1/bd/design_1/design_1.bd]
-launch_runs design_1_oscillator2_0_0_synth_1 -jobs 8
-wait_on_run design_1_oscillator2_0_0_synth_1
-export_simulation -lib_map_path [list {modelsim=/home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.cache/compile_simlib/modelsim} {questa=/home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.cache/compile_simlib/questa} {xcelium=/home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.cache/compile_simlib/xcelium} {vcs=/home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.cache/compile_simlib/vcs} {riviera=/home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.cache/compile_simlib/riviera}] -of_objects [get_files /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sources_1/bd/design_1/design_1.bd] -directory /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.ip_user_files/sim_scripts -ip_user_files_dir /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.ip_user_files -ipstatic_source_dir /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.ip_user_files/ipstatic -use_ip_compiled_libs -force -quiet
-close_sim
-generate_target Simulation [get_files /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sources_1/ip/clk_wiz_0/clk_wiz_0.xci]
-launch_simulation
-source design_1_wrapper.tcl
-add_wave {{/design_1_wrapper/design_1_i/oscillator2_0/clock12M}} {{/design_1_wrapper/design_1_i/oscillator2_0/reset_n}} {{/design_1_wrapper/design_1_i/oscillator2_0/clk}} {{/design_1_wrapper/design_1_i/oscillator2_0/clkn}} 
-restart
-restart
-restart
-restart
-restart
-restart
-run all
-current_wave_config {Untitled 1}
-add_wave {{/design_1_wrapper/design_1_i/oscillator2_0/inst/clock12M}} {{/design_1_wrapper/design_1_i/oscillator2_0/inst/reset_n}} {{/design_1_wrapper/design_1_i/oscillator2_0/inst/clk}} {{/design_1_wrapper/design_1_i/oscillator2_0/inst/clkn}} {{/design_1_wrapper/design_1_i/oscillator2_0/inst/clock50M}} {{/design_1_wrapper/design_1_i/oscillator2_0/inst/counter}} {{/design_1_wrapper/design_1_i/oscillator2_0/inst/MAX}} 
-restart
-restart
-run all
-restart
-run all
-run 10 us
-restart
-run 10 us
-save_wave_config {/home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/design_1_wrapper_behav.wcfg}
-add_files -fileset sim_1 -norecurse /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/design_1_wrapper_behav.wcfg
-set_property xsim.view /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/design_1_wrapper_behav.wcfg [get_filesets sim_1]
-close_sim
+# Disabling source management mode.  This is to allow the top design properties to be set without GUI intervention.
+set_property source_mgmt_mode None [current_project]
+set_property top oscillator2 [current_fileset]
+set_property top_lib xil_defaultlib [current_fileset]
+set_property top_arch Behavioral [current_fileset]
+set_property top_file /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sources_1/new/hf_gen_fpga.vhd [current_fileset]
+# Re-enabling previously disabled source management mode.
+set_property source_mgmt_mode All [current_project]
+update_compile_order -fileset sources_1
+set_property is_enabled false [get_files  /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.gen/sources_1/bd/design_1/hdl/design_1_wrapper.v]
+set_property is_enabled false [get_files  /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sources_1/new/tb_hf_gen_fpga.vhd]
+set_property is_enabled false [get_files  /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/sources_1/bd/design_1/design_1.bd]
+file mkdir /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/constrs_1
+file mkdir /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/constrs_1/new
+close [ open /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/constrs_1/new/cmod_a7.xdc w ]
+add_files -fileset constrs_1 /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.srcs/constrs_1/new/cmod_a7.xdc
+update_module_reference design_1_Stimu2_0_0
+launch_runs synth_1 -jobs 8
+wait_on_run synth_1
+launch_runs impl_1 -jobs 8
+wait_on_run impl_1
+launch_runs impl_1 -to_step write_bitstream -jobs 8
+wait_on_run impl_1
+reset_run synth_1
+launch_runs synth_1 -jobs 8
+wait_on_run synth_1
+launch_runs impl_1 -jobs 8
+wait_on_run impl_1
+launch_runs impl_1 -to_step write_bitstream -jobs 8
+wait_on_run impl_1
+open_hw_manager
+connect_hw_server -allow_non_jtag
+open_hw_target
+set_property PROGRAM.FILE {/home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.runs/impl_1/oscillator2.bit} [get_hw_devices xc7a35t_0]
+current_hw_device [get_hw_devices xc7a35t_0]
+refresh_hw_device -update_hw_probes false [lindex [get_hw_devices xc7a35t_0] 0]
+set_property PROBES.FILE {} [get_hw_devices xc7a35t_0]
+set_property FULL_PROBES.FILE {} [get_hw_devices xc7a35t_0]
+set_property PROGRAM.FILE {/home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.runs/impl_1/oscillator2.bit} [get_hw_devices xc7a35t_0]
+program_hw_devices [get_hw_devices xc7a35t_0]
+refresh_hw_device [lindex [get_hw_devices xc7a35t_0] 0]

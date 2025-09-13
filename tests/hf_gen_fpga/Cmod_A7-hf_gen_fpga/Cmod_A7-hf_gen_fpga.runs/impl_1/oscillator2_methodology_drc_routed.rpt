@@ -1,0 +1,60 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2024.2 (lin64) Build 5239630 Fri Nov 08 22:34:34 MST 2024
+| Date         : Sat Sep 13 19:13:25 2025
+| Host         : f4bjh-minipc running 64-bit Ubuntu 24.04.3 LTS
+| Command      : report_methodology -file oscillator2_methodology_drc_routed.rpt -pb oscillator2_methodology_drc_routed.pb -rpx oscillator2_methodology_drc_routed.rpx
+| Design       : oscillator2
+| Device       : xc7a35tcpg236-1
+| Speed File   : -1
+| Design State : Fully Routed
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Report Methodology
+
+Table of Contents
+-----------------
+1. REPORT SUMMARY
+2. REPORT DETAILS
+
+1. REPORT SUMMARY
+-----------------
+            Netlist: netlist
+          Floorplan: design_1
+      Design limits: <entire design considered>
+             Max checks: <unlimited>
+             Checks found: 4
++-----------+----------+------------------------------------------------------------------+--------+
+| Rule      | Severity | Description                                                      | Checks |
++-----------+----------+------------------------------------------------------------------+--------+
+| CKLD-2    | Warning  | Clock Net has IO Driver, not a Clock Buf, and/or non-Clock loads | 1      |
+| TIMING-18 | Warning  | Missing input or output delay                                    | 3      |
++-----------+----------+------------------------------------------------------------------+--------+
+
+2. REPORT DETAILS
+-----------------
+CKLD-2#1 Warning
+Clock Net has IO Driver, not a Clock Buf, and/or non-Clock loads  
+Clock net clock12M_IBUF is directly driven by an IO rather than a Clock Buffer or may be an IO driving a mix of Clock Buffer and non-Clock loads. This connectivity should be reviewed and corrected as appropriate. Driver(s): clk_sig_reg/C, clkn_sig_reg/C, counter_reg[0]/C, counter_reg[10]/C,
+counter_reg[11]/C, counter_reg[12]/C, counter_reg[13]/C, counter_reg[14]/C,
+counter_reg[15]/C, counter_reg[1]/C, counter_reg[3]/C, counter_reg[4]/C,
+counter_reg[8]/C, counter_reg[9]/C, interlock_reg/C
+ (the first 15 of 20 listed)
+Related violations: <none>
+
+TIMING-18#1 Warning
+Missing input or output delay  
+An input delay is missing on reset_n relative to the rising and/or falling clock edge(s) of sys_clk.
+Related violations: <none>
+
+TIMING-18#2 Warning
+Missing input or output delay  
+An output delay is missing on clk relative to the rising and/or falling clock edge(s) of sys_clk.
+Related violations: <none>
+
+TIMING-18#3 Warning
+Missing input or output delay  
+An output delay is missing on clkn relative to the rising and/or falling clock edge(s) of sys_clk.
+Related violations: <none>
+
+
