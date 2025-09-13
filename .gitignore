@@ -6,3 +6,4 @@ dependencies.lock
 .*
 *backup*
 *.str
+*.zip
