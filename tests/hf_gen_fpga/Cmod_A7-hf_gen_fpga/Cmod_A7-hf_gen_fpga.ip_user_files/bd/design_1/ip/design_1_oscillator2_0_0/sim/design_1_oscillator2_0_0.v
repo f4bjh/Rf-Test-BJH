@@ -73,7 +73,7 @@ output wire clk;
 output wire clkn;
 
   oscillator2 #(
-    .MAX(8'B00000100)
+    .MAX(8'B00000001)
   ) inst (
     .clock12M(clock12M),
     .reset_n(reset_n),

@@ -52,7 +52,7 @@
 
 (* X_CORE_INFO = "oscillator2,Vivado 2024.2" *)
 (* CHECK_LICENSE_TYPE = "design_1_oscillator2_0_0,oscillator2,{}" *)
-(* CORE_GENERATION_INFO = "design_1_oscillator2_0_0,oscillator2,{x_ipProduct=Vivado 2024.2,x_ipVendor=xilinx.com,x_ipLibrary=module_ref,x_ipName=oscillator2,x_ipVersion=1.0,x_ipCoreRevision=1,x_ipLanguage=VERILOG,x_ipSimLanguage=MIXED,MAX=00000100}" *)
+(* CORE_GENERATION_INFO = "design_1_oscillator2_0_0,oscillator2,{x_ipProduct=Vivado 2024.2,x_ipVendor=xilinx.com,x_ipLibrary=module_ref,x_ipName=oscillator2,x_ipVersion=1.0,x_ipCoreRevision=1,x_ipLanguage=VERILOG,x_ipSimLanguage=MIXED,MAX=00000001}" *)
 (* IP_DEFINITION_SOURCE = "module_ref" *)
 (* DowngradeIPIdentifiedWarnings = "yes" *)
 module design_1_oscillator2_0_0 (
@@ -74,7 +74,7 @@ output wire clk;
 output wire clkn;
 
   oscillator2 #(
-    .MAX(8'B00000100)
+    .MAX(8'B00000001)
   ) inst (
     .clock12M(clock12M),
     .reset_n(reset_n),

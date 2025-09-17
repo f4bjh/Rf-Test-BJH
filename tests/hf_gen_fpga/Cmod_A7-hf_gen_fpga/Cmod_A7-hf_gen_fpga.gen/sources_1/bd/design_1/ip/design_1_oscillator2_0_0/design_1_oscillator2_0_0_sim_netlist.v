@@ -2,7 +2,7 @@
 // Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 // --------------------------------------------------------------------------------
 // Tool Version: Vivado v.2024.2 (lin64) Build 5239630 Fri Nov 08 22:34:34 MST 2024
-// Date        : Sat Sep 13 17:47:28 2025
+// Date        : Wed Sep 17 07:31:47 2025
 // Host        : f4bjh-minipc running 64-bit Ubuntu 24.04.3 LTS
 // Command     : write_verilog -force -mode funcsim
 //               /home/f4bjh/devel/Rf-Test-BJH/tests/hf_gen_fpga/Cmod_A7-hf_gen_fpga/Cmod_A7-hf_gen_fpga.gen/sources_1/bd/design_1/ip/design_1_oscillator2_0_0/design_1_oscillator2_0_0_sim_netlist.v
@@ -31,7 +31,7 @@ module design_1_oscillator2_0_0
   wire clock12M;
   wire reset_n;
 
-  (* MAX = "8'b00000100" *) 
+  (* MAX = "8'b00000001" *) 
   design_1_oscillator2_0_0_oscillator2 inst
        (.clk(clk),
         .clkn(clkn),
@@ -53,7 +53,7 @@ module design_1_oscillator2_0_0_clk_wiz_0
 
 endmodule
 
-(* MAX = "8'b00000100" *) (* ORIG_REF_NAME = "oscillator2" *) 
+(* MAX = "8'b00000001" *) (* ORIG_REF_NAME = "oscillator2" *) 
 module design_1_oscillator2_0_0_oscillator2
    (clock12M,
     reset_n,
@@ -74,7 +74,6 @@ module design_1_oscillator2_0_0_oscillator2
   wire clock12M;
   wire [15:0]counter;
   wire \counter[0]_i_1_n_0 ;
-  wire \counter[0]_i_2_n_0 ;
   wire \counter[10]_i_1_n_0 ;
   wire \counter[11]_i_1_n_0 ;
   wire \counter[12]_i_1_n_0 ;
@@ -82,10 +81,9 @@ module design_1_oscillator2_0_0_oscillator2
   wire \counter[14]_i_1_n_0 ;
   wire \counter[15]_i_2_n_0 ;
   wire \counter[15]_i_3_n_0 ;
+  wire \counter[15]_i_4_n_0 ;
   wire \counter[15]_i_5_n_0 ;
   wire \counter[15]_i_6_n_0 ;
-  wire \counter[15]_i_7_n_0 ;
-  wire \counter[15]_i_8_n_0 ;
   wire \counter[1]_i_1_n_0 ;
   wire \counter[2]_i_1_n_0 ;
   wire \counter[3]_i_1_n_0 ;
@@ -100,8 +98,8 @@ module design_1_oscillator2_0_0_oscillator2
   wire \counter_reg[12]_i_2_n_1 ;
   wire \counter_reg[12]_i_2_n_2 ;
   wire \counter_reg[12]_i_2_n_3 ;
-  wire \counter_reg[15]_i_4_n_2 ;
-  wire \counter_reg[15]_i_4_n_3 ;
+  wire \counter_reg[15]_i_7_n_2 ;
+  wire \counter_reg[15]_i_7_n_3 ;
   wire \counter_reg[4]_i_2_n_0 ;
   wire \counter_reg[4]_i_2_n_1 ;
   wire \counter_reg[4]_i_2_n_2 ;
@@ -114,24 +112,27 @@ module design_1_oscillator2_0_0_oscillator2
   wire interlock;
   wire reset;
   wire reset_n;
-  wire [3:2]\NLW_counter_reg[15]_i_4_CO_UNCONNECTED ;
-  wire [3:3]\NLW_counter_reg[15]_i_4_O_UNCONNECTED ;
+  wire [3:2]\NLW_counter_reg[15]_i_7_CO_UNCONNECTED ;
+  wire [3:3]\NLW_counter_reg[15]_i_7_O_UNCONNECTED ;
   wire NLW_u_clk_clk_out1_UNCONNECTED;
   wire NLW_u_clk_locked_UNCONNECTED;
 
-  (* SOFT_HLUTNM = "soft_lutpair0" *) 
+  (* SOFT_HLUTNM = "soft_lutpair2" *) 
   LUT2 #(
     .INIT(4'h2)) 
     clk_INST_0
        (.I0(clk_sig),
         .I1(interlock),
         .O(clk));
-  (* SOFT_HLUTNM = "soft_lutpair8" *) 
-  LUT2 #(
-    .INIT(4'h9)) 
+  (* SOFT_HLUTNM = "soft_lutpair0" *) 
+  LUT5 #(
+    .INIT(32'hFFFE0001)) 
     clk_sig_i_1
        (.I0(\counter[15]_i_3_n_0 ),
-        .I1(clk_sig),
+        .I1(\counter[15]_i_4_n_0 ),
+        .I2(\counter[15]_i_5_n_0 ),
+        .I3(\counter[15]_i_6_n_0 ),
+        .I4(clk_sig),
         .O(clk_sig_i_1_n_0));
   FDCE clk_sig_reg
        (.C(clock12M),
@@ -139,19 +140,22 @@ module design_1_oscillator2_0_0_oscillator2
         .CLR(reset),
         .D(clk_sig_i_1_n_0),
         .Q(clk_sig));
+  (* SOFT_HLUTNM = "soft_lutpair2" *) 
   LUT2 #(
     .INIT(4'h2)) 
     clkn_INST_0
        (.I0(clkn_sig),
         .I1(interlock),
         .O(clkn));
-  (* SOFT_HLUTNM = "soft_lutpair0" *) 
-  LUT3 #(
-    .INIT(8'hE2)) 
+  LUT6 #(
+    .INIT(64'hFFFFFFFE00010000)) 
     clkn_sig_i_1
-       (.I0(clk_sig),
-        .I1(\counter[15]_i_3_n_0 ),
-        .I2(clkn_sig),
+       (.I0(\counter[15]_i_3_n_0 ),
+        .I1(\counter[15]_i_4_n_0 ),
+        .I2(\counter[15]_i_5_n_0 ),
+        .I3(\counter[15]_i_6_n_0 ),
+        .I4(clk_sig),
+        .I5(clkn_sig),
         .O(clkn_sig_i_1_n_0));
   FDPE clkn_sig_reg
        (.C(clock12M),
@@ -159,171 +163,188 @@ module design_1_oscillator2_0_0_oscillator2
         .D(clkn_sig_i_1_n_0),
         .PRE(reset),
         .Q(clkn_sig));
-  LUT2 #(
-    .INIT(4'h2)) 
+  (* SOFT_HLUTNM = "soft_lutpair1" *) 
+  LUT1 #(
+    .INIT(2'h1)) 
     \counter[0]_i_1 
-       (.I0(\counter[0]_i_2_n_0 ),
-        .I1(counter[0]),
+       (.I0(counter[0]),
         .O(\counter[0]_i_1_n_0 ));
-  LUT6 #(
-    .INIT(64'hFFFFFFFFFFFFFFFE)) 
-    \counter[0]_i_2 
-       (.I0(\counter[15]_i_8_n_0 ),
-        .I1(\counter[15]_i_7_n_0 ),
-        .I2(counter[15]),
-        .I3(counter[14]),
-        .I4(counter[1]),
-        .I5(\counter[15]_i_5_n_0 ),
-        .O(\counter[0]_i_2_n_0 ));
-  (* SOFT_HLUTNM = "soft_lutpair2" *) 
-  LUT2 #(
-    .INIT(4'h8)) 
+  LUT5 #(
+    .INIT(32'hFFFE0000)) 
     \counter[10]_i_1 
        (.I0(\counter[15]_i_3_n_0 ),
-        .I1(data0[10]),
+        .I1(\counter[15]_i_4_n_0 ),
+        .I2(\counter[15]_i_5_n_0 ),
+        .I3(\counter[15]_i_6_n_0 ),
+        .I4(data0[10]),
         .O(\counter[10]_i_1_n_0 ));
-  (* SOFT_HLUTNM = "soft_lutpair3" *) 
-  LUT2 #(
-    .INIT(4'h8)) 
+  LUT5 #(
+    .INIT(32'hFFFE0000)) 
     \counter[11]_i_1 
        (.I0(\counter[15]_i_3_n_0 ),
-        .I1(data0[11]),
+        .I1(\counter[15]_i_4_n_0 ),
+        .I2(\counter[15]_i_5_n_0 ),
+        .I3(\counter[15]_i_6_n_0 ),
+        .I4(data0[11]),
         .O(\counter[11]_i_1_n_0 ));
-  (* SOFT_HLUTNM = "soft_lutpair3" *) 
-  LUT2 #(
-    .INIT(4'h8)) 
+  LUT5 #(
+    .INIT(32'hFFFE0000)) 
     \counter[12]_i_1 
        (.I0(\counter[15]_i_3_n_0 ),
-        .I1(data0[12]),
+        .I1(\counter[15]_i_4_n_0 ),
+        .I2(\counter[15]_i_5_n_0 ),
+        .I3(\counter[15]_i_6_n_0 ),
+        .I4(data0[12]),
         .O(\counter[12]_i_1_n_0 ));
-  (* SOFT_HLUTNM = "soft_lutpair2" *) 
-  LUT2 #(
-    .INIT(4'h8)) 
+  LUT5 #(
+    .INIT(32'hFFFE0000)) 
     \counter[13]_i_1 
        (.I0(\counter[15]_i_3_n_0 ),
-        .I1(data0[13]),
+        .I1(\counter[15]_i_4_n_0 ),
+        .I2(\counter[15]_i_5_n_0 ),
+        .I3(\counter[15]_i_6_n_0 ),
+        .I4(data0[13]),
         .O(\counter[13]_i_1_n_0 ));
-  (* SOFT_HLUTNM = "soft_lutpair1" *) 
-  LUT2 #(
-    .INIT(4'h8)) 
+  LUT5 #(
+    .INIT(32'hFFFE0000)) 
     \counter[14]_i_1 
        (.I0(\counter[15]_i_3_n_0 ),
-        .I1(data0[14]),
+        .I1(\counter[15]_i_4_n_0 ),
+        .I2(\counter[15]_i_5_n_0 ),
+        .I3(\counter[15]_i_6_n_0 ),
+        .I4(data0[14]),
         .O(\counter[14]_i_1_n_0 ));
-  LUT2 #(
-    .INIT(4'h7)) 
+  LUT5 #(
+    .INIT(32'h0001FFFF)) 
     \counter[15]_i_1 
        (.I0(\counter[15]_i_3_n_0 ),
-        .I1(interlock),
+        .I1(\counter[15]_i_4_n_0 ),
+        .I2(\counter[15]_i_5_n_0 ),
+        .I3(\counter[15]_i_6_n_0 ),
+        .I4(interlock),
         .O(counter_d));
-  (* SOFT_HLUTNM = "soft_lutpair1" *) 
-  LUT2 #(
-    .INIT(4'h8)) 
+  LUT5 #(
+    .INIT(32'hFFFE0000)) 
     \counter[15]_i_2 
        (.I0(\counter[15]_i_3_n_0 ),
-        .I1(data0[15]),
+        .I1(\counter[15]_i_4_n_0 ),
+        .I2(\counter[15]_i_5_n_0 ),
+        .I3(\counter[15]_i_6_n_0 ),
+        .I4(data0[15]),
         .O(\counter[15]_i_2_n_0 ));
-  LUT5 #(
-    .INIT(32'hFFFFFFFE)) 
+  LUT4 #(
+    .INIT(16'hFFFE)) 
     \counter[15]_i_3 
-       (.I0(\counter[15]_i_5_n_0 ),
-        .I1(\counter[15]_i_6_n_0 ),
-        .I2(\counter[15]_i_7_n_0 ),
-        .I3(\counter[15]_i_8_n_0 ),
-        .I4(counter[0]),
+       (.I0(counter[5]),
+        .I1(counter[4]),
+        .I2(counter[7]),
+        .I3(counter[6]),
         .O(\counter[15]_i_3_n_0 ));
+  (* SOFT_HLUTNM = "soft_lutpair1" *) 
+  LUT4 #(
+    .INIT(16'hFFFD)) 
+    \counter[15]_i_4 
+       (.I0(counter[0]),
+        .I1(counter[1]),
+        .I2(counter[3]),
+        .I3(counter[2]),
+        .O(\counter[15]_i_4_n_0 ));
   LUT4 #(
     .INIT(16'hFFFE)) 
     \counter[15]_i_5 
-       (.I0(counter[11]),
-        .I1(counter[10]),
-        .I2(counter[13]),
-        .I3(counter[12]),
+       (.I0(counter[13]),
+        .I1(counter[12]),
+        .I2(counter[15]),
+        .I3(counter[14]),
         .O(\counter[15]_i_5_n_0 ));
-  LUT3 #(
-    .INIT(8'hFE)) 
-    \counter[15]_i_6 
-       (.I0(counter[15]),
-        .I1(counter[14]),
-        .I2(counter[1]),
-        .O(\counter[15]_i_6_n_0 ));
-  LUT4 #(
-    .INIT(16'hFFFD)) 
-    \counter[15]_i_7 
-       (.I0(counter[2]),
-        .I1(counter[3]),
-        .I2(counter[5]),
-        .I3(counter[4]),
-        .O(\counter[15]_i_7_n_0 ));
   LUT4 #(
     .INIT(16'hFFFE)) 
-    \counter[15]_i_8 
-       (.I0(counter[7]),
-        .I1(counter[6]),
-        .I2(counter[9]),
-        .I3(counter[8]),
-        .O(\counter[15]_i_8_n_0 ));
-  LUT2 #(
-    .INIT(4'h8)) 
+    \counter[15]_i_6 
+       (.I0(counter[9]),
+        .I1(counter[8]),
+        .I2(counter[11]),
+        .I3(counter[10]),
+        .O(\counter[15]_i_6_n_0 ));
+  LUT5 #(
+    .INIT(32'hFFFE0000)) 
     \counter[1]_i_1 
        (.I0(\counter[15]_i_3_n_0 ),
-        .I1(data0[1]),
+        .I1(\counter[15]_i_4_n_0 ),
+        .I2(\counter[15]_i_5_n_0 ),
+        .I3(\counter[15]_i_6_n_0 ),
+        .I4(data0[1]),
         .O(\counter[1]_i_1_n_0 ));
-  (* SOFT_HLUTNM = "soft_lutpair7" *) 
-  LUT2 #(
-    .INIT(4'h8)) 
+  LUT5 #(
+    .INIT(32'hFFFE0000)) 
     \counter[2]_i_1 
        (.I0(\counter[15]_i_3_n_0 ),
-        .I1(data0[2]),
+        .I1(\counter[15]_i_4_n_0 ),
+        .I2(\counter[15]_i_5_n_0 ),
+        .I3(\counter[15]_i_6_n_0 ),
+        .I4(data0[2]),
         .O(\counter[2]_i_1_n_0 ));
-  (* SOFT_HLUTNM = "soft_lutpair7" *) 
-  LUT2 #(
-    .INIT(4'h8)) 
+  LUT5 #(
+    .INIT(32'hFFFE0000)) 
     \counter[3]_i_1 
        (.I0(\counter[15]_i_3_n_0 ),
-        .I1(data0[3]),
+        .I1(\counter[15]_i_4_n_0 ),
+        .I2(\counter[15]_i_5_n_0 ),
+        .I3(\counter[15]_i_6_n_0 ),
+        .I4(data0[3]),
         .O(\counter[3]_i_1_n_0 ));
-  (* SOFT_HLUTNM = "soft_lutpair6" *) 
-  LUT2 #(
-    .INIT(4'h8)) 
+  LUT5 #(
+    .INIT(32'hFFFE0000)) 
     \counter[4]_i_1 
        (.I0(\counter[15]_i_3_n_0 ),
-        .I1(data0[4]),
+        .I1(\counter[15]_i_4_n_0 ),
+        .I2(\counter[15]_i_5_n_0 ),
+        .I3(\counter[15]_i_6_n_0 ),
+        .I4(data0[4]),
         .O(\counter[4]_i_1_n_0 ));
-  (* SOFT_HLUTNM = "soft_lutpair6" *) 
-  LUT2 #(
-    .INIT(4'h8)) 
+  LUT5 #(
+    .INIT(32'hFFFE0000)) 
     \counter[5]_i_1 
        (.I0(\counter[15]_i_3_n_0 ),
-        .I1(data0[5]),
+        .I1(\counter[15]_i_4_n_0 ),
+        .I2(\counter[15]_i_5_n_0 ),
+        .I3(\counter[15]_i_6_n_0 ),
+        .I4(data0[5]),
         .O(\counter[5]_i_1_n_0 ));
-  (* SOFT_HLUTNM = "soft_lutpair4" *) 
-  LUT2 #(
-    .INIT(4'h8)) 
+  LUT5 #(
+    .INIT(32'hFFFE0000)) 
     \counter[6]_i_1 
        (.I0(\counter[15]_i_3_n_0 ),
-        .I1(data0[6]),
+        .I1(\counter[15]_i_4_n_0 ),
+        .I2(\counter[15]_i_5_n_0 ),
+        .I3(\counter[15]_i_6_n_0 ),
+        .I4(data0[6]),
         .O(\counter[6]_i_1_n_0 ));
-  (* SOFT_HLUTNM = "soft_lutpair5" *) 
-  LUT2 #(
-    .INIT(4'h8)) 
+  LUT5 #(
+    .INIT(32'hFFFE0000)) 
     \counter[7]_i_1 
        (.I0(\counter[15]_i_3_n_0 ),
-        .I1(data0[7]),
+        .I1(\counter[15]_i_4_n_0 ),
+        .I2(\counter[15]_i_5_n_0 ),
+        .I3(\counter[15]_i_6_n_0 ),
+        .I4(data0[7]),
         .O(\counter[7]_i_1_n_0 ));
-  (* SOFT_HLUTNM = "soft_lutpair5" *) 
-  LUT2 #(
-    .INIT(4'h8)) 
+  LUT5 #(
+    .INIT(32'hFFFE0000)) 
     \counter[8]_i_1 
        (.I0(\counter[15]_i_3_n_0 ),
-        .I1(data0[8]),
+        .I1(\counter[15]_i_4_n_0 ),
+        .I2(\counter[15]_i_5_n_0 ),
+        .I3(\counter[15]_i_6_n_0 ),
+        .I4(data0[8]),
         .O(\counter[8]_i_1_n_0 ));
-  (* SOFT_HLUTNM = "soft_lutpair4" *) 
-  LUT2 #(
-    .INIT(4'h8)) 
+  LUT5 #(
+    .INIT(32'hFFFE0000)) 
     \counter[9]_i_1 
        (.I0(\counter[15]_i_3_n_0 ),
-        .I1(data0[9]),
+        .I1(\counter[15]_i_4_n_0 ),
+        .I2(\counter[15]_i_5_n_0 ),
+        .I3(\counter[15]_i_6_n_0 ),
+        .I4(data0[9]),
         .O(\counter[9]_i_1_n_0 ));
   FDCE \counter_reg[0] 
        (.C(clock12M),
@@ -376,12 +397,12 @@ module design_1_oscillator2_0_0_oscillator2
         .D(\counter[15]_i_2_n_0 ),
         .Q(counter[15]));
   (* ADDER_THRESHOLD = "35" *) 
-  CARRY4 \counter_reg[15]_i_4 
+  CARRY4 \counter_reg[15]_i_7 
        (.CI(\counter_reg[12]_i_2_n_0 ),
-        .CO({\NLW_counter_reg[15]_i_4_CO_UNCONNECTED [3:2],\counter_reg[15]_i_4_n_2 ,\counter_reg[15]_i_4_n_3 }),
+        .CO({\NLW_counter_reg[15]_i_7_CO_UNCONNECTED [3:2],\counter_reg[15]_i_7_n_2 ,\counter_reg[15]_i_7_n_3 }),
         .CYINIT(1'b0),
         .DI({1'b0,1'b0,1'b0,1'b0}),
-        .O({\NLW_counter_reg[15]_i_4_O_UNCONNECTED [3],data0[15:13]}),
+        .O({\NLW_counter_reg[15]_i_7_O_UNCONNECTED [3],data0[15:13]}),
         .S({1'b0,counter[15:13]}));
   FDCE \counter_reg[1] 
        (.C(clock12M),
@@ -453,11 +474,14 @@ module design_1_oscillator2_0_0_oscillator2
         .CLR(reset),
         .D(\counter[9]_i_1_n_0 ),
         .Q(counter[9]));
-  (* SOFT_HLUTNM = "soft_lutpair8" *) 
-  LUT1 #(
-    .INIT(2'h1)) 
+  (* SOFT_HLUTNM = "soft_lutpair0" *) 
+  LUT4 #(
+    .INIT(16'h0001)) 
     interlock_i_1
        (.I0(\counter[15]_i_3_n_0 ),
+        .I1(\counter[15]_i_4_n_0 ),
+        .I2(\counter[15]_i_5_n_0 ),
+        .I3(\counter[15]_i_6_n_0 ),
         .O(clk_sig_d));
   FDCE interlock_reg
        (.C(clock12M),

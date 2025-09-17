@@ -26,7 +26,7 @@ begin
   tb_reset <= '0';
   wait for 1ns;
   tb_reset <= '1';
-  wait for clock12M*100;    
+  wait for clock12M*10000;    
   tb_reset <= '0';
   wait for clock12M*10;
   wait;

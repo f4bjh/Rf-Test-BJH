@@ -8,11 +8,11 @@
     "gen_directory": "../../../../../../Cmod_A7-hf_gen_fpga.gen/sources_1/bd/design_1/ip/design_1_oscillator2_0_0",
     "parameters": {
       "component_parameters": {
-        "MAX": [ { "value": "\"00000100\"", "resolve_type": "user", "format": "bitString", "usage": "all" } ],
+        "MAX": [ { "value": "\"00000001\"", "resolve_type": "user", "format": "bitString", "usage": "all" } ],
         "Component_Name": [ { "value": "design_1_oscillator2_0_0", "resolve_type": "user", "usage": "all" } ]
       },
       "model_parameters": {
-        "MAX": [ { "value": "\"00000100\"", "resolve_type": "generated", "format": "bitString", "usage": "all" } ]
+        "MAX": [ { "value": "\"00000001\"", "resolve_type": "generated", "format": "bitString", "usage": "all" } ]
       },
       "project_parameters": {
         "ARCHITECTURE": [ { "value": "artix7" } ],
