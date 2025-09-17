@@ -16,7 +16,7 @@ use IEEE.numeric_std.all;
 
 entity oscillator2 is
 generic(
-    MAX: unsigned (7 downto 0) := x"04"
+    MAX: unsigned (7 downto 0) := x"01"
 );
 
 port(
