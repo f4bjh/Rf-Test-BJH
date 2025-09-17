@@ -90,10 +90,11 @@ begin
     begin
         if reset_n = '0' then
             clk_reg    <= '0';
-        elsif reset_counter_n = '0' then
+        elsif rising_edge(clk_in) then
+          if reset_counter_n = '0' then
              counter <= 0;   
              clk_reg    <= '0';
-        else
+          else
             -- Division avec duty-cycle pair/impair
             counter <= counter + 1;
             if (clk_reg = '0' and counter = high_count-1) then
@@ -103,6 +104,7 @@ begin
                 counter <= 0;
                 clk_reg <= '0';
             end if;
+          end if;
         end if;
     end process;
 
