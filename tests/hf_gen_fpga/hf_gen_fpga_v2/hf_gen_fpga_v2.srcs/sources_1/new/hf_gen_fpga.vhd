@@ -16,6 +16,7 @@ architecture rtl of oscillator2 is
 
     signal DIV        : natural range 1 to MAX := MAX; -- valeur courante du diviseur
     signal counter    : natural := 0;
+    signal reset_counter_n : std_logic :='0';
     signal clk_reg    : std_logic := '0';
 
     signal high_count : natural := MAX/2;
@@ -60,7 +61,7 @@ begin
     begin
         if reset_n = '0' then
             DIV        <= MAX;
-            counter    <= 0;
+            reset_counter_n    <= '0';
             high_count <= MAX/2;
             low_count  <= MAX - (MAX/2);
             button_last <= '0';
@@ -76,17 +77,22 @@ begin
                 -- recalcul high/low
                 high_count <= DIV/2;
                 low_count  <= DIV - (DIV/2);
-                counter    <= 0;
+                reset_counter_n    <= '0';
+            else
+                reset_counter_n    <= '1';
             end if;
             button_last <= button_stable;
          end if;
     end process;
     
     --gestion de la clock de sortie
-    process(clk_in, reset_n, counter)
+    process(clk_in, reset_n, reset_counter_n)
     begin
         if reset_n = '0' then
             clk_reg    <= '0';
+        elsif reset_counter_n = '0' then
+             counter <= 0;   
+             clk_reg    <= '0';
         else
             -- Division avec duty-cycle pair/impair
             counter <= counter + 1;
