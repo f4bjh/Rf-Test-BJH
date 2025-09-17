@@ -11,3 +11,12 @@ dependencies.lock
 *backup*
 *.str
 *.zip
+vivado.jou
+vivado.log
+vivado_*
+*.cache/
+*.gen/
+*.hw/
+*.ip_user_files/
+*.runs/
+*.sim/
