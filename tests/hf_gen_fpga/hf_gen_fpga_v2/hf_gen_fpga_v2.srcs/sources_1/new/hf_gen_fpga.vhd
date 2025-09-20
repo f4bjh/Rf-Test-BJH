@@ -96,13 +96,18 @@ begin
              clk_reg    <= '0';
           else
             -- Division avec duty-cycle pair/impair
-            counter <= counter + 1;
-            if (clk_reg = '0' and counter = high_count-1) then
+            if DIV = 1 then
+              -- cas particulier : pas de division, clk_out = clk_in
+              clk_reg <= not clk_reg;  -- ou bien clk_reg <= clk_in;
+            else
+              counter <= counter + 1;
+              if (clk_reg = '0' and counter = high_count-1) then
                 counter <= 0;
                 clk_reg <= '1';
-            elsif (clk_reg = '1' and counter = low_count-1) then
+              elsif (clk_reg = '1' and counter = low_count-1) then
                 counter <= 0;
                 clk_reg <= '0';
+              end if;
             end if;
           end if;
         end if;
