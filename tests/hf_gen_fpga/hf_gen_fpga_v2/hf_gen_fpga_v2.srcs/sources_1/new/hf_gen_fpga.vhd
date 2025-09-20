@@ -87,7 +87,7 @@ begin
     end process;
     
     --gestion de la clock de sortie
-    process(clk_in, reset_n, reset_counter_n)
+    process(clk_in, reset_n)
     begin
         if reset_n = '0' then
             clk_reg    <= '0';
