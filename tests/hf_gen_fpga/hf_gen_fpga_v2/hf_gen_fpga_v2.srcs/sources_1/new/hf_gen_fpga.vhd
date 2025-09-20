@@ -69,7 +69,7 @@ begin
         elsif rising_edge(clk_in) then
             -- Détection front montant (anti-rebondé)
             if (button_last = '0' and button_stable = '1') then
-                if DIV = 1 then
+                if DIV = 0 then
                     DIV <= MAX;
                     high_count <= MAX/2;
                     low_count  <= MAX - (MAX/2);
@@ -97,9 +97,9 @@ begin
              clk_reg    <= '0';
           else
             -- Division avec duty-cycle pair/impair
-            if DIV = 1 then
+            if DIV <= 1 then
               -- cas particulier : pas de division, clk_out = clk_in
-              clk_reg <= not clk_reg;  -- ou bien clk_reg <= clk_in;
+              clk_reg <= clk_in;
             else
               counter <= counter + 1;
               if (clk_reg = '0' and counter = high_count-1) then
