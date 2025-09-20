@@ -71,15 +71,16 @@ begin
             if (button_last = '0' and button_stable = '1') then
                 if DIV = 1 then
                     DIV <= MAX;
+                    high_count <= MAX/2;
+                    low_count  <= MAX - (MAX/2);
                 else
                     DIV <= DIV - 1;
+                    high_count <= (DIV - 1)/2;
+                    low_count  <= (DIV - 1) - ((DIV - 1)/2);
                 end if;
-                -- recalcul high/low
-                high_count <= DIV/2;
-                low_count  <= DIV - (DIV/2);
-                reset_counter_n    <= '0';
-            else
-                reset_counter_n    <= '1';
+                reset_counter_n <= '0';
+            else 
+                reset_counter_n <= '1';
             end if;
             button_last <= button_stable;
          end if;
