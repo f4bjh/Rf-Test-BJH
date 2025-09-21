@@ -78,7 +78,14 @@ void init_timer(meas_t *measure)
     gptimer_register_event_callbacks(gptimer, &cbs, user_ctx);
 
     gptimer_alarm_config_t alarm_config = {
-        .alarm_count = MEASURE_PERIOD_US, // precision du frequencemetre (1Hz)
+        .alarm_count = MEASURE_PERIOD_US, // precision du frequencemetre (1Hz) - hardcoded for now
+					  // will have to be tuned in function of the range selected
+					  // by user in web page
+					  // should we also add the option to choose the window time 
+					  // in web page ?
+					  // note : thie frequencymeter will be rework once ready
+					  // to get a really better precision (see relevant issue in
+					  // git lab n° 79
         .reload_count = 0,
         .flags.auto_reload_on_alarm = true,
     };
@@ -127,12 +134,21 @@ esp_err_t calc_frequencymeter(instance_meas_t *instance_meas)
     memset(instance_meas->calc_value, 0, CALC_VALUE_SIZE*sizeof(char));
     int freq=0;
 
+    //au depart,l'objectif etait d'obtenir une precision de 1mHz, sur le calibre 10MHz
+    //mais ca suppose des lors d'avoir une fene^tre de 1000*1s...soit 1000s...ce qui n'est pas raisonnable
+    //alors, a moins d'avoir correctement resolut li'ssue n°79 sur gitlab, qui vise a obtenir et ameliorer
+    //la precision pour obtenir cette precision attendue de 1mHz, pour le moment, on met en place un
+    //espece de contournement, dans la but d'affichier artificiellement une frequence avec une precision de 1mHz
+    //par exemple, pour 4MHz, on va afficher 4 000 000, 000 Hz. Les 3 zero aprs la virgule etant ajouté hardcodé ci-dessous
+    //note : on est oblige de passer un variable tampon "freq", car pdata_cache est un pointeur sur un octet seulement
+
+
     freq = *(measure.pdata_cache);
     freq |= ((*(measure.pdata_cache+1))<<8)&0xFF00;
     freq |= ((*(measure.pdata_cache+2))<<16)&0xFF0000;
     freq |= ((*(measure.pdata_cache+3))<<24)&0xFF000000;
 
-    sprintf(instance_meas->calc_value,"%d", freq );
+    sprintf(instance_meas->calc_value,"%d", freq*1000 );
 
     return ESP_OK;
 }
