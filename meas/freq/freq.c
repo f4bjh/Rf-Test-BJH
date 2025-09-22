@@ -11,7 +11,7 @@
 #include "meas.h"
 
 #define PCNT_INPUT_GPIO      GPIO_FREQUENCYMETER_INPUT       // GPIO d'entrée du signal
-#define MEASURE_PERIOD_US    1000000 // Période d'échantillonnage (1s) - periode de declenchement de l'IT timer
+#define MEASURE_PERIOD_US    250000 // Période d'échantillonnage (250ms) - periode de declenchement de l'IT timer
 
 static gptimer_handle_t gptimer = NULL;
 static pcnt_channel_handle_t pcnt_chan = NULL;
@@ -78,7 +78,7 @@ void init_timer(meas_t *measure)
     gptimer_register_event_callbacks(gptimer, &cbs, user_ctx);
 
     gptimer_alarm_config_t alarm_config = {
-        .alarm_count = MEASURE_PERIOD_US, // precision du frequencemetre (1Hz) - hardcoded for now
+        .alarm_count = MEASURE_PERIOD_US, // precision du frequencemetre (4Hz) - hardcoded for now
 					  // will have to be tuned in function of the range selected
 					  // by user in web page
 					  // should we also add the option to choose the window time 
@@ -148,7 +148,7 @@ esp_err_t calc_frequencymeter(instance_meas_t *instance_meas)
     freq |= ((*(measure.pdata_cache+2))<<16)&0xFF0000;
     freq |= ((*(measure.pdata_cache+3))<<24)&0xFF000000;
 
-    sprintf(instance_meas->calc_value,"%u", freq*1000 );
+    sprintf(instance_meas->calc_value,"%llu", (unsigned long long int) 4*freq*1000 );
 
     return ESP_OK;
 }

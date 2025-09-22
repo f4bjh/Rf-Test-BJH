@@ -37,7 +37,7 @@ socket.addEventListener('close', (event) => {
 });
 
 let freq = `unknown`;
-let freq_digit=new Array(10).fill(0);
+let freq_digit=new Array(11).fill(0);
 let freq_range = `10MHz`; // Valeur par défaut
 
 function send_freq_range_update(freq_range) {
@@ -86,10 +86,10 @@ socket.addEventListener('message', (event) => {
         break;
     }
 
-    let strFreq = String(freq).padStart(10, '0');
+    let strFreq = String(freq).padStart(11, '0');
 
-    for (let i = 0; i < 10; i++) {
-        freq_digit[i] = parseInt(strFreq[9-i]);
+    for (let i = 0; i < 11; i++) {
+        freq_digit[i] = parseInt(strFreq[10-i]);
     }
 
     //here, it depends on precision user set in page
