@@ -132,7 +132,7 @@ esp_err_t calc_frequencymeter(instance_meas_t *instance_meas)
 {
     meas_t measure=instance_meas->measures;
     memset(instance_meas->calc_value, 0, CALC_VALUE_SIZE*sizeof(char));
-    int freq=0;
+    unsigned int freq=0;
 
     //au depart,l'objectif etait d'obtenir une precision de 1mHz, sur le calibre 10MHz
     //mais ca suppose des lors d'avoir une fene^tre de 1000*1s...soit 1000s...ce qui n'est pas raisonnable
@@ -148,7 +148,7 @@ esp_err_t calc_frequencymeter(instance_meas_t *instance_meas)
     freq |= ((*(measure.pdata_cache+2))<<16)&0xFF0000;
     freq |= ((*(measure.pdata_cache+3))<<24)&0xFF000000;
 
-    sprintf(instance_meas->calc_value,"%d", freq*1000 );
+    sprintf(instance_meas->calc_value,"%u", freq*1000 );
 
     return ESP_OK;
 }
