@@ -50,12 +50,5 @@ Rf-Test-BJH is an amateur radio project of a universal radio test bench.
 
 ## Developpement documentation
 
-[Firmware architecture](./doc/Rf-Test-BJH/archi-sw-new2.drawio.svg)
+[SW/HW documentation](./doc/Rf-Test-BJH/hw_sw_documentation.md)
 
-[Partition table](./doc/Rf-Test-BJH/partition-table.drawio.svg)
-
-[Hardware architecture](./doc/Rf-Test-BJH/hw-synoptique-3.drawio.svg)
-
-[Frequencymeter architecture](./doc/Rf-Test-BJH/rf-freq-archi.drawio.svg)
-
-Note : in doc folder of this repo, you will find pdf version of this documentation
