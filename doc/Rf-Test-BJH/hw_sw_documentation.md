@@ -7,6 +7,9 @@
 
 ## HW architecture
 
+### Mecanic architecture
+![Mecanic structure](meca_struct.drawio.svg)
+
 ### Module connections
 ![Module connections](hw-synoptique.drawio.svg)
 
