@@ -279,4 +279,6 @@ int64_t adf4351_out_altvoltage0_refin_frequency(adf4351_dev *dev,
 int32_t adf4351_out_altvoltage0_powerdown(adf4351_dev *dev,
 		int32_t pwd);
 
+void adf4351_remove(adf4351_cfg_t *pcfg);
+
 #endif

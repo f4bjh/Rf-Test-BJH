@@ -40,236 +40,11 @@
 #include "meas_mgt.h"
 #include "meas.h"
 
-static char TAG[] = "PLL";
+static char TAG[] = "adf4351";
 
 uint32_t ADF4351_steps[] = {100, 500, 10000, 50000, 100000, 500000, 1000000};
 
 spi_device_handle_t spi_handle;
-
-
-#if 0
-int ADF4351_set_freq(adf4351_cfg_t *pcfg, uint32_t freq)
-{
-    // input range checks
-    // this will never trigger
-    // if(freq > ADF_FREQ_MAX) 
-    //     return -1;
-    if(freq < ADF_FREQ_MIN) {
-      ESP_LOGE(TAG,"output frequency too low");
-      return -1;
-    }
-
-    // equation for RF_OUT
-    // RF_OUT = [INT + (FRAC/MOD)] * (f_PFD/RF_DIVIDER)
-    // RF_OUT is the RF frequency output
-    // INT is the integer division facgtor
-    // FRAC is the numerator of the fractional division (0 to MOD - 1)
-    // MOD is the preset fractional modulus (2 to 4095)
-    // RF_DIVIDER is the output dividers that divides down the VCO frequency
-    // f_PFD = REF_IN * (1 + D)/(R * (1+T))
-
-    int localosc_ratio = 2200000000 / freq;
-    pcfg->_outdiv = 1;
-    int RfDivSel = 0;
-
-    // select the output divider
-    while(pcfg->_outdiv <= localosc_ratio && pcfg->_outdiv <= 64)
-    {
-        pcfg->_outdiv *= 2;
-        RfDivSel++;
-    }
-
-    if (freq > 3600000000/pcfg->_outdiv)
-    {
-        pcfg->Prescaler = 1;
-    }
-    else 
-    {
-        pcfg->Prescaler = 0;
-    }
-
-    double PFDFreq = pcfg->_reffreq * (1.0 + pcfg->RD2refdouble) / (pcfg->RCounter * (1.0 + pcfg->RD1Rdiv2)); // find the loop frequency
-
-    double N = freq * pcfg->_outdiv / PFDFreq;
-    pcfg->_N_Int = (uint16_t) N;
-    double Mod = PFDFreq / pcfg->ChanStep;
-    Mod = (double) ((uint32_t) Mod);
-    double Frac = (N - pcfg->_N_Int) * Mod + 0.5;
-    pcfg->_Frac = (uint32_t) Frac;
-    pcfg->_Mod = (uint32_t) Mod;
-
-    if(pcfg->_Frac != 0) 
-    {
-        uint32_t gcd = ADF4351_gcd_iter(pcfg->_Frac, pcfg->_Mod) ;
-
-        if(gcd > 1) 
-        {
-            pcfg->_Frac /= gcd;
-            Frac = (double) pcfg->_Frac;
-            pcfg->_Mod /= gcd;
-            Mod = (double) Mod;
-        }
-    }
-
-    double cfreq;
-
-    if(pcfg->_Frac == 0) 
-    {
-        cfreq = (PFDFreq * N) / pcfg->_outdiv;
-    } 
-    else 
-    {
-        cfreq = (PFDFreq * (N + (Frac/Mod))) / pcfg->_outdiv;
-    }
-
-    pcfg->_cfreq = cfreq;
-
-    if(freq != (uint32_t) cfreq)
-    {
-        ESP_LOGI(TAG, "Calculated frequency (%f) different from input frequency ", cfreq);
-    }
-    
-    // error checks
-    if(pcfg->_Mod < 2 || pcfg->_Mod > 4095)
-    {
-        ESP_LOGE(TAG, "Mod out of range");
-        return -1;
-    }
-
-    if(pcfg->_Frac > pcfg->_Mod - 1)
-    {
-        ESP_LOGE(TAG, "Frac out of range");
-        return -1;
-    }
-
-    if((pcfg->Prescaler == 0) && (pcfg->_N_Int < 23))
-    {
-        ESP_LOGE(TAG, "N_int out of range");
-        return -1;
-    }
-
-    else if((pcfg->Prescaler == 1) && (pcfg->_N_Int < 75))
-    {
-        ESP_LOGE(TAG, "N_int out of range");
-        return -1;
-    }
-
-    // set the registers to 0 first
-    memset(&pcfg->_registers, 0, sizeof(pcfg->_registers));
-
-    // configure register 0
-    // (0,3,0) control bits
-    ADF4351_set_register_bf(&pcfg->_registers[0], 3, 12, pcfg->_Frac);
-    ADF4351_set_register_bf(&pcfg->_registers[0], 15, 16, pcfg->_N_Int);
-    ESP_LOGI(TAG, "N_Int calculated to be %d", pcfg->_N_Int);
-
-    // configure register 1
-    ADF4351_set_register_bf(&pcfg->_registers[1], 0, 3, 1);
-    ADF4351_set_register_bf(&pcfg->_registers[1], 3, 12, pcfg->_Mod);
-    ADF4351_set_register_bf(&pcfg->_registers[1], 15, 12, 1);
-    ADF4351_set_register_bf(&pcfg->_registers[1], 27, 1, pcfg->Prescaler);
-    // (28,1,0) phase adjust
-
-    // configure register 2
-    ADF4351_set_register_bf(&pcfg->_registers[2], 0, 3, 2);
-    // (3,1,0) counter reset
-    // (4,1,0) cp3 state
-    // (5,1,0) power down
-    ADF4351_set_register_bf(&pcfg->_registers[2], 6, 1, 1); // pd polarity
-    if(pcfg->_Frac == 0)  
-    {
-        ADF4351_set_register_bf(&pcfg->_registers[2], 7, 1, 1); // LDP, int-n mode
-        ADF4351_set_register_bf(&pcfg->_registers[2], 8, 1, 1); // ldf, int-n mode
-    } 
-    else 
-    {
-        ADF4351_set_register_bf(&pcfg->_registers[2], 7, 1, 0); // LDP, frac-n mode
-        ADF4351_set_register_bf(&pcfg->_registers[2], 8, 1, 0); // ldf, frac-n mode
-    }
-    ADF4351_set_register_bf(&pcfg->_registers[2], 9, 4, 7); // charge pump
-    // (13,1,0) dbl buf
-    ADF4351_set_register_bf(&pcfg->_registers[2], 14, 10, pcfg->RCounter); // R counter
-    ADF4351_set_register_bf(&pcfg->_registers[2], 24, 1, pcfg->RD1Rdiv2)  ; // RD1_RDiv2
-    ADF4351_set_register_bf(&pcfg->_registers[2], 25, 1, pcfg->RD2refdouble)  ; // RD2refdouble
-    // R[2].setbf(26,3,0) ; //  muxout, not used
-    // (29,2,0) low noise and spurs mode
-
-    // configure register 3
-    ADF4351_set_register_bf(&pcfg->_registers[3], 0, 3, 3) ; // control bits
-    ADF4351_set_register_bf(&pcfg->_registers[3], 3, 12, pcfg->ClkDiv) ; // clock divider
-    // (15,2,0) clk div mode
-    // (17,1,0) reserved
-    // (18,1,0) CSR
-    // (19,2,0) reserved
-    if(pcfg->_Frac == 0 ) 
-    {
-        ADF4351_set_register_bf(&pcfg->_registers[3], 21, 1, 1); //  charge cancel, reduces pfd spurs
-        ADF4351_set_register_bf(&pcfg->_registers[3], 22, 1, 1); //  ABP, int-n
-    } 
-    else  
-    {
-        ADF4351_set_register_bf(&pcfg->_registers[3], 21, 1, 0) ; //  charge cancel
-        ADF4351_set_register_bf(&pcfg->_registers[3], 22, 1, 0); //  ABP, frac-n
-    }
-    ADF4351_set_register_bf(&pcfg->_registers[3], 23, 1, 1) ; // Band Select Clock Mode
-    // (24,8,0) reserved
-
-    // configure register 4
-    ADF4351_set_register_bf(&pcfg->_registers[4], 0, 3, 4) ; // control bits
-    ADF4351_set_register_bf(&pcfg->_registers[4], 3, 2, pcfg->pwrlevel) ; // output power 0-3 (-4dbM to 5dbM, 3db steps)
-    ADF4351_set_register_bf(&pcfg->_registers[4], 5, 1, 1) ; // rf output enable
-    // (6,2,0) aux output power
-    // (8,1,0) aux output enable
-    // (9,1,0) aux output select
-    // (10,1,0) mtld
-    // (11,1,0) vco power down
-    ADF4351_set_register_bf(&pcfg->_registers[4], 12, 8, pcfg->BandSelClock) ; // band select clock divider
-    ADF4351_set_register_bf(&pcfg->_registers[4], 20, 3, RfDivSel) ; // rf divider select
-    ADF4351_set_register_bf(&pcfg->_registers[4], 23, 1, 1) ; // feedback select
-    // (24,8,0) reserved
-
-    // configure register 5
-    ADF4351_set_register_bf(&pcfg->_registers[5], 0, 3, 5) ; // control bits
-    // (3,16,0) reserved
-    ADF4351_set_register_bf(&pcfg->_registers[5], 19, 2, 3) ; // Reserved field,set to 11
-    // (21,1,0) reserved
-    ADF4351_set_register_bf(&pcfg->_registers[5], 22, 2, 1) ; // LD Pin Mode
-    // (24,8,0) reserved
-
-    int i;
-    for(i = 5; i > -1; i--)
-    {
-        ESP_LOGI(TAG, "Writing register with content 0x%" PRIx32 "", pcfg->_registers[i]);
-        ADF4351_write_register(pcfg, pcfg->_registers[i]);
-        ets_delay_us(1500); // why wait so long?
-    }
-
-    return 0;
-}
-
-int ADF4351_set_ref_freq(adf4351_cfg_t *pcfg, uint32_t ref_freq)
-{
-    // check if input is valid
-    if(ref_freq > ADF_REFIN_MAX)
-        return -1; // change return from 1 to -1 for clearer sign of error
-    else if(ref_freq < 100000)
-        return -1;
-
-    float new_ref_freq = ref_freq * (1.0 + pcfg->RD2refdouble) / (pcfg->RCounter * (1.0 + pcfg->RD1Rdiv2));
-
-    if(new_ref_freq > ADF_PFD_MAX)
-        return -1;
-    else if(ref_freq < ADF_PFD_MIN)
-        return -1;
-
-    pcfg->_reffreq = ref_freq;
-    
-    return 0;
-}
-#endif
-
-
-
 
 
 void adf4351_write(adf4351_dev *dev, uint32_t reg)
@@ -585,13 +360,6 @@ int32_t adf4351_setup(adf4351_dev **device,
 	dev->pdata->r4_user_settings |=
 		ADF4351_REG4_AUX_OUTPUT_PWR(init_param.aux_output_power);
 
-#if 0
-	adf4351_out_altvoltage0_refin_frequency(dev, dev->pdata->clkin);
-	adf4351_out_altvoltage0_frequency_resolution(dev,
-			dev->pdata->channel_spacing);
-	adf4351_out_altvoltage0_frequency(dev, dev->pdata->power_up_frequency);
-#endif	
-
 	*device = dev;
 
 	ESP_LOGI(TAG,"ADF4351 successfully initialized.\n");
@@ -679,45 +447,34 @@ int32_t adf4351_out_altvoltage0_powerdown(adf4351_dev *dev,
 
 void adf4351_enable(adf4351_cfg_t *pcfg)
 {
+ 
     // check if CE pin was initialised
-    if(pcfg->_ce_initialised)
+    if (!pcfg->_ce_initialised ) {
+        ESP_LOGE(TAG, "Attempting to toggle CE pin without initialisation");
+	return;
+    }
+
+    if(!pcfg->_enabled)
     {
         gpio_set_level(pcfg->pins.gpio_ce, 1);
         pcfg->_enabled = true;
     }
-    else
-        ESP_LOGE(TAG, "Attempting to toggle CE pin without initialisation");
 }
 
 void adf4351_disable(adf4351_cfg_t *pcfg)
 {
     // check if CE pin was initialised
-    if(pcfg->_ce_initialised)
+    if (!pcfg->_ce_initialised ) {
+        ESP_LOGE(TAG, "Attempting to toggle CE pin without initialisation");
+	return;
+    }
+
+    if(pcfg->_enabled)
     {
         gpio_set_level(pcfg->pins.gpio_ce, 0);
         pcfg->_enabled = false;
     }
-    else
-        ESP_LOGE(TAG, "Attempting to toggle CE pin without initialisation");
 }
-
-#if 0
-void adf4351_set_register_bf(uint32_t *preg, uint8_t start, uint8_t len, uint32_t value)
-{
-    uint32_t bitmask = (1 << len) - 1;
-    value &= bitmask;
-    bitmask <<= start;
-    *preg = (*preg & (~bitmask)) | (value << start);
-}
-
-uint32_t adf4351_get_register_bf(uint32_t *preg, uint8_t start, uint8_t len)
-{
-    uint32_t bitmask = ((1 << len) - 1) << start;
-    uint32_t result = (*preg & bitmask) >> start;
-    return result;
-}
-#endif
-
 
 void adf4351_initialise(adf4351_cfg_t *pcfg)
 {
@@ -726,9 +483,9 @@ void adf4351_initialise(adf4351_cfg_t *pcfg)
     pcfg->_reffreq = REF_FREQ_DEFAULT;
     pcfg->_cfreq = 0.0;
 
-	// Step1, initalise SPI perpheral and GPIO
-	// Configuration for the SPI bus
-	spi_bus_config_t buscfg = 
+    // Step1, initalise SPI perpheral and GPIO
+    // Configuration for the SPI bus
+    spi_bus_config_t buscfg = 
     {
 		.mosi_io_num = pcfg->pins.gpio_mosi,
 		//.data0_io_num = -1,
@@ -744,9 +501,9 @@ void adf4351_initialise(adf4351_cfg_t *pcfg)
 		.data5_io_num = -1,
 		.data6_io_num = -1,
 		.data7_io_num = -1,
-	};
+    };
 
-	// Configuration for the SPI device on the other side of the bus
+    // Configuration for the SPI device on the other side of the bus
     spi_device_interface_config_t devcfg = 
     {
         .command_bits = 0,
@@ -815,7 +572,40 @@ void adf4351_initialise(adf4351_cfg_t *pcfg)
     ret = spi_bus_add_device(SENDER_HOST, &devcfg, &spi_handle);
     assert(ret == ESP_OK);
 
-    ESP_LOGI(TAG, "SPI device successfully attached");
+    ESP_LOGI(TAG, "ADF4351 successfully attached");
     pcfg->_spi_initialised = true;
+}
+
+
+void adf4351_remove(adf4351_cfg_t *pcfg)
+{
+    esp_err_t ret;
+
+    // Réinitialiser les GPIO
+    if (pcfg->_le_initialised) {
+        gpio_reset_pin(pcfg->pins.gpio_le);
+        pcfg->_le_initialised = false;
+    }
+
+    if (pcfg->_ld_initialised) {
+        gpio_reset_pin(pcfg->pins.gpio_ld);
+        pcfg->_ld_initialised = false;
+    }
+
+    // Réinitialiser les autres champs
+    pcfg->_reffreq = 0.0;
+    pcfg->_cfreq = 0.0;
+    pcfg->_enabled = false;
+
+    // Supprimer le périphérique SPI
+    if (pcfg->_spi_initialised) {
+        spi_bus_remove_device(spi_handle);
+        spi_bus_free(SENDER_HOST);
+        pcfg->_spi_initialised = false;
+    }
+
+
+
+    ESP_LOGI(TAG, "ADF4351 successfully dettached");
 }
 
