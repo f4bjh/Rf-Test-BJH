@@ -37,8 +37,8 @@ socket.addEventListener('close', (event) => {
 });
 
 let freq = `unknown`;
-let freq_digit=new Array(10).fill(0);
-let freq_range = `4MHz`; // Valeur par défaut
+let freq_digit=new Array(11).fill(0);
+let freq_range = `10MHz`; // Valeur par défaut
 
 function send_freq_range_update(freq_range) {
     const jsonData = {
@@ -86,25 +86,32 @@ socket.addEventListener('message', (event) => {
         break;
     }
 
-    let strFreq = String(freq).padStart(10, '0');
+    let strFreq = String(freq).padStart(11, '0');
 
-    for (let i = 0; i < 10; i++) {
-        freq_digit[i] = parseInt(strFreq[9-i]);
+    for (let i = 0; i < 11; i++) {
+        freq_digit[i] = parseInt(strFreq[10-i]);
     }
 
     //here, it depends on precision user set in page
     //but precision will be set according this : 
     // input freq range   |   precision
-    //  0 - 4 MHz         |   mHz       ex : 4294967.155Hz  (ie 4MHz)
-    // 4MHz - 250MHz      |  1/10       ex : 42120785.1 (ie 42MHz)
-    // 250MHz - 4GHz      |   Hz        ex : 400014004   (ie 4GHz)
+    //  0 - 10 MHz        |   mHz       ex : 4294967.155Hz  (ie 4MHz)
+    // 10MHz - 1200MHz    |  1/10       ex : 42120785.1 (ie 42MHz)
+    // 1200MHz - 5GHz     |   Hz        ex : 400014004   (ie 4GHz)
     // it will have to be managed in meas/freq/freq
-    // 1st case (0-4MHz) : 22 bits of data before coma + 10 bits after coma
-    // 2nd case (4MHz-250MHz) : 28 bits of data before coma + 4 bits after coma
-    // 3rd case (250MHz-4GHz) : 32 bits of data 
+    // 1st case (0-10MHz) : 24 bits of data before coma + 10 bits after coma
+    // 				max = 16.77MHz          /  max = 1023
+    // 			        nb de digit = 8         /  nb digit = 3
+    // 2nd case (10MHz-1200MHz) : 28 bits of data before coma + 4 bits after coma
+    // 3rd case (1200MHz-5GHz) : 32 bits of data 
 
-    if (freq_range === "4MHz") {
+    if (freq_range === "10MHz") {
         freq_digit.innerHTML = `
+	<div class='s7s'><input value='` + freq_digit[10] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digit[9] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='entre-digit'>&nbsp</div>
+	<div class='s7s'><input value='` + freq_digit[8] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digit[7] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
         <div class='s7s'><input value='` + freq_digit[6] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
         <div class='entre-digit'>&nbsp</div>
         <div class='s7s'><input value='` + freq_digit[5] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
@@ -117,7 +124,7 @@ socket.addEventListener('message', (event) => {
         <div class='unit-Hz'>Hz</div>
         `;
     }
-    if (freq_range === "250MHz") {
+    if (freq_range === "1200MHz") {
         freq_digit.innerHTML = `
         <div class='s7s'><input value='` + freq_digit[9] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
         <div class='s7s'><input value='` + freq_digit[8] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
@@ -135,7 +142,7 @@ socket.addEventListener('message', (event) => {
         <div class='unit-Hz'>Hz</div>
         `;		
     }
-    if (freq_range === "4GHz") {
+    if (freq_range === "5GHz") {
         freq_digit.innerHTML = `
         <div class='s7s'><input value='` + freq_digit[9] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
         <div class='entre-digit'>&nbsp</div>
