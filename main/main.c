@@ -7,6 +7,27 @@ char password[] = EXAMPLE_ESP_WIFI_STA_PASSWD;
 bool wifi_credentials_set=false;
 
 void app_main(void) {
+#ifdef CONFIG_FIRMWARE_OTA
+	spi_bus_config_t buscfg = 
+    {
+		.mosi_io_num = GPIO_SPI_MOSI,
+		//.data0_io_num = -1,
+		.miso_io_num = -1, //GPIO_SPI_MISO
+		.data1_io_num = -1,
+		.sclk_io_num = GPIO_SPI_CLK,
+		.quadwp_io_num = -1,
+		.data2_io_num = -1,
+		.quadhd_io_num = -1,
+		.data2_io_num = -1,
+		.data3_io_num = -1,
+		.data4_io_num = -1,
+		.data5_io_num = -1,
+		.data6_io_num = -1,
+		.data7_io_num = -1,
+	};
+#endif
+
+
 	esp_err_t ret = nvs_flash_init();
 	esp_err_t ret_lcd;
 	esp_app_desc_t app_desc;
@@ -48,7 +69,14 @@ void app_main(void) {
 	wifi_credentials_set  = false;
 #endif
 #ifdef CONFIG_FIRMWARE_OTA
+	//Initialise SPI bus
+	ESP_LOGI(TAG, "SPI bus initialisation Mode: %d, Clock speed: %d, MOSI GPIO: %d", devcfg.mode, devcfg.clock_speed_hz, buscfg.mosi_io_num);
+    ret = spi_bus_initialize(SENDER_HOST, &buscfg, SPI_DMA_DISABLED);
+    assert(ret == ESP_OK);
 
+    ESP_LOGI(TAG, "SPI bus successfully initialised");
+
+	//get wifi credentials
 	nvs_handle_t handle;
 	ret = nvs_open("storage", NVS_READWRITE, &handle);
 	ESP_ERROR_CHECK(ret);
