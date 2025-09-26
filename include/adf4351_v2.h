@@ -88,9 +88,6 @@
 
 typedef struct 
 {
-    uint8_t gpio_sclk; // CLK pin
-    uint8_t gpio_miso; // data pin
-    uint8_t gpio_mosi; // dummy pin
     uint8_t gpio_cs; // dummy pin
     uint8_t gpio_ce; // chip enable
     uint8_t gpio_le; // load enable

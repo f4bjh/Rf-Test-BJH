@@ -44,7 +44,7 @@ static char TAG[] = "PLL";
 
 uint32_t ADF4351_steps[] = {100, 500, 10000, 50000, 100000, 500000, 1000000};
 
-spi_device_handle_t spi_handle;
+spi_device_handle_t spi_rf_gen_handle;
 
 
 #if 0
@@ -290,7 +290,7 @@ void adf4351_write(adf4351_dev *dev, uint32_t reg)
     t.length = 32;
     t.rx_buffer = NULL;
 
-    err = spi_device_transmit(spi_handle, &t);
+    err = spi_device_transmit(spi_rf_gen_handle, &t);
     if (err != ESP_OK)
       ESP_LOGE(TAG,"spi device transmit error %d", err);
 
@@ -726,6 +726,7 @@ void adf4351_initialise(adf4351_cfg_t *pcfg)
     pcfg->_reffreq = REF_FREQ_DEFAULT;
     pcfg->_cfreq = 0.0;
 
+#if 0
 	// Step1, initalise SPI perpheral and GPIO
 	// Configuration for the SPI bus
 	spi_bus_config_t buscfg = 
@@ -745,6 +746,7 @@ void adf4351_initialise(adf4351_cfg_t *pcfg)
 		.data6_io_num = -1,
 		.data7_io_num = -1,
 	};
+#endif
 
 	// Configuration for the SPI device on the other side of the bus
     spi_device_interface_config_t devcfg = 
@@ -806,13 +808,15 @@ void adf4351_initialise(adf4351_cfg_t *pcfg)
 
     ESP_LOGI(TAG, "GPIO successfully initialised");
 
+#if 0
     ESP_LOGI(TAG, "SPI bus initialisation Mode: %d, Clock speed: %d, MOSI GPIO: %d", devcfg.mode, devcfg.clock_speed_hz, buscfg.mosi_io_num);
     ret = spi_bus_initialize(SENDER_HOST, &buscfg, SPI_DMA_DISABLED);
     assert(ret == ESP_OK);
 
     ESP_LOGI(TAG, "SPI bus successfully initialised");
+#endif
 
-    ret = spi_bus_add_device(SENDER_HOST, &devcfg, &spi_handle);
+    ret = spi_bus_add_device(SENDER_HOST, &devcfg, &spi_rf_gen_handle);
     assert(ret == ESP_OK);
 
     ESP_LOGI(TAG, "SPI device successfully attached");
