@@ -4,9 +4,9 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity spi_slave is
     Port (
-        SCK    : in  std_logic;       -- Horloge SPI
-        MOSI   : in  std_logic;       -- Donnée maître -> esclave
-        CS_N   : in  std_logic;       -- Chip Select actif bas
+        sck    : in  std_logic;       -- Horloge SPI
+        mosi   : in  std_logic;       -- Donnée maître -> esclave
+        ce     : in  std_logic;       -- Chip Select actif bas
         LED0   : out std_logic        -- LED user sur Cmod A7
     );
 end spi_slave;
@@ -19,14 +19,14 @@ architecture Behavioral of spi_slave is
     signal stop      : std_logic := '0';
 begin
 
-    process(SCK, CS_N)
+    process(sck, ce)
     begin
         if stop = '0' then
-            if CS_N = '0' then
-                if rising_edge(SCK) then
-                    shift_reg <= shift_reg(14 downto 0) & MOSI;
+            if ce = '1' then
+                if rising_edge(sck) then
+                    shift_reg <= shift_reg(14 downto 0) & mosi;
                     if bit_cnt = 15 then
-                        data_reg <= shift_reg(14 downto 0) & MOSI;
+                        data_reg <= shift_reg(14 downto 0) & mosi;
                         bit_cnt <= 0;
                     else
                         bit_cnt <= bit_cnt + 1;
