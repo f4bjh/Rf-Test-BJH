@@ -5,9 +5,10 @@
 
 //frquencymeter
 #define	GPIO_FREQUENCYMETER_INPUT	4
-#define GPIO_FREQUENCYMETER_CE  tbd
+#define GPIO_FREQUENCYMETER_CE	6 
 
 //rf generator
+#define GPIO_RF_GEN_CE		7
 #define GPIO_RF_GEN_LE		15
 #define GPIO_RF_GEN_PLL_LOCKED  16
 

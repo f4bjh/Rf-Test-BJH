@@ -70,7 +70,7 @@ void app_main(void) {
 #endif
 #ifdef CONFIG_FIRMWARE_OTA
 	//Initialise SPI bus
-	ESP_LOGI(TAG, "SPI bus initialisation Mode: %d, Clock speed: %d, MOSI GPIO: %d", devcfg.mode, devcfg.clock_speed_hz, buscfg.mosi_io_num);
+	ESP_LOGI(TAG, "SPI bus initialisation MOSI GPIO: %d", buscfg.mosi_io_num);
     ret = spi_bus_initialize(SENDER_HOST, &buscfg, SPI_DMA_DISABLED);
     assert(ret == ESP_OK);
 
