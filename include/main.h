@@ -6,8 +6,10 @@
 #include <nvs_flash.h>
 #include "esp_log.h"
 #include <string.h>
+#include <driver/spi_master.h>
 
 #include "http_server.h"
 #include "wifi.h"
 #include "lcd.h"
-
+#include "spi.h"
+#include "gpio.h"

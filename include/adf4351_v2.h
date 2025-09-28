@@ -1,14 +1,15 @@
 #ifndef adf4351_H
 #define adf4351_H  
 
+#include "spi.h"
+#include "gpio.h"
+
 #define ADF_FREQ_MAX 4294967295         ///< Maximum Generated Frequency
 #define ADF_FREQ_MIN  34385000          ///< Minimum Generated Frequency
 #define ADF_PFD_MAX   32000000.0        ///< Maximum Frequency for Phase Detector
 #define ADF_PFD_MIN   125000.0          ///< Minimum Frequency for Phase Detector
 #define ADF_REFIN_MAX   250000000       ///< Maximum Reference Frequency
 #define REF_FREQ_DEFAULT 100000000      ///< Default Reference Frequency
-
-#define SENDER_HOST SPI3_HOST
 
 /* Channels */
 #define ADF4351_RX_CHANNEL	0
@@ -85,14 +86,6 @@
 #define ADF4351_MAX_FREQ_REFIN		250000000 /* Hz */
 #define ADF4351_MAX_MODULUS			4095
 #define ADF4351_MAX_R_CNT			1023
-
-typedef struct 
-{
-    uint8_t gpio_cs; // dummy pin
-    uint8_t gpio_ce; // chip enable
-    uint8_t gpio_le; // load enable
-    uint8_t gpio_ld; // lock detect
-} pin_settings;
 
 typedef struct {
 	/* Device settings */

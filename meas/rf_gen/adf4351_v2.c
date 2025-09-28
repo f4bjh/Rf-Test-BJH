@@ -39,6 +39,7 @@
 
 #include "meas_mgt.h"
 #include "meas.h"
+#include "adf4351_v2.h"
 
 static char TAG[] = "PLL";
 
@@ -816,6 +817,7 @@ void adf4351_initialise(adf4351_cfg_t *pcfg)
     ESP_LOGI(TAG, "SPI bus successfully initialised");
 #endif
 
+    ESP_LOGI(TAG, "Attach SPI ADF4351 Mode: %d, Clock speed: %d", devcfg.mode, devcfg.clock_speed_hz);
     ret = spi_bus_add_device(SENDER_HOST, &devcfg, &spi_rf_gen_handle);
     assert(ret == ESP_OK);
 
