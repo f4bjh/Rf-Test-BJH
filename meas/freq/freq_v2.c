@@ -45,7 +45,7 @@ void frequencymeter_task(void *arg)
   ESP_LOGI(TAG,"Starting frequencymeter_task 2");
 
   while(1) {
-       vTaskDelay(1000 / portTICK_PERIOD_MS);
+       vTaskDelay(10 / portTICK_PERIOD_MS);
 
        ESP_LOGI(TAG,"Talking to FPGA over SPI...");	
        reciproc_freq_TEST_WRITE_SPI_FPGA(&fpga_freq);
