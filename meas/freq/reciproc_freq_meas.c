@@ -53,7 +53,7 @@ void reciproc_freq_enable(reciproc_freq_cfg_t *pcfg)
     // check if CE pin was initialised
     if(pcfg->_ce_initialised)
     {
-        gpio_set_level(pcfg->pins.gpio_ce, 1);
+        gpio_set_level(pcfg->pins.gpio_ce, 0);
         pcfg->_enabled = true;
     }
     else
@@ -65,7 +65,7 @@ void reciproc_freq_disable(reciproc_freq_cfg_t *pcfg)
     // check if CE pin was initialised
     if(pcfg->_ce_initialised)
     {
-        gpio_set_level(pcfg->pins.gpio_ce, 0);
+        gpio_set_level(pcfg->pins.gpio_ce, 1);
         pcfg->_enabled = false;
     }
     else
