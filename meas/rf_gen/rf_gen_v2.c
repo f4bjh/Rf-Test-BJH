@@ -6,7 +6,7 @@
 #include <sys/param.h>
 
 #include "meas_mgt.h"
-#include "meas.h"
+#include "rf_gen.h"
 #include "gpio.h"
 
 static char TAG[] = "rf_gen";

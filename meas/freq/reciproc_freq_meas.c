@@ -9,8 +9,9 @@
 #include <driver/spi_master.h>
 #include <driver/gpio.h>
 
-#include "meas_mgt.h"
-#include "meas.h"
+#include "gpio.h"
+#include "spi.h"
+#include "reciproc_freq_meas.h"
 
 static char TAG[] = "reciproc_freq";
 
@@ -41,11 +42,22 @@ void reciproc_freq_enable(reciproc_freq_cfg_t *pcfg)
     // check if CE pin was initialised
     if(pcfg->_ce_initialised)
     {
-        gpio_set_level(pcfg->pins.gpio_ce, 0);
+        spi_chip_enable(&(pcfg->pins));
         pcfg->_enabled = true;
     }
     else
         ESP_LOGE(TAG, "Attempting to toggle CE pin without initialisation");
+}
+
+void reciproc_freq_reset(reciproc_freq_cfg_t *pcfg)
+{
+    // check if POR pin was initialised
+    if(pcfg->_por_initialised)
+    {
+        spi_chip_reset(&(pcfg->pins));
+    }
+    else
+        ESP_LOGE(TAG, "Attempting to toggle POR pin without initialisation");
 }
 
 void reciproc_freq_disable(reciproc_freq_cfg_t *pcfg)
@@ -53,7 +65,7 @@ void reciproc_freq_disable(reciproc_freq_cfg_t *pcfg)
     // check if CE pin was initialised
     if(pcfg->_ce_initialised)
     {
-        gpio_set_level(pcfg->pins.gpio_ce, 1);
+        spi_chip_disable(&(pcfg->pins));
         pcfg->_enabled = false;
     }
     else
@@ -109,13 +121,13 @@ void reciproc_freq_initialise(reciproc_freq_cfg_t *pcfg)
     // initialise internal fields
     pcfg->_enabled = false;
 
-    // GPIO settings for chip enable pin (active high)
+    // GPIO settings for chip select pin (active low)
     gpio_config_t reciproc_freq_cs_n_cfg = 
     {
         .intr_type = GPIO_INTR_DISABLE,
         .mode = GPIO_MODE_OUTPUT,
         .pull_down_en = 1,
-        .pin_bit_mask = (1 << pcfg->pins.gpio_cs_n)
+        .pin_bit_mask = (1 << pcfg->pins.gpio_ce.gpio_number)
     };
 
 
@@ -123,7 +135,7 @@ void reciproc_freq_initialise(reciproc_freq_cfg_t *pcfg)
     assert(ret == ESP_OK);
     pcfg->_ce_initialised = true;
 
-    gpio_set_level(pcfg->pins.gpio_ce, 1);
+    reciproc_freq_disable(pcfg);
     ESP_LOGI(TAG, "GPIO successfully initialised");
 
     // Configuration for the SPI device on the other side of the bus
@@ -135,7 +147,7 @@ void reciproc_freq_initialise(reciproc_freq_cfg_t *pcfg)
         .clock_speed_hz = APB_CLK_FREQ/80, // run at 1MHz
         .duty_cycle_pos = 128,        // 50% duty cycle
         .mode = 0,
-        .spics_io_num = pcfg->pins.gpio_cs, // does not matter, not using the SPI CS pin anyways
+        .spics_io_num = pcfg->pins.gpio_ce.gpio_number, // does not matter, not using the SPI CS pin anyways
         .cs_ena_posttrans = 0,        
         .queue_size = 1
     };
@@ -144,6 +156,29 @@ void reciproc_freq_initialise(reciproc_freq_cfg_t *pcfg)
     assert(ret == ESP_OK);
     ESP_LOGI(TAG, "SPI device successfully attached");
 
+    // GPIO settings for reset pin (active low)
+    gpio_config_t reciproc_freq_por_cfg = 
+    {
+        .intr_type = GPIO_INTR_DISABLE,
+        .mode = GPIO_MODE_OUTPUT,
+        .pull_down_en = 1,
+        .pin_bit_mask = (1 << pcfg->pins.gpio_por.gpio_number)
+    };
+    ret = gpio_config(&reciproc_freq_por_cfg);
+    assert(ret == ESP_OK);
+    pcfg->_por_initialised = true;
+ 
+    //reset the chip
+    reciproc_freq_reset(pcfg);
+
     pcfg->_spi_initialised = true;
 }
 
+void stop_reciproc_freq_meas(reciproc_freq_cfg_t *pcfg)
+{
+
+  reciproc_freq_disable(pcfg);
+  //reset the chip
+  reciproc_freq_reset(pcfg);
+
+}

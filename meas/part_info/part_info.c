@@ -6,7 +6,7 @@
 #include <sys/param.h>
 
 #include "meas_mgt.h"
-#include "meas.h"
+#include "chip_info.h"
 
 esp_err_t get_current_part(meas_t *measure)
 {
