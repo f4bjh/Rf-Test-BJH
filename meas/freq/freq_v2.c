@@ -11,8 +11,8 @@ static char TAG[] = "frequencymeter";
 
 static reciproc_freq_cfg_t fpga_freq={
   .pins = {
-    .gpio_ce = GPIO_FREQUENCYMETER_CE,
-    .gpio_cs = 14, // dummy pin
+    .gpio_ce = 14,
+    .gpio_cs = GPIO_FREQUENCYMETER_CS_N, // dummy pin
     .gpio_le = 14, //dummy pin
     .gpio_ld = 14, //dummy pin
   },

@@ -20,12 +20,6 @@ void reciproc_freq_write(reciproc_freq_dev *dev, uint32_t reg)
 {
     esp_err_t err;
 
-#if 0
-    // ensure LE pin is low
-    gpio_set_level(dev->pins.gpio_le, 0);
-    ets_delay_us(5);
-#endif
-
     spi_transaction_t t;
     memset(&t, 0, sizeof(t));
     t.tx_data[0] = (reg>>24)&0xff;
@@ -39,12 +33,6 @@ void reciproc_freq_write(reciproc_freq_dev *dev, uint32_t reg)
     err = spi_device_transmit(spi_frequencymeter_handle, &t);
     if (err != ESP_OK)
       ESP_LOGE(TAG,"spi device transmit error %d", err);
-
-#if 0
-    gpio_set_level(dev->pins.gpio_le, 1);    // pull LE pin high to latch incoming word into register
-    ets_delay_us(5);
-    gpio_set_level(dev->pins.gpio_le, 0);    // pull LE pin to its default low
-#endif
 
 }
 
@@ -116,32 +104,29 @@ int32_t reciproc_freq_setup(reciproc_freq_dev **device,
 
 void reciproc_freq_initialise(reciproc_freq_cfg_t *pcfg)
 {
+    esp_err_t ret;
+
     // initialise internal fields
     pcfg->_enabled = false;
 
-#if 0
-	// Step1, initalise SPI perpheral and GPIO
-	// Configuration for the SPI bus
-	spi_bus_config_t buscfg = 
+    // GPIO settings for chip enable pin (active high)
+    gpio_config_t reciproc_freq_cs_n_cfg = 
     {
-		.mosi_io_num = pcfg->pins.gpio_mosi,
-		//.data0_io_num = -1,
-		.miso_io_num = -1,
-		.data1_io_num = -1,
-		.sclk_io_num = pcfg->pins.gpio_sclk,
-		.quadwp_io_num = -1,
-		.data2_io_num = -1,
-		.quadhd_io_num = -1,
-		.data2_io_num = -1,
-		.data3_io_num = -1,
-		.data4_io_num = -1,
-		.data5_io_num = -1,
-		.data6_io_num = -1,
-		.data7_io_num = -1,
-	};
-#endif
+        .intr_type = GPIO_INTR_DISABLE,
+        .mode = GPIO_MODE_OUTPUT,
+        .pull_down_en = 1,
+        .pin_bit_mask = (1 << pcfg->pins.gpio_cs_n)
+    };
 
-	// Configuration for the SPI device on the other side of the bus
+
+    ret = gpio_config(&reciproc_freq_cs_n_cfg);
+    assert(ret == ESP_OK);
+    pcfg->_ce_initialised = true;
+
+    gpio_set_level(pcfg->pins.gpio_ce, 1);
+    ESP_LOGI(TAG, "GPIO successfully initialised");
+
+    // Configuration for the SPI device on the other side of the bus
     spi_device_interface_config_t devcfg = 
     {
         .command_bits = 0,
@@ -154,76 +139,11 @@ void reciproc_freq_initialise(reciproc_freq_cfg_t *pcfg)
         .cs_ena_posttrans = 0,        
         .queue_size = 1
     };
-
-#if 0
-    // GPIO settings for load enable pin (active high)
-    gpio_config_t reciproc_freq_le_cfg = 
-    {
-        .intr_type = GPIO_INTR_DISABLE,
-        .mode = GPIO_MODE_OUTPUT,
-        .pull_down_en = 1,
-        .pin_bit_mask = (1 << pcfg->pins.gpio_le)
-    };
-#endif
-
-    // GPIO settings for chip enable pin (active high)
-    gpio_config_t reciproc_freq_ce_cfg = 
-    {
-        .intr_type = GPIO_INTR_DISABLE,
-        .mode = GPIO_MODE_OUTPUT,
-        .pull_down_en = 1,
-        .pin_bit_mask = (1 << pcfg->pins.gpio_ce)
-    };
-
-#if 0
-    // GPIO settings for lock detect pin (high - PLL lock, low - loss of PLL lock)
-    gpio_config_t reciproc_freq_ld_cfg = 
-    {
-        .intr_type = GPIO_INTR_DISABLE,
-        .mode = GPIO_MODE_INPUT,
-        .pin_bit_mask = (1 << pcfg->pins.gpio_ld)
-    };
-#endif
-
-	esp_err_t ret;
-
-#if 0
-    ret = gpio_config(&reciproc_freq_le_cfg);
-    assert(ret == ESP_OK);
-    pcfg->_le_initialised = true;
-#endif
-
-    ret = gpio_config(&reciproc_freq_ce_cfg);
-    assert(ret == ESP_OK);
-    pcfg->_ce_initialised = true;
-
-#if 0
-    ret = gpio_config(&reciproc_freq_ld_cfg);
-    assert(ret == ESP_OK);
-    pcfg->_ld_initialised = true;
-#endif
-
-    // drive LE and CE low just in case
-#if 0
-    gpio_set_level(pcfg->pins.gpio_le, 0);
-#endif
-    gpio_set_level(pcfg->pins.gpio_ce, 0);
-
-    ESP_LOGI(TAG, "GPIO successfully initialised");
-
-#if 0
-    ESP_LOGI(TAG, "SPI bus initialisation Mode: %d, Clock speed: %d, MOSI GPIO: %d", devcfg.mode, devcfg.clock_speed_hz, buscfg.mosi_io_num);
-    ret = spi_bus_initialize(SENDER_HOST, &buscfg, SPI_DMA_DISABLED);
-    assert(ret == ESP_OK);
-
-    ESP_LOGI(TAG, "SPI bus successfully initialised");
-#endif
-    
     ESP_LOGI(TAG, "Attach SPI Reciprocal frequency meas Mode: %d, Clock speed: %d", devcfg.mode, devcfg.clock_speed_hz);
     ret = spi_bus_add_device(SENDER_HOST, &devcfg, &spi_frequencymeter_handle);
     assert(ret == ESP_OK);
-
     ESP_LOGI(TAG, "SPI device successfully attached");
+
     pcfg->_spi_initialised = true;
 }
 
