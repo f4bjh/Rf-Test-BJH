@@ -1,7 +1,14 @@
+#define ACTIVE_LOW      0
+#define ACTIVE_HIGH     1
+
+#define GPIO_DUMMY 0
+
 //bus SPI
 #define GPIO_SPI_MOSI   13
 //#define GPIO_SPI_MISO tbd
 #define GPIO_SPI_CLK    12 
+#define GPIO_SPI_POR    14
+
 
 //frquencymeter
 #define	GPIO_FREQUENCYMETER_INPUT	4

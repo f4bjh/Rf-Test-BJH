@@ -5,19 +5,33 @@
 #include "esp_log.h"
 
 #include "meas_mgt.h"
-#include "meas.h"
+#include "gpio.h"
+#include "spi.h"
+#include "reciproc_freq_meas.h"
+#include "freq.h"
 
 static char TAG[] = "frequencymeter";
 
 static reciproc_freq_cfg_t fpga_freq={
   .pins = {
-    .gpio_ce = 14,
-    .gpio_cs = GPIO_FREQUENCYMETER_CS_N, // dummy pin
-    .gpio_le = 14, //dummy pin
-    .gpio_ld = 14, //dummy pin
+    .gpio_ce = {
+      .gpio_number = GPIO_FREQUENCYMETER_CS_N,
+      .polarity = ACTIVE_LOW
+     },
+    .gpio_le = {
+      .gpio_number = GPIO_DUMMY
+     },
+    .gpio_ld = {
+      .gpio_number = GPIO_DUMMY
+     },
+    .gpio_por = {
+      .gpio_number = GPIO_SPI_POR,
+      .polarity = ACTIVE_LOW
+     }
   },
   ._spi_initialised = false,
   ._ce_initialised = false,
+  ._por_initialised = false,
   ._enabled = false,
   .reciproc_freq_device=NULL
 };
@@ -45,7 +59,7 @@ void frequencymeter_task(void *arg)
   ESP_LOGI(TAG,"Starting frequencymeter_task 2");
 
   while(1) {
-       vTaskDelay(10 / portTICK_PERIOD_MS);
+       vTaskDelay(1000 / portTICK_PERIOD_MS);
 
        ESP_LOGI(TAG,"Talking to FPGA over SPI...");	
        reciproc_freq_TEST_WRITE_SPI_FPGA(&fpga_freq);
@@ -83,15 +97,11 @@ esp_err_t init_frequencymeter(meas_t *measure)
 	return ESP_ERR_NOT_FOUND;
     }
 
-    ESP_LOGI(TAG,"F4BJH 1");
     memcpy(&(reciproc_freq_device->pins),&fpga_freq.pins,sizeof(pin_settings));
-    ESP_LOGI(TAG,"F4BJH 2");
  
     fpga_freq.reciproc_freq_device = reciproc_freq_device;
-    ESP_LOGI(TAG,"F4BJH 3");
  
     frequencymeter_task_arg->fpga_freq = fpga_freq;
-    ESP_LOGI(TAG,"F4BJH 4");
  
     //create a frequencymeter on CPU1
     if ( xTaskCreatePinnedToCore(frequencymeter_task, 
@@ -104,8 +114,6 @@ esp_err_t init_frequencymeter(meas_t *measure)
 	    vTaskSetThreadLocalStoragePointer(measure->handle, 0, frequencymeter_task_arg);
     };
 
-    ESP_LOGI(TAG,"F4BJH 5");
- 
    return ESP_OK;
 
 }
@@ -113,6 +121,8 @@ esp_err_t init_frequencymeter(meas_t *measure)
 esp_err_t stop_frequencymeter(meas_t *measure)
 {
   static TaskHandle_t task_handle;
+
+  stop_reciproc_freq_meas(&fpga_freq);
 
   task_handle = measure->handle;
 

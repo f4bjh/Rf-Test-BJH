@@ -1,5 +1,3 @@
-#include "gpio.h"
-
 typedef struct {
 	uint32_t window_time_ms;
 	uint32_t ref_fast_clk_MHz; 
@@ -24,6 +22,7 @@ typedef struct reciproc_freq_cfg_s
     pin_settings pins; // pin settings for SPI and GPIO
     bool _spi_initialised; // SPI initalisation flag
     bool _ce_initialised; // CE initalisation flag
+    bool _por_initialised;
     bool _enabled; // Device enabled flag
     reciproc_freq_dev *reciproc_freq_device;
 } reciproc_freq_cfg_t;
@@ -54,3 +53,4 @@ int32_t reciproc_freq_setup(reciproc_freq_dev **device,reciproc_freq_init_param 
     @return None
 */
 void reciproc_freq_initialise(reciproc_freq_cfg_t *pcfg);
+void stop_reciproc_freq_meas(reciproc_freq_cfg_t *pcfg);
