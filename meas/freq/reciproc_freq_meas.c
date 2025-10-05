@@ -72,13 +72,62 @@ void reciproc_freq_disable(reciproc_freq_cfg_t *pcfg)
         ESP_LOGE(TAG, "Attempting to toggle CE pin without initialisation");
 }
 
-int32_t reciproc_freq_TEST_WRITE_SPI_FPGA(reciproc_freq_cfg_t *pcfg)
+void reciproc_freq_send_spi_data(reciproc_freq_cfg_t *pcfg, uint8_t cmd, uint8_t param[])
 {
-	int32_t ret=0;
+
+	uint32_t spi_data;
 
 	reciproc_freq_enable(pcfg);
-	reciproc_freq_write(pcfg->reciproc_freq_device,0x0000FDEC);
+	spi_data = (cmd&0xFF) <<24;
+	spi_data |= (param[0]&0xFF)<<16;
+	spi_data |= (param[1]&0xFF)<<8;
+	spi_data |= (param[2]&0xFF);
+	ESP_LOGI(TAG,"send 0x%" PRIX32 " to FPGA",spi_data);
+	reciproc_freq_write(pcfg->reciproc_freq_device,spi_data);
 	reciproc_freq_disable(pcfg);
+
+}
+
+bool led_state=false;
+int32_t reciproc_freq_TEST_TOGGLE_LED(reciproc_freq_cfg_t *pcfg)
+{
+
+	int32_t ret=0;
+	uint8_t cmd;
+	uint8_t param[3];
+
+	led_state =!led_state;
+	cmd = (led_state == true ? RECIPROC_FREQ_MEAS_CMD_SPI_LED_ON : RECIPROC_FREQ_MEAS_CMD_SPI_LED_OFF);
+	param[0] = 0;
+	param[1] = 0;
+	param[2] = 0;
+
+	reciproc_freq_send_spi_data(pcfg,cmd,param);
+
+	return ret;
+
+}
+
+uint32_t reciproq_freq_val[]={0,100000,1000000,6000000};
+uint8_t Index=0;
+int32_t reciproc_freq_TEST_SET_FREQ(reciproc_freq_cfg_t *pcfg)
+{
+
+	int32_t ret=0;
+	uint8_t cmd;
+	uint8_t param[3];
+
+	if (Index == 3)
+		Index = 0;
+	else
+		Index++;
+
+	cmd = RECIPROC_FREQ_MEAS_CMD_SPI_SET_NCO_FREQ;
+	param[0] = (uint8_t) (((reciproq_freq_val[Index])&(0xFF0000))>> 16);
+	param[1] = (uint8_t) (((reciproq_freq_val[Index])&(0xFF00))>> 8);
+	param[2] = (uint8_t) (((reciproq_freq_val[Index])&(0xFF)));
+	
+	reciproc_freq_send_spi_data(pcfg,cmd,param);
 
 	return ret;
 
