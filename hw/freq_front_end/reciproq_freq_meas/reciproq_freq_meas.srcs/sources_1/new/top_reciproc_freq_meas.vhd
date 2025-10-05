@@ -9,7 +9,8 @@ entity top_reciproc_freq_meas is
         sck        : in  std_logic;
         mosi       : in  std_logic;
         cs_n       : in  std_logic;
-        LED0       : out std_logic
+        LED0       : out std_logic;
+        NCO_OUT    : out std_logic
     );
 end entity top_reciproc_freq_meas;
 
@@ -18,8 +19,8 @@ architecture rtl of top_reciproc_freq_meas is
     -- Signal interne du SPI slave
     signal led_spi : std_logic;
 
-    -- (Futurs signaux NCO)
-    signal nco_out : std_logic := '0';
+    -- Signal interne du NCO
+    signal nco_clk_out : std_logic;
 
 begin
 
@@ -37,19 +38,23 @@ begin
         );
 
     -------------------------------------------------------------------
-    -- (Futur) NCO : à instancier ici plus tard
+    -- Instance du NCO (DDS simple)
     -------------------------------------------------------------------
-    -- nco_inst : entity work.nco
-    --     port map (
-    --         clk => clk_master,
-    --         reset_n => reset_n,
-    --         freq_word => ...,
-    --         nco_out => nco_out
-    --     );
+    nco_inst : entity work.nco
+        generic map (
+            clk_freq => 12_000_000.0,  -- fréquence de l'horloge maître
+            freq     => 100_000.0      -- fréquence de sortie (100 kHz)
+        )
+        port map (
+            clk_in  => clk_master,
+            reset_n => reset_n,
+            clk_out => nco_clk_out
+        );
 
     -------------------------------------------------------------------
     -- Sorties physiques
     -------------------------------------------------------------------
-    LED0 <= led_spi;  -- pour le moment, directement la LED du SPI slave
+    LED0   <= led_spi;
+    NCO_OUT <= nco_clk_out;
 
 end architecture rtl;
