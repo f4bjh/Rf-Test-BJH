@@ -1,10 +1,10 @@
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.NUMERIC_STD.ALL;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
 entity top_reciproc_freq_meas is
-    Port (
-        clk_master : in  std_logic;  -- 12 MHz
+    port(
+        clk_master : in  std_logic;
         reset_n    : in  std_logic;
         sck        : in  std_logic;
         mosi       : in  std_logic;
@@ -12,49 +12,74 @@ entity top_reciproc_freq_meas is
         LED0       : out std_logic;
         NCO_OUT    : out std_logic
     );
-end entity top_reciproc_freq_meas;
+end entity;
 
 architecture rtl of top_reciproc_freq_meas is
+    -- SPI slave interface
+    signal spi_word      : std_logic_vector(31 downto 0);
+    signal spi_data_valid: std_logic;
 
-    -- Signal interne du SPI slave
-    signal led_spi : std_logic;
+    -- LED signals
+    signal led_state : std_logic := '0';
+    signal led_on, led_off, led_toggle : std_logic;
 
-    -- Signal interne du NCO
-    signal nco_clk_out : std_logic;
-
+    -- NCO
+    signal freq_word      : unsigned(23 downto 0);
+    signal freq_valid     : std_logic;
+    signal nco_clk_out    : std_logic;
 begin
-
-    -------------------------------------------------------------------
-    -- Instance du module SPI Slave
-    -------------------------------------------------------------------
+    -- SPI Slave
     spi_slave_inst : entity work.spi_slave
-        port map (
+        port map(
             clk_master => clk_master,
             reset_n    => reset_n,
             sck        => sck,
             mosi       => mosi,
             cs_n       => cs_n,
-            LED0       => led_spi
+            data_out   => spi_word,
+            data_valid => spi_data_valid
         );
 
-    -------------------------------------------------------------------
-    -- Instance du NCO (DDS simple)
-    -------------------------------------------------------------------
+    -- SPI Decoder
+    spi_decode_inst : entity work.spi_decode
+        port map(
+            clk            => clk_master,
+            reset_n        => reset_n,
+            data_in        => spi_word,
+            data_valid     => spi_data_valid,
+            led_on         => led_on,
+            led_off        => led_off,
+            led_toggle     => led_toggle,
+            nco_freq_word  => freq_word,
+            nco_freq_valid => freq_valid
+        );
+        
+    -- NCO
     nco_inst : entity work.nco
-        generic map (
-            clk_freq => 12_000_000.0,  -- fréquence de l'horloge maître
-            freq     => 100_000.0      -- fréquence de sortie (100 kHz)
-        )
-        port map (
-            clk_in  => clk_master,
-            reset_n => reset_n,
-            clk_out => nco_clk_out
-        );
+       port map (
+           clk_in     => clk_master,
+           reset_n    => reset_n,
+           freq_word  => freq_word,
+           freq_valid => freq_valid,
+           clk_out    => NCO_OUT
+       );
+       
+    -- LED management
+    process(clk_master, reset_n)
+    begin
+        if reset_n = '0' then
+            led_state <= '0';
+        elsif rising_edge(clk_master) then
+            if led_on = '1' then
+                led_state <= '1';
+            elsif led_off = '1' then
+                led_state <= '0';
+            elsif led_toggle = '1' then
+                led_state <= not led_state;
+            end if;
+        end if;
+    end process;
 
-    -------------------------------------------------------------------
-    -- Sorties physiques
-    -------------------------------------------------------------------
-    LED0   <= led_spi;
-    NCO_OUT <= nco_clk_out;
+    LED0 <= led_state;
 
-end architecture rtl;
+end architecture;

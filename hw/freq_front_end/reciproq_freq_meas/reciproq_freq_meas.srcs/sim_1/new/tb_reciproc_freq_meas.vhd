@@ -61,48 +61,28 @@ begin
         reset_n <= '1';
         wait for 500 ns;
 
-        -- Transmission de 0x0000FDEC
-        send_word(cs_n, sck, mosi, x"0000FDEC");
+        send_word(cs_n, sck, mosi, x"04000000");
         wait for 10 ms;
 
-        -- Transmission d'un autre mot
-        send_word(cs_n, sck, mosi, x"12345678");
+        send_word(cs_n, sck, mosi, x"01000000");
         wait for 10 ms;
 
-        -- Re-transmission de 0x0000FDEC
-        send_word(cs_n, sck, mosi, x"0000FDEC");
+        -- 100kHz
+        send_word(cs_n, sck, mosi, x"040186A0");
         wait for 10 ms;
 
-        -- Re-transmission de 0x0000FDEC
-        send_word(cs_n, sck, mosi, x"0000FDEC");
+        send_word(cs_n, sck, mosi, x"02000000");
         wait for 10 ms;
 
-        -- Re-transmission de 0x0000FDEC
-        send_word(cs_n, sck, mosi, x"0000FDEC");
+        -- 1MHz
+        send_word(cs_n, sck, mosi, x"040F4240");
         wait for 10 ms;
 
-        -- Re-transmission de 0x0000FDEC
-        send_word(cs_n, sck, mosi, x"0000FDEC");
+        send_word(cs_n, sck, mosi, x"03000000");
         wait for 10 ms;
         
-        -- Re-transmission de 0x0000FDEC
-        send_word(cs_n, sck, mosi, x"0000FDEC");
-        wait for 10 ms;
-
-        -- Re-transmission de 0x0000FDEC
-        send_word(cs_n, sck, mosi, x"0000FDEC");
-        wait for 10 ms;
-        
-        -- Re-transmission de 0x0000FDEC
-        send_word(cs_n, sck, mosi, x"0000FDEC");
-        wait for 10 ms;
-
-        -- Re-transmission de 0x0000FDEC
-        send_word(cs_n, sck, mosi, x"0000FDEC");
-        wait for 10 ms;
-        
-        -- Re-transmission de 0x0000FDEC
-        send_word(cs_n, sck, mosi, x"0000FDEC");
+        -- 6MHz
+        send_word(cs_n, sck, mosi, x"045B8D80");
         wait for 10 ms;
         
     end process;
