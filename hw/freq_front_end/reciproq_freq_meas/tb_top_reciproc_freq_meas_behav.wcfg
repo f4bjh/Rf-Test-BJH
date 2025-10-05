@@ -10,18 +10,19 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="1,757.054375 us"></ZoomStartTime>
-      <ZoomEndTime time="1,785.604376 us"></ZoomEndTime>
-      <Cursor1Time time="1,765.554375 us"></Cursor1Time>
+      <ZoomStartTime time="50,646,619.869 ns"></ZoomStartTime>
+      <ZoomEndTime time="50,649,494.870 ns"></ZoomEndTime>
+      <Cursor1Time time="50,648,098.995 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="276"></NameColumnWidth>
-      <ValueColumnWidth column_width="112"></ValueColumnWidth>
+      <ValueColumnWidth column_width="108"></ValueColumnWidth>
    </column_width_setting>
    <WVObjectSize size="8" />
    <wave_markers>
-      <marker label="" time="1765554375" />
-      <marker label="" time="1775553975" />
+      <marker label="" time="20392925925" />
+      <marker label="" time="50647099035" />
+      <marker label="" time="50648098995" />
    </wave_markers>
    <wvobject type="logic" fp_name="/tb_top_reciproc_freq_meas/clk_master">
       <obj_property name="ElementShortName">clk_master</obj_property>
