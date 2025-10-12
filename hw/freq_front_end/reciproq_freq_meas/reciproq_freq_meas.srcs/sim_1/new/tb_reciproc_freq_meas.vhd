@@ -6,7 +6,6 @@ use std.textio.all;
 entity tb_top_reciproc_freq_meas is 
 end entity;
 
-
 architecture sim of tb_top_reciproc_freq_meas is
   constant FREF_HZ  : integer := 12_000_000;
   constant CLK_PER  : time := 83.333 ns;
@@ -15,6 +14,8 @@ architecture sim of tb_top_reciproc_freq_meas is
   signal clk_ref   : std_logic := '0';
   signal rst_n     : std_logic := '0';
   signal sig_in    : std_logic := '0';
+  signal sig_gen_out : std_logic := '0';
+  signal use_nco_out : std_logic := '0';
   signal start     : std_logic := '0';
   signal ready     : std_logic;
   signal done      : std_logic;
@@ -39,13 +40,37 @@ architecture sim of tb_top_reciproc_freq_meas is
   signal f_direct, f_interp : real := 0.0;
 
   file result_file : text open write_mode is "resultats.txt";
-  
+
+  -- Procédure utilitaire : envoie un mot 32 bits MSB first sur SPI
+  procedure send_word(signal cs_n   : out std_logic;
+                      signal sck    : out std_logic;
+                      signal mosi   : out std_logic;
+                      word          : std_logic_vector(31 downto 0)) is
+  begin
+      cs_n <= '0';
+      wait for 10*CLK_PER;
+      for i in 31 downto 0 loop
+          mosi <= word(i);
+          wait for 2 us;
+          sck <= '1';
+          wait for 2 us;
+          sck <= '0';
+      end loop;
+      wait for 10*CLK_PER;
+      cs_n <= '1';
+  end procedure;
+
 begin
 
   ------------------------------------------------------------------------
   -- Horloge de référence 12 MHz
   ------------------------------------------------------------------------
   clk_ref <= not clk_ref after CLK_PER / 2;
+
+  ------------------------------------------------------------------------
+  -- Sélection dynamique de la source du signal à mesurer
+  ------------------------------------------------------------------------
+  sig_in <= NCO_OUT when use_nco_out = '1' else sig_gen_out;
 
   ------------------------------------------------------------------------
   -- Instance du design principal
@@ -73,7 +98,7 @@ begin
     );
 
   ------------------------------------------------------------------------
-  -- Génération du signal à mesurer
+  -- Génération du signal externe
   ------------------------------------------------------------------------
   sig_gen: process
     variable per_sig : time;
@@ -82,9 +107,9 @@ begin
     loop
       if f_sig > 0.0 then
         per_sig := 1 sec / f_sig;
-        sig_in <= '1';
+        sig_gen_out <= '1';
         wait for per_sig / 2;
-        sig_in <= '0';
+        sig_gen_out <= '0';
         wait for per_sig / 2;
       else
         wait for 1 us;
@@ -107,29 +132,50 @@ begin
     rst_n <= '1';
     wait for STABILIZATION_TIME;
 
-    for k in 0 to 5 loop
-      f_sig := real(TEST_FREQS(k));
+    send_word(cs_n, sck, mosi, x"04000000");
+    wait for 10 ms;
+
+    send_word(cs_n, sck, mosi, x"01000000");
+    wait for 10 ms;
+
+    -- 100kHz init
+    send_word(cs_n, sck, mosi, x"040186A0");
+    wait for 10 ms;
+   
+    for k in 0 to 6 loop
+      if k = 6 then
+        use_nco_out <= '1';
+      else
+        use_nco_out <= '0';
+      end if;
+
+      if k <=5 then
+       f_sig := real(TEST_FREQS(k));
+      else
+       f_sig := real(100_000);
+      end if;
       per_sig := 1 sec / f_sig;
 
-      report "===== Test signal " & integer'image(TEST_FREQS(k)) & " Hz =====" severity note;
+      if k= 6 then
+        report "===== Test signal NCO 100kHz =====" severity note;
+      else
+        report "===== Test signal " & integer'image(TEST_FREQS(k)) & " Hz =====" severity note;
+      end if;
 
       wait for 200 * per_sig;
 
-      -- Début de la mesure
       start <= '1';
       wait for CLK_PER;
       start <= '0';
 
       wait until done = '1';
       
-      -- Temps écoulé en secondes à partir des ticks
       if end_tick > start_tick then
         dt := real(to_integer(end_tick - start_tick)) / real(FREF_HZ);
       else
         dt := 0.0;
       end if;
       
-      -- Calcul des fréquences à partir du freq_counter / frac_interp
       if end_tick > start_tick and N_counted /= 0 then
         f_est_d := FREF_HZ * real(to_integer(N_counted)) / real(to_integer(end_tick - start_tick));
       else
@@ -144,29 +190,24 @@ begin
 
       f_est_c := real(to_integer(f_calc));
 
-      -- Affichage regroupé
       report
       "------------------------------" severity note;
       report
       "Méthode       | Fréquence (Hz)     | Précision (Hz)" severity note;
       report
       "f_direct      | " & real'image(f_est_d) & " | " & real'image(abs(f_est_d - f_sig)) severity note;
-      --report
-      --"f_interp      | " & real'image(f_est_i) & " | " & real'image(abs(f_est_i - f_sig)) severity note;
-      --report
-      --"f_calc        | " & real'image(f_est_c) & " | " & real'image(abs(f_est_c - f_sig)) severity note;
       report
       "Temps mesure  : " & real'image(dt) & " s" severity note;
-      --report
-      --"------------------------------" severity note;
-      -- exemple d'affichage regroupé
+
       write(l, string'("------------------------------"));
       writeline(result_file, l);
-    
+      if k=6 then
+        write(l, string'("NCO 100kHz"));
+        writeline(result_file, l);
+      end if;
       write(l, string'("Méthode       | Fréquence (Hz) | Précision (Hz) | t_measure"));
       writeline(result_file, l);
     
-      -- mesurer f_direct
       write(l, string'("f_direct      | "));
       write(l, real'image(f_est_d));
       write(l, string'("   | "));
