@@ -47,7 +47,10 @@ architecture rtl of freq_counter is
 
   -- timeout counter (in reference ticks)
   constant TIMEOUT_TICKS : unsigned(REF_CNT_W-1 downto 0) :=
-    to_unsigned( (FREF_HZ * TIMEOUT_MS) / 1000, REF_CNT_W);
+    resize(to_unsigned(FREF_HZ, REF_CNT_W) *
+         to_unsigned(TIMEOUT_MS, REF_CNT_W) /
+         to_unsigned(1000, REF_CNT_W),
+         REF_CNT_W);
   signal timeout_cnt : unsigned(REF_CNT_W-1 downto 0) := (others => '0');
 
   -- flags
