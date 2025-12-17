@@ -10,15 +10,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="12,109,695.400 ns"></ZoomStartTime>
-      <ZoomEndTime time="12,110,278.401 ns"></ZoomEndTime>
-      <Cursor1Time time="12,110,099.400 ns"></Cursor1Time>
+      <ZoomStartTime time="0.000000000 ms"></ZoomStartTime>
+      <ZoomEndTime time="71.460141527 ms"></ZoomEndTime>
+      <Cursor1Time time="30.625968310 ms"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="188"></NameColumnWidth>
-      <ValueColumnWidth column_width="188"></ValueColumnWidth>
+      <ValueColumnWidth column_width="180"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="27" />
+   <WVObjectSize size="30" />
    <wave_markers>
       <marker label="" time="20392925925" />
       <marker label="" time="50647099035" />
@@ -129,7 +129,19 @@
       <obj_property name="ObjectShortName">STABILIZATION_TIME</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_top_reciproc_freq_meas/TEST_FREQS">
-      <obj_property name="ElementShortName">TEST_FREQS[0:2]</obj_property>
-      <obj_property name="ObjectShortName">TEST_FREQS[0:2]</obj_property>
+      <obj_property name="ElementShortName">TEST_FREQS[0:5]</obj_property>
+      <obj_property name="ObjectShortName">TEST_FREQS[0:5]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_top_reciproc_freq_meas/uut/spi_slave_inst/data_out">
+      <obj_property name="ElementShortName">data_out[31:0]</obj_property>
+      <obj_property name="ObjectShortName">data_out[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_top_reciproc_freq_meas/uut/spi_slave_inst/tx_shift">
+      <obj_property name="ElementShortName">tx_shift[31:0]</obj_property>
+      <obj_property name="ObjectShortName">tx_shift[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_top_reciproc_freq_meas/uut/spi_slave_inst/opcode">
+      <obj_property name="ElementShortName">opcode[7:0]</obj_property>
+      <obj_property name="ObjectShortName">opcode[7:0]</obj_property>
    </wvobject>
 </wave_config>

@@ -10,8 +10,9 @@ entity top_reciproc_freq_meas is
   port(
     clk_master    : in  std_logic;
     reset_n       : in  std_logic;
-    sck           : in  std_logic;
+    sclk          : in  std_logic;
     mosi          : in  std_logic;
+    miso          : out  std_logic;
     cs_n          : in  std_logic;
     hf_freq_in    : in  std_logic;
     start         : in  std_logic;
@@ -54,26 +55,15 @@ begin
   ------------------------------------------------------------------------
   -- SPI Slave
   ------------------------------------------------------------------------
+  
   spi_slave_inst : entity work.spi_slave
-    port map(
-      clk_master => clk_master,
-      reset_n    => reset_n,
-      sck        => sck,
-      mosi       => mosi,
-      cs_n       => cs_n,
-      data_out   => spi_word,
-      data_valid => spi_data_valid
-    );
-
-  ------------------------------------------------------------------------
-  -- SPI Decoder
-  ------------------------------------------------------------------------
-  spi_decode_inst : entity work.spi_decode
     port map(
       clk            => clk_master,
       reset_n        => reset_n,
-      data_in        => spi_word,
-      data_valid     => spi_data_valid,
+      sclk           => sclk,
+      cs_n           => cs_n,
+      mosi           => mosi,
+      miso           => miso,
       led_on         => led_on,
       led_off        => led_off,
       led_toggle     => led_toggle,

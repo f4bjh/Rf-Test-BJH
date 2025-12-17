@@ -23,9 +23,11 @@ architecture sim of tb_top_reciproc_freq_meas is
 
   signal sck       : std_logic := '0';
   signal mosi      : std_logic := '0';
+  signal miso      : std_logic := '0';
   signal cs_n      : std_logic := '1';
   signal LED0      : std_logic;
   signal NCO_OUT   : std_logic;
+  signal rx_buff   : std_logic_vector(31 downto 0);
 
   -- Signaux exposés par le top
   signal start_tick, end_tick : unsigned(63 downto 0);
@@ -41,19 +43,37 @@ architecture sim of tb_top_reciproc_freq_meas is
 
   file result_file : text open write_mode is "resultats.txt";
 
+
+function slv_to_hex(slv : std_logic_vector) return string is
+    constant hex_chars : string := "0123456789ABCDEF";
+    variable result    : string(1 to slv'length / 4);
+    variable nibble    : std_logic_vector(3 downto 0);
+begin
+    for i in 0 to (slv'length / 4) - 1 loop
+        nibble := slv(slv'left - i*4 downto slv'left - i*4 - 3);
+        result(i+1) := hex_chars(to_integer(unsigned(nibble)) + 1);
+    end loop;
+    return result;
+end function;
+
+
+
   -- Procédure utilitaire : envoie un mot 32 bits MSB first sur SPI
-  procedure send_word(signal cs_n   : out std_logic;
+  procedure spi_transfer_32(signal cs_n   : out std_logic;
                       signal sck    : out std_logic;
                       signal mosi   : out std_logic;
-                      word          : std_logic_vector(31 downto 0)) is
+                      signal miso   : in std_logic;
+                      constant tx_word          : in std_logic_vector(31 downto 0);
+                      signal   rx_word          : out std_logic_vector(31 downto 0)) is
   begin
       cs_n <= '0';
       wait for 10*CLK_PER;
       for i in 31 downto 0 loop
-          mosi <= word(i);
+          mosi <= tx_word(i);
           wait for 2 us;
           sck <= '1';
           wait for 2 us;
+          rx_word(i) <= miso;
           sck <= '0';
       end loop;
       wait for 10*CLK_PER;
@@ -80,8 +100,9 @@ begin
     port map (
       clk_master    => clk_ref,
       reset_n       => rst_n,
-      sck           => sck,
+      sclk           => sck,
       mosi          => mosi,
+      miso          => miso,
       cs_n          => cs_n,
       hf_freq_in    => sig_in,
       start         => start,
@@ -131,36 +152,51 @@ begin
     wait for 10 us;
     rst_n <= '1';
     wait for STABILIZATION_TIME;
+    
+    
 
-    send_word(cs_n, sck, mosi, x"04000000");
+    spi_transfer_32(cs_n, sck, mosi, miso, x"04000000", rx_buff);
     wait for 10 ms;
 
-    send_word(cs_n, sck, mosi, x"01000000");
+    spi_transfer_32(cs_n, sck, mosi, miso, x"02010000", rx_buff);
     wait for 10 ms;
 
     -- 100kHz init
-    send_word(cs_n, sck, mosi, x"040186A0");
+    spi_transfer_32(cs_n, sck, mosi, miso, x"040186A0", rx_buff);
     wait for 10 ms;
+
+
+        -- ===============================
+        -- READ_STATUS : 0x01 00 00 00
+        -- ===============================
+
+        spi_transfer_32(cs_n, sck, mosi, miso, x"01000000", rx_buff);
    
-    for k in 0 to 6 loop
-      if k = 6 then
-        use_nco_out <= '1';
-      else
-        use_nco_out <= '0';
-      end if;
+        report "READ_STATUS returned = 0x" &
+            slv_to_hex(rx_buff)
+            severity note;
+            
+        report "STATUS.VERSION   = 0x" &
+            slv_to_hex(rx_buff(31 downto 24))
+            severity note;
 
-      if k <=5 then
-       f_sig := real(TEST_FREQS(k));
-      else
-       f_sig := real(100_000);
-      end if;
-      per_sig := 1 sec / f_sig;
+        report "STATUS.ERROR     = " &
+            std_logic'image(rx_buff(7))
+            severity note;
 
-      if k= 6 then
-        report "===== Test signal NCO 100kHz =====" severity note;
-      else
-        report "===== Test signal " & integer'image(TEST_FREQS(k)) & " Hz =====" severity note;
-      end if;
+        report "STATUS.LED_STATE = " &
+            std_logic'image(rx_buff(3))
+            severity note;
+
+  
+   
+   
+      use_nco_out <= '1';
+      f_sig := real(100_000);
+
+    
+      report "===== Test signal NCO 100kHz =====" severity note;
+    
 
       wait for 200 * per_sig;
 
@@ -201,10 +237,10 @@ begin
 
       write(l, string'("------------------------------"));
       writeline(result_file, l);
-      if k=6 then
-        write(l, string'("NCO 100kHz"));
-        writeline(result_file, l);
-      end if;
+      
+      write(l, string'("NCO 100kHz"));
+      writeline(result_file, l);
+      
       write(l, string'("Méthode       | Fréquence (Hz) | Précision (Hz) | t_measure"));
       writeline(result_file, l);
     
@@ -218,7 +254,7 @@ begin
       writeline(result_file, l);
     
       wait for 200 us;
-    end loop;
+  
 
     report "end testbench";
   end process;
