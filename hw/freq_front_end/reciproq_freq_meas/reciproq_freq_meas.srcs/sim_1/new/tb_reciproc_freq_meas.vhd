@@ -7,6 +7,9 @@ entity tb_top_reciproc_freq_meas is
 end entity;
 
 architecture sim of tb_top_reciproc_freq_meas is
+
+  type t_word32_array is array (natural range <>) of std_logic_vector(31 downto 0);
+
   constant FREF_HZ  : integer := 12_000_000;
   constant CLK_PER  : time := 83.333 ns;
   constant STABILIZATION_TIME : time := 100 us;
@@ -27,8 +30,10 @@ architecture sim of tb_top_reciproc_freq_meas is
   signal cs_n      : std_logic := '1';
   signal LED0      : std_logic;
   signal NCO_OUT   : std_logic;
-  signal rx_buff   : std_logic_vector(31 downto 0);
-
+  signal rx1 : t_word32_array(0 to 0);
+  signal rx4 : t_word32_array(0 to 3);
+  signal rx8 : t_word32_array(0 to 7);
+  
   -- Signaux exposés par le top
   signal start_tick, end_tick : unsigned(63 downto 0);
   signal N_counted            : unsigned(31 downto 0);
@@ -58,27 +63,43 @@ end function;
 
 
 
-  -- Procédure utilitaire : envoie un mot 32 bits MSB first sur SPI
-  procedure spi_transfer_32(signal cs_n   : out std_logic;
-                      signal sck    : out std_logic;
-                      signal mosi   : out std_logic;
-                      signal miso   : in std_logic;
-                      constant tx_word          : in std_logic_vector(31 downto 0);
-                      signal   rx_word          : out std_logic_vector(31 downto 0)) is
-  begin
-      cs_n <= '0';
-      wait for 10*CLK_PER;
-      for i in 31 downto 0 loop
-          mosi <= tx_word(i);
-          wait for 2 us;
-          sck <= '1';
-          wait for 2 us;
-          rx_word(i) <= miso;
-          sck <= '0';
-      end loop;
-      wait for 10*CLK_PER;
-      cs_n <= '1';
-  end procedure;
+procedure spi_device_transmit (
+    signal cs_n     : out std_logic;
+    signal sck      : out std_logic;
+    signal mosi     : out std_logic;
+    signal miso     : in  std_logic;
+    constant tx_word : in std_logic_vector(31 downto 0);
+    signal rx_words  : out t_word32_array
+) is
+begin
+    cs_n <= '0';
+    wait for 10 * CLK_PER;
+
+    -- Transmission du mot TX (32 bits)
+    for i in 31 downto 0 loop
+        mosi <= tx_word(i);
+        wait for 2 us;
+        sck <= '1';
+        wait for 2 us;
+        sck <= '0';
+    end loop;
+
+    -- Réception de N mots de 32 bits
+    for w in rx_words'range loop
+        for i in 31 downto 0 loop
+            mosi <= '0';
+            wait for 2 us;
+            sck <= '1';
+            wait for 2 us;
+            rx_words(w)(i) <= miso;
+            sck <= '0';
+        end loop;
+    end loop;
+
+    wait for 10 * CLK_PER;
+    cs_n <= '1';
+end procedure;
+
 
 begin
 
@@ -154,58 +175,37 @@ begin
     wait for STABILIZATION_TIME;
     
     
-
-    spi_transfer_32(cs_n, sck, mosi, miso, x"04000000", rx_buff);
-    wait for 10 ms;
-
-    spi_transfer_32(cs_n, sck, mosi, miso, x"02010000", rx_buff);
+    -- led on
+    spi_device_transmit(cs_n, sck, mosi, miso, x"02010000", rx1);
     wait for 10 ms;
 
     -- 100kHz init
-    spi_transfer_32(cs_n, sck, mosi, miso, x"040186A0", rx_buff);
+    spi_device_transmit(cs_n, sck, mosi, miso, x"040186A0", rx1);
     wait for 10 ms;
 
+    use_nco_out <= '1';
+    f_sig := real(100_000);
 
-        -- ===============================
-        -- READ_STATUS : 0x01 00 00 00
-        -- ===============================
+    report "===== Test signal NCO 100kHz =====" severity note;
 
-        spi_transfer_32(cs_n, sck, mosi, miso, x"01000000", rx_buff);
-   
-        report "READ_STATUS returned = 0x" &
-            slv_to_hex(rx_buff)
-            severity note;
-            
-        report "STATUS.VERSION   = 0x" &
-            slv_to_hex(rx_buff(31 downto 24))
-            severity note;
+    wait for 200 * per_sig;
 
-        report "STATUS.ERROR     = " &
-            std_logic'image(rx_buff(7))
-            severity note;
+    start <= '1';
+    wait for CLK_PER;
+    start <= '0';
+    wait until done = '1';
 
-        report "STATUS.LED_STATE = " &
-            std_logic'image(rx_buff(3))
-            severity note;
+    -- READ_STATUS
+    spi_device_transmit(cs_n, sck, mosi, miso,x"01000000", rx1);
+    report "READ_STATUS = 0x" & slv_to_hex(rx1(0));
 
-  
-   
-   
-      use_nco_out <= '1';
-      f_sig := real(100_000);
-
-    
-      report "===== Test signal NCO 100kHz =====" severity note;
-    
-
-      wait for 200 * per_sig;
-
-      start <= '1';
-      wait for CLK_PER;
-      start <= '0';
-
-      wait until done = '1';
-      
+    -- READ_DATA
+    spi_device_transmit(cs_n, sck, mosi, miso,x"10000000", rx8);
+    for i in rx8'range loop
+        report "READ_DATA(" & integer'image(i) & ") = 0x" &
+               slv_to_hex(rx8(i));
+    end loop;
+           
       if end_tick > start_tick then
         dt := real(to_integer(end_tick - start_tick)) / real(FREF_HZ);
       else
