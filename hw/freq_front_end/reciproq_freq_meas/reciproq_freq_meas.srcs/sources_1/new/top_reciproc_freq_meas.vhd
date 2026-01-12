@@ -20,14 +20,14 @@ entity top_reciproc_freq_meas is
     done          : out std_logic;
     f_calc        : out unsigned(31 downto 0);
     LED0          : out std_logic;
-    NCO_OUT       : out std_logic;
+    NCO_OUT       : out std_logic
 
     -- Pour testbench
-    start_tick    : out unsigned(63 downto 0);
-    end_tick      : out unsigned(63 downto 0);
-    N_counted     : out unsigned(31 downto 0);
-    interp_period : out unsigned(63 downto 0);
-    interp_valid  : out std_logic
+    --start_tick    : out unsigned(63 downto 0);
+    --end_tick      : out unsigned(63 downto 0);
+    --N_counted     : out unsigned(31 downto 0);
+    --interp_period : out unsigned(63 downto 0);
+    --interp_valid  : out std_logic
   );
 end entity;
 
@@ -54,6 +54,13 @@ architecture rtl of top_reciproc_freq_meas is
 
   signal meas_done      : std_logic;                            -- measurement (capture of N periods) done (pulse)
   signal calc_done : std_logic;
+
+  --freq_counter
+  signal start_tick    : unsigned(63 downto 0);
+  signal end_tick      : unsigned(63 downto 0);
+  signal N_counted     : unsigned(31 downto 0);
+  signal interp_period : unsigned(63 downto 0);
+  signal interp_valid  : std_logic;
 
 begin
 
