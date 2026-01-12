@@ -15,7 +15,7 @@ entity spi_decode is
         tx_word  : out std_logic_vector(31 downto 0);
         tx_load  : out std_logic;
         tx_busy  : in  std_logic;
-
+        
         -- LED
         led_on     : out std_logic;
         led_toggle : out std_logic;
@@ -42,7 +42,7 @@ signal fifo_mem    : fifo_array := (
 
 signal fifo_rd_ptr : integer range 0 to FIFO_DEPTH-1 := 0;
 signal fifo_count  : integer range 0 to FIFO_DEPTH := FIFO_DEPTH;
---signal fifo_dout   : std_logic_vector(31 downto 0);
+signal fifo_full : std_logic := '0';
 
 ----------------------------------------------------------------
 -- Status / control
@@ -68,7 +68,7 @@ begin
 status_reg(31 downto 24) <= x"01"; -- VERSION
 status_reg(23 downto 8)  <= (others => '0');
 status_reg(7) <= '0';
-status_reg(6) <= '0';
+status_reg(6) <= fifo_full;
 status_reg(5) <= error_flag;
 status_reg(4) <= nco_freq_valid;
 status_reg(3) <= led_on;
@@ -187,5 +187,5 @@ begin
         end case;
     end if;
 end process;
-
+fifo_full <= '1' when (fifo_count = FIFO_DEPTH) else '0';
 end architecture;
