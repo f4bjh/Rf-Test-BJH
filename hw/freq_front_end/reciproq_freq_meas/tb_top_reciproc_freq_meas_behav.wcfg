@@ -10,15 +10,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="48.146111054 ms"></ZoomStartTime>
-      <ZoomEndTime time="70.182777694 ms"></ZoomEndTime>
-      <Cursor1Time time="52.149719192 ms"></Cursor1Time>
+      <ZoomStartTime time="31,110.343442 us"></ZoomStartTime>
+      <ZoomEndTime time="31,177.043443 us"></ZoomEndTime>
+      <Cursor1Time time="31,142.376714 us"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="188"></NameColumnWidth>
-      <ValueColumnWidth column_width="116"></ValueColumnWidth>
+      <ValueColumnWidth column_width="104"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="46" />
+   <WVObjectSize size="40" />
    <wvobject type="logic" fp_name="/tb_top_reciproc_freq_meas/clk_ref">
       <obj_property name="ElementShortName">clk_ref</obj_property>
       <obj_property name="ObjectShortName">clk_ref</obj_property>
@@ -30,10 +30,6 @@
    <wvobject type="logic" fp_name="/tb_top_reciproc_freq_meas/sig_in">
       <obj_property name="ElementShortName">sig_in</obj_property>
       <obj_property name="ObjectShortName">sig_in</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/tb_top_reciproc_freq_meas/uut/spi_slave_inst/nco_freq_valid">
-      <obj_property name="ElementShortName">nco_freq_valid</obj_property>
-      <obj_property name="ObjectShortName">nco_freq_valid</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/tb_top_reciproc_freq_meas/uut/nco_inst/freq_valid">
       <obj_property name="ElementShortName">freq_valid</obj_property>
@@ -66,10 +62,6 @@
    <wvobject type="array" fp_name="/tb_top_reciproc_freq_meas/N_counted">
       <obj_property name="ElementShortName">N_counted[31:0]</obj_property>
       <obj_property name="ObjectShortName">N_counted[31:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/tb_top_reciproc_freq_meas/uut/spi_slave_inst/nco_freq_word">
-      <obj_property name="ElementShortName">nco_freq_word[23:0]</obj_property>
-      <obj_property name="ObjectShortName">nco_freq_word[23:0]</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_top_reciproc_freq_meas/uut/u_freq_counter/start_tick">
       <obj_property name="ElementShortName">start_tick[63:0]</obj_property>
@@ -151,56 +143,41 @@
       <obj_property name="ElementShortName">sclk_rise</obj_property>
       <obj_property name="ObjectShortName">sclk_rise</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/tb_top_reciproc_freq_meas/uut/spi_slave_inst/data_valid">
-      <obj_property name="ElementShortName">data_valid</obj_property>
-      <obj_property name="ObjectShortName">data_valid</obj_property>
-   </wvobject>
-   <wvobject type="other" fp_name="/tb_top_reciproc_freq_meas/uut/spi_slave_inst/tx_bit_cnt">
-      <obj_property name="ElementShortName">tx_bit_cnt</obj_property>
-      <obj_property name="ObjectShortName">tx_bit_cnt</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/tb_top_reciproc_freq_meas/uut/spi_slave_inst/start_status">
-      <obj_property name="ElementShortName">start_status</obj_property>
-      <obj_property name="ObjectShortName">start_status</obj_property>
+   <wvobject type="other" fp_name="/tb_top_reciproc_freq_meas/uut/spi_slave_inst/tx_cnt">
+      <obj_property name="ElementShortName">tx_cnt</obj_property>
+      <obj_property name="ObjectShortName">tx_cnt</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_top_reciproc_freq_meas/uut/spi_slave_inst/tx_shift">
       <obj_property name="ElementShortName">tx_shift[31:0]</obj_property>
       <obj_property name="ObjectShortName">tx_shift[31:0]</obj_property>
+      <obj_property name="isExpanded"></obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/tb_top_reciproc_freq_meas/uut/spi_slave_inst/status_reg">
-      <obj_property name="ElementShortName">status_reg[31:0]</obj_property>
-      <obj_property name="ObjectShortName">status_reg[31:0]</obj_property>
+   <wvobject type="logic" fp_name="/tb_top_reciproc_freq_meas/uut/tx_busy">
+      <obj_property name="ElementShortName">tx_busy</obj_property>
+      <obj_property name="ObjectShortName">tx_busy</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/tb_top_reciproc_freq_meas/uut/tx_load">
+      <obj_property name="ElementShortName">tx_load</obj_property>
+      <obj_property name="ObjectShortName">tx_load</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_top_reciproc_freq_meas/uut/tx_word">
+      <obj_property name="ElementShortName">tx_word[31:0]</obj_property>
+      <obj_property name="ObjectShortName">tx_word[31:0]</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_top_reciproc_freq_meas/uut/spi_slave_inst/rx_word">
       <obj_property name="ElementShortName">rx_word[31:0]</obj_property>
       <obj_property name="ObjectShortName">rx_word[31:0]</obj_property>
    </wvobject>
-   <wvobject type="other" fp_name="/tb_top_reciproc_freq_meas/uut/spi_slave_inst/fifo_rd_ptr">
-      <obj_property name="ElementShortName">fifo_rd_ptr</obj_property>
-      <obj_property name="ObjectShortName">fifo_rd_ptr</obj_property>
+   <wvobject type="logic" fp_name="/tb_top_reciproc_freq_meas/uut/spi_decode_inst/start_read_data">
+      <obj_property name="ElementShortName">start_read_data</obj_property>
+      <obj_property name="ObjectShortName">start_read_data</obj_property>
    </wvobject>
-   <wvobject type="other" fp_name="/tb_top_reciproc_freq_meas/uut/spi_slave_inst/fifo_count">
+   <wvobject type="other" fp_name="/tb_top_reciproc_freq_meas/uut/spi_decode_inst/word_cnt">
+      <obj_property name="ElementShortName">word_cnt</obj_property>
+      <obj_property name="ObjectShortName">word_cnt</obj_property>
+   </wvobject>
+   <wvobject type="other" fp_name="/tb_top_reciproc_freq_meas/uut/spi_decode_inst/fifo_count">
       <obj_property name="ElementShortName">fifo_count</obj_property>
       <obj_property name="ObjectShortName">fifo_count</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/tb_top_reciproc_freq_meas/uut/spi_slave_inst/fifo_dout">
-      <obj_property name="ElementShortName">fifo_dout[31:0]</obj_property>
-      <obj_property name="ObjectShortName">fifo_dout[31:0]</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/tb_top_reciproc_freq_meas/uut/spi_slave_inst/error_flag">
-      <obj_property name="ElementShortName">error_flag</obj_property>
-      <obj_property name="ObjectShortName">error_flag</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/tb_top_reciproc_freq_meas/uut/spi_slave_inst/led_on">
-      <obj_property name="ElementShortName">led_on</obj_property>
-      <obj_property name="ObjectShortName">led_on</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/tb_top_reciproc_freq_meas/uut/spi_slave_inst/led_toggle">
-      <obj_property name="ElementShortName">led_toggle</obj_property>
-      <obj_property name="ObjectShortName">led_toggle</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/tb_top_reciproc_freq_meas/uut/spi_slave_inst/led_off">
-      <obj_property name="ElementShortName">led_off</obj_property>
-      <obj_property name="ObjectShortName">led_off</obj_property>
    </wvobject>
 </wave_config>

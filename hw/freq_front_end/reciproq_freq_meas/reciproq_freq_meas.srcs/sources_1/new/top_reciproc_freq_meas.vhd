@@ -38,14 +38,19 @@ architecture rtl of top_reciproc_freq_meas is
   -- SPI interface
   signal spi_word       : std_logic_vector(31 downto 0);
   signal spi_data_valid : std_logic;
-
+  signal     rx_word    : std_logic_vector(31 downto 0);
+  signal      rx_valid  : std_logic;
+  signal      tx_word   : std_logic_vector(31 downto 0);
+  signal      tx_load   : std_logic;
+  signal      tx_busy   : std_logic;
+  
   -- LED
   signal led_state      : std_logic := '0';
   signal led_on, led_off, led_toggle : std_logic;
 
   -- NCO
-  signal freq_word      : unsigned(23 downto 0);
-  signal freq_valid     : std_logic;
+  signal nco_freq_word      : unsigned(23 downto 0);
+  signal nco_freq_valid     : std_logic;
 
   signal meas_done      : std_logic;                            -- measurement (capture of N periods) done (pulse)
   signal calc_done : std_logic;
@@ -57,19 +62,44 @@ begin
   ------------------------------------------------------------------------
   
   spi_slave_inst : entity work.spi_slave
-    port map(
-      clk            => clk_master,
-      reset_n        => reset_n,
-      sclk           => sclk,
-      cs_n           => cs_n,
-      mosi           => mosi,
-      miso           => miso,
-      led_on         => led_on,
-      led_off        => led_off,
-      led_toggle     => led_toggle,
-      nco_freq_word  => freq_word,
-      nco_freq_valid => freq_valid
-    );
+ port map (
+    clk     => clk_master,
+    reset_n => reset_n,
+    sclk    => sclk,
+    cs_n    => cs_n,
+    mosi    => mosi,
+    miso    => miso,
+
+    rx_word  => rx_word,
+    rx_valid => rx_valid,
+
+    tx_word  => tx_word,
+    tx_load  => tx_load,
+    tx_busy  => tx_busy
+);
+
+  ------------------------------------------------------------------------
+  -- SPI Decode
+  ------------------------------------------------------------------------
+  
+spi_decode_inst : entity work.spi_decode
+port map (
+    clk     => clk_master,
+    reset_n => reset_n,
+
+    rx_word  => rx_word,
+    rx_valid => rx_valid,
+
+    tx_word  => tx_word,
+    tx_load  => tx_load,
+    tx_busy  => tx_busy,
+
+    led_on        => led_on,
+    led_off       => led_off,
+    led_toggle    => led_toggle,
+    nco_freq_word => nco_freq_word,
+    nco_freq_valid=> nco_freq_valid
+);
 
   ------------------------------------------------------------------------
   -- NCO
@@ -78,8 +108,8 @@ begin
     port map (
       clk_in     => clk_master,
       reset_n    => reset_n,
-      freq_word  => freq_word,
-      freq_valid => freq_valid,
+      freq_word  => nco_freq_word,
+      freq_valid => nco_freq_valid,
       clk_out    => NCO_OUT
     );
 

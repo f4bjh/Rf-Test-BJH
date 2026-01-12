@@ -90,8 +90,9 @@ begin
             mosi <= '0';
             wait for 2 us;
             sck <= '1';
-            wait for 2 us;
+            wait for 1 ns; 
             rx_words(w)(i) <= miso;
+            wait for 2 us;
             sck <= '0';
         end loop;
     end loop;
