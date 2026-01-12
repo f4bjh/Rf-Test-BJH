@@ -16,9 +16,6 @@ entity top_reciproc_freq_meas is
     cs_n          : in  std_logic;
     hf_freq_in    : in  std_logic;
     start         : in  std_logic;
-    ready         : out std_logic;
-    done          : out std_logic;
-    f_calc        : out unsigned(31 downto 0);
     LED0          : out std_logic;
     NCO_OUT       : out std_logic
 
@@ -61,7 +58,12 @@ architecture rtl of top_reciproc_freq_meas is
   signal N_counted     : unsigned(31 downto 0);
   signal interp_period : unsigned(63 downto 0);
   signal interp_valid  : std_logic;
-
+  signal ready         : std_logic;
+ 
+  --calc
+  signal   done        : std_logic;
+  signal  f_calc       : unsigned(31 downto 0);
+  
 begin
 
   ------------------------------------------------------------------------
