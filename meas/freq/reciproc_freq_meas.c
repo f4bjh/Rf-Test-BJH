@@ -17,7 +17,7 @@ static char TAG[] = "reciproc_freq";
 
 spi_device_handle_t spi_frequencymeter_handle;
 
-void reciproc_freq_write(reciproc_freq_dev *dev, uint32_t reg)
+void reciproc_freq_write(reciproc_freq_dev *dev, uint32_t reg, uint8_t rx_size, uint8_t *rx_buffer)
 {
     esp_err_t err;
 
@@ -29,7 +29,8 @@ void reciproc_freq_write(reciproc_freq_dev *dev, uint32_t reg)
     t.tx_data[3] = (reg    )&0xff;
     t.flags = SPI_TRANS_USE_TXDATA;
     t.length = 32;
-    t.rx_buffer = NULL;
+    t.rx_buffer = rx_buffer;
+    t.rxlength = rx_size;
 
     err = spi_device_transmit(spi_frequencymeter_handle, &t);
     if (err != ESP_OK)
@@ -72,7 +73,8 @@ void reciproc_freq_disable(reciproc_freq_cfg_t *pcfg)
         ESP_LOGE(TAG, "Attempting to toggle CE pin without initialisation");
 }
 
-void reciproc_freq_send_spi_data(reciproc_freq_cfg_t *pcfg, uint8_t cmd, uint8_t param[])
+
+void reciproc_freq_send_spi(reciproc_freq_cfg_t *pcfg, uint8_t cmd, uint8_t param[], uint8_t rx_size, uint8_t *rx_buffer)
 {
 
 	uint32_t spi_data;
@@ -83,7 +85,7 @@ void reciproc_freq_send_spi_data(reciproc_freq_cfg_t *pcfg, uint8_t cmd, uint8_t
 	spi_data |= (param[1]&0xFF)<<8;
 	spi_data |= (param[2]&0xFF);
 	ESP_LOGI(TAG,"send 0x%" PRIX32 " to FPGA",spi_data);
-	reciproc_freq_write(pcfg->reciproc_freq_device,spi_data);
+	reciproc_freq_write(pcfg->reciproc_freq_device,spi_data, rx_size, rx_buffer);
 	reciproc_freq_disable(pcfg);
 
 }
@@ -97,12 +99,12 @@ int32_t reciproc_freq_TEST_TOGGLE_LED(reciproc_freq_cfg_t *pcfg)
 	uint8_t param[3];
 
 	led_state =!led_state;
-	cmd = (led_state == true ? RECIPROC_FREQ_MEAS_CMD_SPI_LED_ON : RECIPROC_FREQ_MEAS_CMD_SPI_LED_OFF);
-	param[0] = 0;
+	cmd = RECIPROC_FREQ_MEAS_CMD_SPI_SET_LED_STATUS;
+	param[0] = (led_state == true ? RECIPROC_FREQ_MEAS_CMD_SPI_LED_ON : RECIPROC_FREQ_MEAS_CMD_SPI_LED_OFF);
 	param[1] = 0;
 	param[2] = 0;
 
-	reciproc_freq_send_spi_data(pcfg,cmd,param);
+	reciproc_freq_send_spi(pcfg,cmd,param,0, NULL);
 
 	return ret;
 
@@ -127,7 +129,7 @@ int32_t reciproc_freq_TEST_SET_FREQ(reciproc_freq_cfg_t *pcfg)
 	param[1] = (uint8_t) (((reciproq_freq_val[Index])&(0xFF00))>> 8);
 	param[2] = (uint8_t) (((reciproq_freq_val[Index])&(0xFF)));
 	
-	reciproc_freq_send_spi_data(pcfg,cmd,param);
+	reciproc_freq_send_spi(pcfg,cmd,param, 0, NULL);
 
 	return ret;
 
@@ -153,6 +155,8 @@ int32_t reciproc_freq_setup(reciproc_freq_dev **device,
 	dev->pdata->square_out_freq = init_param.square_out_freq;
 
 	*device = dev;
+
+	//pulse start signal
 
 	ESP_LOGI(TAG,"FPGA reciprocal frequency meas successfully initialized.\n");
 
