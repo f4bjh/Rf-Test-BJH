@@ -11,10 +11,17 @@
 //
 // SPI sub cmd
 //
-#define RECIPROC_FREQ_MEAS_CMD_SPI_LED_ON 0x01
-#define RECIPROC_FREQ_MEAS_CMD_SPI_LED_OFF 0x02
-#define RECIPROC_FREQ_MEAS_CMD_SPI_LED_TOGGLE 0x03
-#
+#define RECIPROC_FREQ_MEAS_SUB_CMD_SIZE 3
+#define RECIPROC_FREQ_MEAS_SUB_CMD_SPI_LED_ON 0x01
+#define RECIPROC_FREQ_MEAS_SUB_CMD_SPI_LED_OFF 0x02
+#define RECIPROC_FREQ_MEAS_SUB_CMD_SPI_LED_TOGGLE 0x03
+#define RECIPROC_FREQ_MEAS_SUB_CMD_DUMMY 0x00
+
+#define RECIPROC_FREQ_MEAS_RX_SIZE_32b  4
+#define RECIPROC_FREQ_MEAS_RX_SIZE_4x32b  4*RECIPROC_FREQ_MEAS_RX_SIZE_32b
+#define RECIPROC_FREQ_MEAS_RX_SIZE_8x32b  8*RECIPROC_FREQ_MEAS_RX_SIZE_32b
+
+
 typedef struct {
 	uint32_t window_time_ms;
 	uint32_t ref_fast_clk_MHz; 
@@ -60,8 +67,10 @@ void reciproc_freq_enable(reciproc_freq_cfg_t *pcfg);
     @return None
 */
 void reciproc_freq_disable(reciproc_freq_cfg_t *pcfg);
+
 int32_t reciproc_freq_TEST_TOGGLE_LED(reciproc_freq_cfg_t *pcfg);
 int32_t reciproc_freq_TEST_SET_FREQ(reciproc_freq_cfg_t *pcfg);
+int32_t reciproc_freq_read_status(reciproc_freq_cfg_t *pcfg,uint8_t *rx_status);
 
 int32_t reciproc_freq_setup(reciproc_freq_dev **device,reciproc_freq_init_param init_param);
 

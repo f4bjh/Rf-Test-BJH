@@ -49,6 +49,9 @@ void frequencymeter_task(void *arg)
   frequencymeter_task_arg_t *frequencymeter_task_arg=arg;
   meas_t *measure = frequencymeter_task_arg->measure;
   //reciproc_freq_cfg_t fpga_freq;
+  uint8_t rx_status[RECIPROC_FREQ_MEAS_RX_SIZE_32b];
+
+
   ESP_LOGI(TAG,"Starting frequencymeter_task");
 
   
@@ -64,6 +67,8 @@ void frequencymeter_task(void *arg)
        ESP_LOGI(TAG,"Talking to FPGA over SPI...");	
        reciproc_freq_TEST_TOGGLE_LED(&fpga_freq);
        reciproc_freq_TEST_SET_FREQ(&fpga_freq);
+       reciproc_freq_read_status(&fpga_freq,rx_status);
+       ESP_LOGI(TAG,"reciproc_freq_read_status=0x%02X%02X%02X%02X",rx_status[0],rx_status[1],rx_status[2],rx_status[3]);
       
   }
 }

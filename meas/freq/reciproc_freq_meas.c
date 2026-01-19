@@ -74,16 +74,16 @@ void reciproc_freq_disable(reciproc_freq_cfg_t *pcfg)
 }
 
 
-void reciproc_freq_send_spi(reciproc_freq_cfg_t *pcfg, uint8_t cmd, uint8_t param[], uint8_t rx_size, uint8_t *rx_buffer)
+void reciproc_freq_send_spi(reciproc_freq_cfg_t *pcfg, uint8_t cmd, uint8_t subcmd[], uint8_t rx_size, uint8_t *rx_buffer)
 {
 
 	uint32_t spi_data;
 
 	reciproc_freq_enable(pcfg);
 	spi_data = (cmd&0xFF) <<24;
-	spi_data |= (param[0]&0xFF)<<16;
-	spi_data |= (param[1]&0xFF)<<8;
-	spi_data |= (param[2]&0xFF);
+	spi_data |= (subcmd[0]&0xFF)<<16;
+	spi_data |= (subcmd[1]&0xFF)<<8;
+	spi_data |= (subcmd[2]&0xFF);
 	ESP_LOGI(TAG,"send 0x%" PRIX32 " to FPGA",spi_data);
 	reciproc_freq_write(pcfg->reciproc_freq_device,spi_data, rx_size, rx_buffer);
 	reciproc_freq_disable(pcfg);
@@ -96,15 +96,15 @@ int32_t reciproc_freq_TEST_TOGGLE_LED(reciproc_freq_cfg_t *pcfg)
 
 	int32_t ret=0;
 	uint8_t cmd;
-	uint8_t param[3];
+	uint8_t subcmd[RECIPROC_FREQ_MEAS_SUB_CMD_SIZE];
 
 	led_state =!led_state;
 	cmd = RECIPROC_FREQ_MEAS_CMD_SPI_SET_LED_STATUS;
-	param[0] = (led_state == true ? RECIPROC_FREQ_MEAS_CMD_SPI_LED_ON : RECIPROC_FREQ_MEAS_CMD_SPI_LED_OFF);
-	param[1] = 0;
-	param[2] = 0;
+	subcmd[0] = (led_state == true ? RECIPROC_FREQ_MEAS_SUB_CMD_SPI_LED_ON : RECIPROC_FREQ_MEAS_SUB_CMD_SPI_LED_OFF);
+	subcmd[1] = 0;
+	subcmd[2] = 0;
 
-	reciproc_freq_send_spi(pcfg,cmd,param,0, NULL);
+	reciproc_freq_send_spi(pcfg,cmd,subcmd,0, NULL);
 
 	return ret;
 
@@ -117,7 +117,7 @@ int32_t reciproc_freq_TEST_SET_FREQ(reciproc_freq_cfg_t *pcfg)
 
 	int32_t ret=0;
 	uint8_t cmd;
-	uint8_t param[3];
+	uint8_t subcmd[RECIPROC_FREQ_MEAS_SUB_CMD_SIZE];
 
 	if (Index == 3)
 		Index = 0;
@@ -125,15 +125,34 @@ int32_t reciproc_freq_TEST_SET_FREQ(reciproc_freq_cfg_t *pcfg)
 		Index++;
 
 	cmd = RECIPROC_FREQ_MEAS_CMD_SPI_SET_NCO_FREQ;
-	param[0] = (uint8_t) (((reciproq_freq_val[Index])&(0xFF0000))>> 16);
-	param[1] = (uint8_t) (((reciproq_freq_val[Index])&(0xFF00))>> 8);
-	param[2] = (uint8_t) (((reciproq_freq_val[Index])&(0xFF)));
+	subcmd[0] = (uint8_t) (((reciproq_freq_val[Index])&(0xFF0000))>> 16);
+	subcmd[1] = (uint8_t) (((reciproq_freq_val[Index])&(0xFF00))>> 8);
+	subcmd[2] = (uint8_t) (((reciproq_freq_val[Index])&(0xFF)));
 	
-	reciproc_freq_send_spi(pcfg,cmd,param, 0, NULL);
+	reciproc_freq_send_spi(pcfg,cmd,subcmd, 0, NULL);
 
 	return ret;
 
 }
+
+int32_t reciproc_freq_read_status(reciproc_freq_cfg_t *pcfg,uint8_t *rx_status )
+{
+
+	int32_t ret=0;
+	uint8_t cmd;
+	uint8_t subcmd[RECIPROC_FREQ_MEAS_SUB_CMD_SIZE];
+
+	cmd = RECIPROC_FREQ_MEAS_CMD_SPI_READ_STATUS;
+	subcmd[0] = RECIPROC_FREQ_MEAS_SUB_CMD_DUMMY;
+	subcmd[1] = RECIPROC_FREQ_MEAS_SUB_CMD_DUMMY;
+	subcmd[2] = RECIPROC_FREQ_MEAS_SUB_CMD_DUMMY;
+	
+	reciproc_freq_send_spi(pcfg,cmd,subcmd, RECIPROC_FREQ_MEAS_RX_SIZE_32b, rx_status);
+
+	return ret;
+
+}
+
 
 int32_t reciproc_freq_setup(reciproc_freq_dev **device,
 		            reciproc_freq_init_param init_param)
