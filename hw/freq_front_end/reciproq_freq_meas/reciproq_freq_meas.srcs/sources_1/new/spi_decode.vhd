@@ -97,10 +97,16 @@ begin
         error_flag       <= '0';
 
     elsif rising_edge(clk) then
-        start_status    <= '0';
-        start_read_data <= '0';
-        error_flag      <= '0';
-        nco_freq_valid  <= '0';
+       -- par défaut, signaux impulsionnels
+       led_on        <= '0';
+       led_off       <= '0';
+       led_toggle    <= '0';
+       start_status    <= '0';
+       start_read_data <= '0';
+       error_flag      <= '0';
+       nco_freq_valid  <= '0';
+        
+
 
         if rx_valid = '1' then
             case rx_word(31 downto 24) is
