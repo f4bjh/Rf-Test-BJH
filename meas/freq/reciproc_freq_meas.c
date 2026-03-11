@@ -20,21 +20,38 @@ spi_device_handle_t spi_frequencymeter_handle;
 void reciproc_freq_write(reciproc_freq_dev *dev, uint32_t reg, uint8_t rx_size, uint8_t *rx_buffer)
 {
     esp_err_t err;
-
+    uint8_t tx_data[RECIPROC_FREQ_MEAS_TX_BYTE_SIZE_32b_word + rx_size];
+    uint8_t *rx_data=NULL;
     spi_transaction_t t;
-    memset(&t, 0, sizeof(t));
-    t.tx_data[0] = (reg>>24)&0xff;
-    t.tx_data[1] = (reg>>16)&0xff;
-    t.tx_data[2] = (reg>> 8)&0xff;
-    t.tx_data[3] = (reg    )&0xff;
-    t.flags = SPI_TRANS_USE_TXDATA;
-    t.length = 32;
-    t.rx_buffer = rx_buffer;
-    t.rxlength = rx_size;
 
+    if (rx_size && rx_buffer)
+      rx_data = malloc( (RECIPROC_FREQ_MEAS_TX_BYTE_SIZE_32b_word + rx_size)*sizeof(uint8_t));
+  
+    tx_data[0] = (reg>>24)&0xff;
+    tx_data[1] = (reg>>16)&0xff;
+    tx_data[2] = (reg>> 8)&0xff;
+    tx_data[3] = (reg    )&0xff;
+    memset(&tx_data[RECIPROC_FREQ_MEAS_TX_BYTE_SIZE_32b_word], 0, rx_size);   // dummy clocks to let FPGA send its reply on MISO
+ 
+    memset(&t, 0, sizeof(t));
+    t.tx_buffer=&(tx_data[0]);
+    t.length = 8*(RECIPROC_FREQ_MEAS_TX_BYTE_SIZE_32b_word + rx_size); //total length of frame : 4 bytes of TX + rx_size bytes of RX
+    t.rx_buffer = rx_data;
+    t.rxlength = 0; 
+    t.flags = 0;
+    
     err = spi_device_transmit(spi_frequencymeter_handle, &t);
     if (err != ESP_OK)
       ESP_LOGE(TAG,"spi device transmit error %d", err);
+
+    if (rx_size && rx_buffer) {
+ 
+	    for (uint8_t i=0; i<(RECIPROC_FREQ_MEAS_TX_BYTE_SIZE_32b_word+rx_size); i++)
+	    	ESP_LOGE(TAG,"FDEC 0x%02X",rx_data[i]);
+
+     memcpy(rx_buffer, &rx_data[4],rx_size);
+     free(rx_data);
+    }
 
 }
 
@@ -147,7 +164,7 @@ int32_t reciproc_freq_read_status(reciproc_freq_cfg_t *pcfg,uint8_t *rx_status )
 	subcmd[1] = RECIPROC_FREQ_MEAS_SUB_CMD_DUMMY;
 	subcmd[2] = RECIPROC_FREQ_MEAS_SUB_CMD_DUMMY;
 	
-	reciproc_freq_send_spi(pcfg,cmd,subcmd, RECIPROC_FREQ_MEAS_RX_SIZE_32b, rx_status);
+	reciproc_freq_send_spi(pcfg,cmd,subcmd, RECIPROC_FREQ_MEAS_RX_BYTE_SIZE_32b_word, rx_status);
 
 	return ret;
 

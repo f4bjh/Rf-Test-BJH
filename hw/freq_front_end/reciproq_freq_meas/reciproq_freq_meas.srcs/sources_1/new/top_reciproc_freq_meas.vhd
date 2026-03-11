@@ -20,6 +20,8 @@ entity top_reciproc_freq_meas is
     NCO_OUT       : out std_logic
 
     -- Pour testbench
+    --done          : out std_logic;
+    --f_calc        : out unsigned(31 downto 0);
     --start_tick    : out unsigned(63 downto 0);
     --end_tick      : out unsigned(63 downto 0);
     --N_counted     : out unsigned(31 downto 0);
@@ -53,16 +55,21 @@ architecture rtl of top_reciproc_freq_meas is
   signal calc_done : std_logic;
 
   --freq_counter
+  -- START ** may be needed to comment for testbench **
   signal start_tick    : unsigned(63 downto 0);
   signal end_tick      : unsigned(63 downto 0);
   signal N_counted     : unsigned(31 downto 0);
   signal interp_period : unsigned(63 downto 0);
   signal interp_valid  : std_logic;
+  -- END ** may be needed to comment for testbench **
   signal ready         : std_logic;
  
   --calc
+  -- START ** may be needed to comment for testbench **
   signal   done        : std_logic;
   signal  f_calc       : unsigned(31 downto 0);
+  -- END ** may be needed to comment for testbench **
+ 
   
 begin
 

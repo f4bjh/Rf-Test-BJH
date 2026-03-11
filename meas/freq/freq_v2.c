@@ -49,7 +49,7 @@ void frequencymeter_task(void *arg)
   frequencymeter_task_arg_t *frequencymeter_task_arg=arg;
   meas_t *measure = frequencymeter_task_arg->measure;
   //reciproc_freq_cfg_t fpga_freq;
-  uint8_t rx_status[RECIPROC_FREQ_MEAS_RX_SIZE_32b];
+  uint8_t rx_status[RECIPROC_FREQ_MEAS_RX_BYTE_SIZE_32b_word];
 
 
   ESP_LOGI(TAG,"Starting frequencymeter_task");
