@@ -88,8 +88,7 @@ begin
         for i in 31 downto 0 loop
             mosi <= '0';
             wait for 2 us;
-            sck <= '1';
-            wait for 1 ns; 
+            sck <= '1'; 
             rx_words(w)(i) <= miso;
             wait for 2 us;
             sck <= '0';
