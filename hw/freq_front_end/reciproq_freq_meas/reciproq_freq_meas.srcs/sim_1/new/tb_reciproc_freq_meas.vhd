@@ -12,8 +12,8 @@ architecture sim of tb_top_reciproc_freq_meas is
 
   constant FREF_HZ  : integer := 12_000_000;
   constant CLK_PER  : time := 83.333 ns;
-  constant SPI_CLK  : integer := 250_000;
-  constant SPI_CLK_PER : time := 4 us;
+  constant SPI_CLK  : integer := 1_000_000;
+  constant SPI_CLK_PER : time := 1 us;
   constant STABILIZATION_TIME : time := 100 us;
 
   signal clk_ref   : std_logic := '0';
