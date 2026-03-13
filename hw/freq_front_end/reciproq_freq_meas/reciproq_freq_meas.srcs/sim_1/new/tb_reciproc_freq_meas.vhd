@@ -12,6 +12,8 @@ architecture sim of tb_top_reciproc_freq_meas is
 
   constant FREF_HZ  : integer := 12_000_000;
   constant CLK_PER  : time := 83.333 ns;
+  constant SPI_CLK  : integer := 250_000;
+  constant SPI_CLK_PER : time := 4 us;
   constant STABILIZATION_TIME : time := 100 us;
 
   signal clk_ref   : std_logic := '0';
@@ -77,9 +79,9 @@ begin
     -- Transmission du mot TX (32 bits)
     for i in 31 downto 0 loop
         mosi <= tx_word(i);
-        wait for 2 us;
+        wait for SPI_CLK_PER/2;
         sck <= '1';
-        wait for 2 us;
+        wait for SPI_CLK_PER/2;
         sck <= '0';
     end loop;
 
@@ -87,10 +89,10 @@ begin
     for w in rx_words'range loop
         for i in 31 downto 0 loop
             mosi <= '0';
-            wait for 2 us;
+            wait for SPI_CLK_PER/2;
             sck <= '1'; 
             rx_words(w)(i) <= miso;
-            wait for 2 us;
+            wait for SPI_CLK_PER/2;
             sck <= '0';
         end loop;
     end loop;
