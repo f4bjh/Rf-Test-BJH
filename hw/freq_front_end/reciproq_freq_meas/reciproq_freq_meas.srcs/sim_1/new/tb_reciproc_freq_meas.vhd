@@ -20,7 +20,6 @@ architecture sim of tb_top_reciproc_freq_meas is
   signal sig_gen_out : std_logic := '0';
   signal use_nco_out : std_logic := '0';
   signal start     : std_logic := '0';
-  signal ready     : std_logic;
   signal done      : std_logic;
   signal f_calc    : unsigned(31 downto 0);
 
@@ -128,7 +127,6 @@ begin
       cs_n          => cs_n,
       hf_freq_in    => sig_in,
       start         => start,
-      ready         => ready,
       done          => done,
       f_calc        => f_calc,
       LED0          => LED0,

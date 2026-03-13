@@ -10,15 +10,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="31,110.343442 us"></ZoomStartTime>
-      <ZoomEndTime time="31,177.043443 us"></ZoomEndTime>
-      <Cursor1Time time="31,142.376714 us"></Cursor1Time>
+      <ZoomStartTime time="118,833.385582 us"></ZoomStartTime>
+      <ZoomEndTime time="118,920.289856 us"></ZoomEndTime>
+      <Cursor1Time time="118,905.805810 us"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="188"></NameColumnWidth>
-      <ValueColumnWidth column_width="104"></ValueColumnWidth>
+      <ValueColumnWidth column_width="100"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="40" />
+   <WVObjectSize size="39" />
    <wvobject type="logic" fp_name="/tb_top_reciproc_freq_meas/clk_ref">
       <obj_property name="ElementShortName">clk_ref</obj_property>
       <obj_property name="ObjectShortName">clk_ref</obj_property>
@@ -46,10 +46,6 @@
    <wvobject type="logic" fp_name="/tb_top_reciproc_freq_meas/start">
       <obj_property name="ElementShortName">start</obj_property>
       <obj_property name="ObjectShortName">start</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/tb_top_reciproc_freq_meas/ready">
-      <obj_property name="ElementShortName">ready</obj_property>
-      <obj_property name="ObjectShortName">ready</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/tb_top_reciproc_freq_meas/done">
       <obj_property name="ElementShortName">done</obj_property>
