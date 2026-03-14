@@ -7,26 +7,10 @@ char password[] = EXAMPLE_ESP_WIFI_STA_PASSWD;
 bool wifi_credentials_set=false;
 
 void app_main(void) {
-#ifdef CONFIG_FIRMWARE_OTA
-	spi_bus_config_t buscfg = 
-    {
-		.mosi_io_num = GPIO_SPI_MOSI,
-		//.data0_io_num = -1,
-		.miso_io_num = -1, //GPIO_SPI_MISO
-		.data1_io_num = -1,
-		.sclk_io_num = GPIO_SPI_CLK,
-		.quadwp_io_num = -1,
-		.data2_io_num = -1,
-		.quadhd_io_num = -1,
-		.data2_io_num = -1,
-		.data3_io_num = -1,
-		.data4_io_num = -1,
-		.data5_io_num = -1,
-		.data6_io_num = -1,
-		.data7_io_num = -1,
-	};
-#endif
 
+#ifdef CONFIG_FIRMWARE_OTA
+	spi_bus_config_t buscfg = {0};
+#endif
 
 	esp_err_t ret = nvs_flash_init();
 	esp_err_t ret_lcd;
@@ -69,12 +53,22 @@ void app_main(void) {
 	wifi_credentials_set  = false;
 #endif
 #ifdef CONFIG_FIRMWARE_OTA
-	//Initialise SPI bus
-	ESP_LOGI(TAG, "SPI bus initialisation MOSI GPIO: %d", buscfg.mosi_io_num);
-    ret = spi_bus_initialize(SENDER_HOST, &buscfg, SPI_DMA_DISABLED);
-    assert(ret == ESP_OK);
 
-    ESP_LOGI(TAG, "SPI bus successfully initialised");
+	//
+	//Initialise SPI bus
+	//
+	ESP_LOGI(TAG, "SPI bus initialisation");
+	buscfg.mosi_io_num = GPIO_SPI_MOSI;
+	buscfg.miso_io_num = GPIO_SPI_MISO;
+	buscfg.sclk_io_num = GPIO_SPI_CLK;
+	buscfg.quadwp_io_num = -1;
+	buscfg.quadhd_io_num = -1;
+        ESP_LOGI(TAG," mosi : GPIO%d",buscfg.mosi_io_num);
+	ESP_LOGI(TAG," miso : GPIO%d",buscfg.miso_io_num);
+    	ESP_LOGI(TAG," sclk : GPIO%d",buscfg.sclk_io_num);
+    	ret = spi_bus_initialize(SENDER_HOST, &buscfg, SPI_DMA_DISABLED);
+    	assert(ret == ESP_OK);
+    	ESP_LOGI(TAG, "SPI bus successfully initialised");
 
 	//get wifi credentials
 	nvs_handle_t handle;
