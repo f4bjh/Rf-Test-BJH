@@ -23,6 +23,18 @@
 #define RECIPROC_FREQ_MEAS_RX_BYTE_SIZE_4x32b_word  4*RECIPROC_FREQ_MEAS_RX_BYTE_SIZE_32b_word
 #define RECIPROC_FREQ_MEAS_RX_BYTE_SIZE_8x32b_word  8*RECIPROC_FREQ_MEAS_RX_BYTE_SIZE_32b_word
 
+#define  RECIPROC_FREQ_MEAS_BYTE_POS_VERSION 0x00
+#define  RECIPROC_FREQ_MEAS_BYTE_POS_01 0x01 //not used for now, maybe later
+#define  RECIPROC_FREQ_MEAS_BYTE_POS_02 0x02 // not used for now, maybe later
+#define  RECIPROC_FREQ_MEAS_BYTE_POS_STATUS 0x03
+#define  RECIPROC_FREQ_MEAS_BIT_POS_STATUS_LED_TOGGLE BIT_1
+#define  RECIPROC_FREQ_MEAS_BIT_POS_STATUS_LED_OFF    BIT_2
+#define  RECIPROC_FREQ_MEAS_BIT_POS_STATUS_LED_ON     BIT_3
+#define  RECIPROC_FREQ_MEAS_BIT_POS_STATUS_NCO_FREQ_VALID	BIT_4
+#define  RECIPROC_FREQ_MEAS_BIT_POS_STATUS_ERROR_FLAG	BIT_5
+#define  RECIPROC_FREQ_MEAS_BIT_POS_STATUS_FIFO_FULL	BIT_6
+
+#define  RECIPROC_FREQ_MEAS_VERSION 0x01
 
 typedef struct {
 	uint32_t window_time_ms;
@@ -40,6 +52,7 @@ struct reciproc_freq_platform_data {
 typedef struct {
     struct reciproc_freq_platform_data *pdata;
     pin_settings pins; // pin settings for SPI and GPIO
+    bool led_state;
 } reciproc_freq_dev;
 
 
@@ -70,9 +83,9 @@ void reciproc_freq_enable(reciproc_freq_cfg_t *pcfg);
 */
 void reciproc_freq_disable(reciproc_freq_cfg_t *pcfg);
 
-int32_t reciproc_freq_TEST_TOGGLE_LED(reciproc_freq_cfg_t *pcfg);
+esp_err_t reciproc_freq_toggle_led(reciproc_freq_cfg_t *pcfg);
 int32_t reciproc_freq_TEST_SET_FREQ(reciproc_freq_cfg_t *pcfg);
-int32_t reciproc_freq_read_status(reciproc_freq_cfg_t *pcfg,uint8_t *rx_status);
+esp_err_t reciproc_freq_read_status(reciproc_freq_cfg_t *pcfg,uint8_t *rx_status);
 
 int32_t reciproc_freq_setup(reciproc_freq_dev **device,reciproc_freq_init_param init_param);
 

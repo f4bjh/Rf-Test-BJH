@@ -17,7 +17,7 @@ static char TAG[] = "reciproc_freq";
 
 spi_device_handle_t spi_frequencymeter_handle;
 
-void reciproc_freq_write(reciproc_freq_dev *dev, uint32_t reg, uint8_t rx_size, uint8_t *rx_buffer)
+esp_err_t reciproc_freq_write(reciproc_freq_dev *dev, uint32_t reg, uint8_t rx_size, uint8_t *rx_buffer)
 {
     esp_err_t err;
     uint8_t tx_data[RECIPROC_FREQ_MEAS_TX_BYTE_SIZE_32b_word + rx_size];
@@ -41,17 +41,17 @@ void reciproc_freq_write(reciproc_freq_dev *dev, uint32_t reg, uint8_t rx_size, 
     t.flags = 0;
     
     err = spi_device_transmit(spi_frequencymeter_handle, &t);
-    if (err != ESP_OK)
+    if (err != ESP_OK) {
       ESP_LOGE(TAG,"spi device transmit error %d", err);
+      return err;
+    }
 
     if (rx_size && rx_buffer) {
- 
-	    for (uint8_t i=0; i<(RECIPROC_FREQ_MEAS_TX_BYTE_SIZE_32b_word+rx_size); i++)
-	    	ESP_LOGE(TAG,"FDEC 0x%02X",rx_data[i]);
-
-     memcpy(rx_buffer, &rx_data[4],rx_size);
+     memcpy(rx_buffer, &rx_data[RECIPROC_FREQ_MEAS_TX_BYTE_SIZE_32b_word],rx_size);
      free(rx_data);
     }
+
+    return ESP_OK;
 
 }
 
@@ -91,10 +91,11 @@ void reciproc_freq_disable(reciproc_freq_cfg_t *pcfg)
 }
 
 
-void reciproc_freq_send_spi(reciproc_freq_cfg_t *pcfg, uint8_t cmd, uint8_t subcmd[], uint8_t rx_size, uint8_t *rx_buffer)
+esp_err_t reciproc_freq_send_spi(reciproc_freq_cfg_t *pcfg, uint8_t cmd, uint8_t subcmd[], uint8_t rx_size, uint8_t *rx_buffer)
 {
 
 	uint32_t spi_data;
+	esp_err_t err;
 
 	reciproc_freq_enable(pcfg);
 	spi_data = (cmd&0xFF) <<24;
@@ -102,28 +103,29 @@ void reciproc_freq_send_spi(reciproc_freq_cfg_t *pcfg, uint8_t cmd, uint8_t subc
 	spi_data |= (subcmd[1]&0xFF)<<8;
 	spi_data |= (subcmd[2]&0xFF);
 	ESP_LOGI(TAG,"send 0x%" PRIX32 " to FPGA",spi_data);
-	reciproc_freq_write(pcfg->reciproc_freq_device,spi_data, rx_size, rx_buffer);
+	err = reciproc_freq_write(pcfg->reciproc_freq_device,spi_data, rx_size, rx_buffer);
 	reciproc_freq_disable(pcfg);
+
+	return err;
 
 }
 
-bool led_state=false;
-int32_t reciproc_freq_TEST_TOGGLE_LED(reciproc_freq_cfg_t *pcfg)
+esp_err_t reciproc_freq_toggle_led(reciproc_freq_cfg_t *pcfg)
 {
 
-	int32_t ret=0;
+	esp_err_t err=ESP_OK;
 	uint8_t cmd;
 	uint8_t subcmd[RECIPROC_FREQ_MEAS_SUB_CMD_SIZE];
 
-	led_state =!led_state;
+	pcfg->reciproc_freq_device->led_state =!(pcfg->reciproc_freq_device->led_state);
 	cmd = RECIPROC_FREQ_MEAS_CMD_SPI_SET_LED_STATUS;
-	subcmd[0] = (led_state == true ? RECIPROC_FREQ_MEAS_SUB_CMD_SPI_LED_ON : RECIPROC_FREQ_MEAS_SUB_CMD_SPI_LED_OFF);
+	subcmd[0] = (pcfg->reciproc_freq_device->led_state == true ? RECIPROC_FREQ_MEAS_SUB_CMD_SPI_LED_ON : RECIPROC_FREQ_MEAS_SUB_CMD_SPI_LED_OFF);
 	subcmd[1] = 0;
 	subcmd[2] = 0;
 
-	reciproc_freq_send_spi(pcfg,cmd,subcmd,0, NULL);
+	err = reciproc_freq_send_spi(pcfg,cmd,subcmd,0, NULL);
 
-	return ret;
+	return err;
 
 }
 
@@ -152,10 +154,10 @@ int32_t reciproc_freq_TEST_SET_FREQ(reciproc_freq_cfg_t *pcfg)
 
 }
 
-int32_t reciproc_freq_read_status(reciproc_freq_cfg_t *pcfg,uint8_t *rx_status )
+esp_err_t reciproc_freq_read_status(reciproc_freq_cfg_t *pcfg,uint8_t *rx_status )
 {
 
-	int32_t ret=0;
+	esp_err_t err=ESP_OK;
 	uint8_t cmd;
 	uint8_t subcmd[RECIPROC_FREQ_MEAS_SUB_CMD_SIZE];
 
@@ -164,9 +166,9 @@ int32_t reciproc_freq_read_status(reciproc_freq_cfg_t *pcfg,uint8_t *rx_status )
 	subcmd[1] = RECIPROC_FREQ_MEAS_SUB_CMD_DUMMY;
 	subcmd[2] = RECIPROC_FREQ_MEAS_SUB_CMD_DUMMY;
 	
-	reciproc_freq_send_spi(pcfg,cmd,subcmd, RECIPROC_FREQ_MEAS_RX_BYTE_SIZE_32b_word, rx_status);
+	err = reciproc_freq_send_spi(pcfg,cmd,subcmd, RECIPROC_FREQ_MEAS_RX_BYTE_SIZE_32b_word, rx_status);
 
-	return ret;
+	return err;
 
 }
 
@@ -189,6 +191,7 @@ int32_t reciproc_freq_setup(reciproc_freq_dev **device,
 	dev->pdata->window_time_ms = init_param.window_time_ms;
 	dev->pdata->ref_fast_clk_MHz = init_param.ref_fast_clk_MHz;
 	dev->pdata->square_out_freq = init_param.square_out_freq;
+	dev->led_state = false;
 
 	*device = dev;
 

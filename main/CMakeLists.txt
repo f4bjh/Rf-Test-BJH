@@ -36,7 +36,7 @@ if(CONFIG_FIRMWARE_OTA)
 	"../meas/counter/counter.c"
 	"../meas/chip_info/chip_info.c"
 	"../meas/part_info/part_info.c"
-	"../meas/freq/freq_v2.c"
+	"../meas/freq/freq.c"
 	#"../meas/rf_gen/rf_gen_v2.c"
 	#	"../meas/rf_gen/adf4351_v2.c"
 	"../meas/freq/reciproc_freq_meas.c"

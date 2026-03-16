@@ -1,12 +1,4 @@
-#include <freertos/FreeRTOS.h>
-#include <esp_http_server.h>
-#include <freertos/task.h>
-#include <esp_ota_ops.h>
-#include "esp_log.h"
-
-#include "meas_mgt.h"
-#include "gpio.h"
-#include "spi.h"
+#include "main.h"
 #include "reciproc_freq_meas.h"
 #include "freq.h"
 
@@ -65,7 +57,7 @@ void frequencymeter_task(void *arg)
        vTaskDelay(1000 / portTICK_PERIOD_MS);
 
        ESP_LOGI(TAG,"Talking to FPGA over SPI...");	
-       reciproc_freq_TEST_TOGGLE_LED(&fpga_freq);
+       reciproc_freq_toggle_led(&fpga_freq);
        reciproc_freq_TEST_SET_FREQ(&fpga_freq);
        reciproc_freq_read_status(&fpga_freq,rx_status);
        ESP_LOGI(TAG,"reciproc_freq_read_status=0x%02X%02X%02X%02X",rx_status[0],rx_status[1],rx_status[2],rx_status[3]);
@@ -78,7 +70,9 @@ esp_err_t init_frequencymeter(meas_t *measure)
    int err;
    static reciproc_freq_dev *reciproc_freq_device;
    frequencymeter_task_arg_t *frequencymeter_task_arg=malloc(sizeof(frequencymeter_task_arg_t));; 
- 
+   uint8_t reciproc_freq_status[RECIPROC_FREQ_MEAS_RX_BYTE_SIZE_32b_word];
+
+
    measure->size = sizeof(int);
    measure->pdata = malloc(measure->size * sizeof(uint8_t));
    measure->pdata_cache = malloc(measure->size * sizeof(uint8_t));
@@ -103,6 +97,23 @@ esp_err_t init_frequencymeter(meas_t *measure)
 	return ESP_ERR_NOT_FOUND;
     }
 
+    //
+    // check FPGA is OK
+    //
+    err = reciproc_freq_read_status(&fpga_freq,reciproc_freq_status);
+    if (err != ESP_OK) {
+	ESP_LOGE(TAG,"reciproc_freq_read_status() failed!");
+	return ESP_FAIL;
+    }
+    if (reciproc_freq_status[RECIPROC_FREQ_MEAS_BYTE_POS_VERSION] != RECIPROC_FREQ_MEAS_VERSION) {
+	ESP_LOGE(TAG,"init_frequencymeter failed : reciproc_freq_meas fpga version incompatible (%d/%d)",reciproc_freq_status[RECIPROC_FREQ_MEAS_BYTE_POS_VERSION],RECIPROC_FREQ_MEAS_VERSION);
+    	return ESP_FAIL;
+    }
+    if (reciproc_freq_status[RECIPROC_FREQ_MEAS_BYTE_POS_STATUS] && RECIPROC_FREQ_MEAS_BIT_POS_STATUS_ERROR_FLAG) {
+	ESP_LOGE(TAG,"init_frequencymeter failed : reciproc_freq_meas fpga in error state");
+   	return ESP_FAIL;
+    }
+ 
     memcpy(&(reciproc_freq_device->pins),&fpga_freq.pins,sizeof(pin_settings));
  
     fpga_freq.reciproc_freq_device = reciproc_freq_device;
@@ -110,13 +121,14 @@ esp_err_t init_frequencymeter(meas_t *measure)
     frequencymeter_task_arg->fpga_freq = fpga_freq;
  
     //create a frequencymeter on CPU1
-    if ( xTaskCreatePinnedToCore(frequencymeter_task, 
+    if ( xTaskCreatePinnedToCore(
+		    frequencymeter_task, 
 		   "frequencymeter task", 
 		   4096, 
 		   frequencymeter_task_arg,
 		   tskIDLE_PRIORITY + 1,
 		   (TaskHandle_t*) &(measure->handle),
-		   1) == pdPASS)    {
+		   1)					   == pdPASS)    {
 	    vTaskSetThreadLocalStoragePointer(measure->handle, 0, frequencymeter_task_arg);
     };
 
