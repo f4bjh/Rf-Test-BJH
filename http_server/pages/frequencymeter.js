@@ -1,90 +1,39 @@
 var serverIp = window.location.hostname;
 socket = new WebSocket("ws://" + serverIp + "/ws");
 
-socket.onopen = function () {
-        // Extraire le paramètre d'identification de la page
-	const url = window.location.href;
-	const pageId = url.split('/').pop();
+function update_status(freq_status)
+{
+    // extraction de la version (bits 31..24)
+    let version = (freq_status >>> 24) & 0xFF;
+    document.getElementById("version").textContent = version;
 
-        // Conversion en chaîne binaire pour estimer la longueur en octets (UTF-8)
-        const encoder = new TextEncoder();
-        const vEncoded = encoder.encode(pageId);
-        const l = vEncoded.length; // Longueur en octets
+    function set_button(id, bit)
+    {
+        let button = document.getElementById(id);
+        let value = (freq_status >> bit) & 1;
 
-        // Création de l'objet JSON
-        const jsonData = {
-        t: 0x01,
-        l: l,
-        v: pageId
-        };
+        if (value)
+        {
+            button.classList.remove("green");
+            button.classList.add("red");
+        }
+        else
+        {
+            button.classList.remove("red");
+            button.classList.add("green");
+        }
+    }
 
-        // Conversion en JSON
-        const jsonString = JSON.stringify(jsonData);
-        console.log(jsonString); // {"t":0,"l":3,"v":"123"}
-
-        // Envoi via WebSocket
-        socket.send(jsonString);
-};
-
-// Gérer les erreurs de connexion
-socket.addEventListener('error', (event) => {
-	console.error('Erreur de connexion WebSocket : ', event);
-});
-
-// Gérer la fermeture de la connexion
-socket.addEventListener('close', (event) => {
-	console.log('Connexion WebSocket fermée');
-});
-
-let freq = `unknown`;
-let freq_digit=new Array(11).fill(0);
-let freq_range = `10MHz`; // Valeur par défaut
-
-function send_freq_range_update(freq_range) {
-    const jsonData = {
-        t: 0x0C,
-        l: freq_range.length,
-        v: freq_range
-    };
-    window.socket.send(JSON.stringify(jsonData));
-    console.log(`range envoyé: ${freq_range}`);
+    set_button("fifo_full", 6);
+    set_button("error_flag", 5);
+    set_button("nco_freq_valid", 4);
+    set_button("led_on", 3);
+    set_button("led_off", 2);
+    set_button("led_toggle", 1);
 }
 
-window.addEventListener("DOMContentLoaded", () => {
-	const radios = document.querySelectorAll('input[name="freq_range"]');
-	radios.forEach(radio => {
-		radio.addEventListener("change", () => {
-			if (radio.checked) {
-				send_freq_range_update(radio.value);
-			}
-		});
-	});
-});
-
-// Gérer les messages reçus du serveur
-socket.addEventListener('message', (event) => {
-    if (!event.data || event.data.length === 0) {
-       console.warn("Message vide reçu sur le WebSocket.");
-       return;
-    }
-
-    const json_data = JSON.parse(event.data);
-
-    // Afficher le tag hexadécimal dans la console du navigateur
-    console.log(`t : ${json_data.t}`);
-    console.log(`l : ${json_data.l}`);
-    console.log(`v : ${json_data.v}`);
-
-    const freq_digit = document.getElementById('freq-digit'); //MSB
-                    
-
-    switch (json_data.t) {
-    case 0xB: 
-        if (json_data.l !== 0) {
-        freq = `${json_data.v}`;
-        }
-        break;
-    }
+function update_freq(freq)
+{
 
     let strFreq = String(freq).padStart(11, '0');
 
@@ -160,5 +109,103 @@ socket.addEventListener('message', (event) => {
         <div class='unit-Hz'>Hz</div>
         `;
     }
+}
+
+
+
+socket.onopen = function () {
+        // Extraire le paramètre d'identification de la page
+	const url = window.location.href;
+	const pageId = url.split('/').pop();
+
+        // Conversion en chaîne binaire pour estimer la longueur en octets (UTF-8)
+        const encoder = new TextEncoder();
+        const vEncoded = encoder.encode(pageId);
+        const l = vEncoded.length; // Longueur en octets
+
+        // Création de l'objet JSON
+        const jsonData = {
+        t: 0x01,
+        l: l,
+        v: pageId
+        };
+
+        // Conversion en JSON
+        const jsonString = JSON.stringify(jsonData);
+        console.log(jsonString); // {"t":0,"l":3,"v":"123"}
+
+        // Envoi via WebSocket
+        socket.send(jsonString);
+};
+
+// Gérer les erreurs de connexion
+socket.addEventListener('error', (event) => {
+	console.error('Erreur de connexion WebSocket : ', event);
 });
+
+// Gérer la fermeture de la connexion
+socket.addEventListener('close', (event) => {
+	console.log('Connexion WebSocket fermée');
+});
+
+let freq = `unknown`;
+let freq_digit=new Array(11).fill(0);
+let freq_range = `10MHz`; // Valeur par défaut
+let freq_status = `unknown`;
+
+function send_freq_range_update(freq_range) {
+    const jsonData = {
+        t: 0x0C,
+        l: freq_range.length,
+        v: freq_range
+    };
+    window.socket.send(JSON.stringify(jsonData));
+    console.log(`range envoyé: ${freq_range}`);
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+	const radios = document.querySelectorAll('input[name="freq_range"]');
+	radios.forEach(radio => {
+		radio.addEventListener("change", () => {
+			if (radio.checked) {
+				send_freq_range_update(radio.value);
+			}
+		});
+	});
+});
+
+// Gérer les messages reçus du serveur
+socket.addEventListener('message', (event) => {
+    if (!event.data || event.data.length === 0) {
+       console.warn("Message vide reçu sur le WebSocket.");
+       return;
+    }
+
+    const json_data = JSON.parse(event.data);
+
+    // Afficher le tag hexadécimal dans la console du navigateur
+    console.log(`t : ${json_data.t}`);
+    console.log(`l : ${json_data.l}`);
+    console.log(`v : ${json_data.v}`);
+
+    const freq_digit = document.getElementById('freq-digit'); //MSB
+                    
+
+    switch (json_data.t) {
+    
+    case 0xB:
+        if (json_data.l !== 0) {
+        freq_status = `${json_data.v}`;
+	update_status(Number(freq_status));
+        }
+        break;
+    case 0xC: 
+        if (json_data.l !== 0) {
+        freq = `${json_data.v}`;
+	update_freq(freq);
+        }
+        break;
+    } 
+
+    });
 

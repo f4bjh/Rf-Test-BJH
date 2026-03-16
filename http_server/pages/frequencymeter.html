@@ -36,7 +36,17 @@ html, body {
  
 .figb {
     border-width: 2px 4px 4px 4px;
-    }        
+    }  
+
+.red {
+  background-color: red;
+  color: white;
+}
+
+.green {
+  background-color: green;
+  color: white;
+}
 </style>
  
 </head>
@@ -69,6 +79,15 @@ html, body {
     <h2>Frequency-meter</h2>
     <br><br><br>
 	<div style="position: absolute;left:0%;">
+
+		<div>FPGA reciprocal counter version : v<span id="version"></span></div>
+
+		<button id="fifo_full">FIFO FULL</button>
+		<button id="error_flag">ERROR</button>
+		<button id="nco_freq_valid">NCO VALID</button>
+		<button id="led_on">LED ON</button>
+		<button id="led_off">LED OFF</button>
+		<button id="led_toggle">LED TOGGLE</button>
 
 		<div class="range-selection">
 			<h3>Frequency range selection</h3>
