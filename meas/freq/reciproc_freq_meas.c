@@ -14,7 +14,7 @@
 #include "reciproc_freq_meas.h"
 
 static char TAG[] = "reciproc_freq";
-
+SemaphoreHandle_t spi_mutex;
 spi_device_handle_t spi_frequencymeter_handle;
 
 esp_err_t reciproc_freq_write(reciproc_freq_dev *dev, uint32_t reg, uint8_t rx_size, uint8_t *rx_buffer)
@@ -39,8 +39,11 @@ esp_err_t reciproc_freq_write(reciproc_freq_dev *dev, uint32_t reg, uint8_t rx_s
     t.rx_buffer = rx_data;
     t.rxlength = 0; 
     t.flags = 0;
-    
+
+    xSemaphoreTake(spi_mutex, portMAX_DELAY); 
     err = spi_device_transmit(spi_frequencymeter_handle, &t);
+    xSemaphoreGive(spi_mutex);
+    
     if (err != ESP_OK) {
       ESP_LOGE(TAG,"spi device transmit error %d", err);
       return err;
@@ -184,6 +187,8 @@ int32_t reciproc_freq_setup(reciproc_freq_dev **device,
 		return -1;
 	}
 
+	dev->dev_initialised=false;
+
 	dev->pdata = (struct reciproc_freq_platform_data *)malloc(sizeof(*dev->pdata));
 	if (!dev->pdata)
 		return -1;
@@ -262,6 +267,8 @@ void reciproc_freq_initialise(reciproc_freq_cfg_t *pcfg)
  
     //reset the chip
     reciproc_freq_reset(pcfg);
+
+    spi_mutex = xSemaphoreCreateMutex();
 
     pcfg->_spi_initialised = true;
 }

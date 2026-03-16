@@ -53,6 +53,7 @@ typedef struct {
     struct reciproc_freq_platform_data *pdata;
     pin_settings pins; // pin settings for SPI and GPIO
     bool led_state;
+    bool dev_initialised;
 } reciproc_freq_dev;
 
 

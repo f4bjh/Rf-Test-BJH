@@ -2,7 +2,7 @@
 #include "reciproc_freq_meas.h"
 #include "freq.h"
 
-static char TAG[] = "frequencymeter";
+static char TAG[] = "freq";
 
 static reciproc_freq_cfg_t fpga_freq={
   .pins = {
@@ -35,6 +35,44 @@ reciproc_freq_init_param default_reciproc_freq_init_param = {
 
 };
 
+void read_status_task(void *arg)
+{
+  esp_err_t err;
+  read_status_task_arg_t *read_status_task_arg=arg;
+  meas_t *measure = read_status_task_arg->measure;
+  //reciproc_freq_cfg_t *fpga_freq=read_status_task_arg->fpga_freq;
+  uint8_t reciproc_freq_status[RECIPROC_FREQ_MEAS_RX_BYTE_SIZE_32b_word];
+
+   ESP_LOGI(TAG,"Starting read_status_task");
+
+   measure->ready=false;
+
+  while(1) {
+	vTaskDelay(100 / portTICK_PERIOD_MS);
+
+	if (fpga_freq.reciproc_freq_device) {
+
+		if (fpga_freq.reciproc_freq_device->dev_initialised ) {
+
+			err = reciproc_freq_read_status(&fpga_freq,reciproc_freq_status);
+			  
+			if (err != ESP_OK) {
+				ESP_LOGE(TAG,"reciproc_freq_read_status() failed!");
+			}
+			   
+			ESP_LOGI(TAG,"reciproc_freq_read_status=0x%02X%02X%02X%02X",
+					reciproc_freq_status[0],
+					reciproc_freq_status[1],
+					reciproc_freq_status[2],
+					reciproc_freq_status[3]);
+			memcpy(measure->pdata,reciproc_freq_status, measure->size );
+			measure->ready=true;
+		}
+	} 
+  }
+
+}
+ 
 void frequencymeter_task(void *arg) 
 {
    
@@ -46,12 +84,7 @@ void frequencymeter_task(void *arg)
 
   ESP_LOGI(TAG,"Starting frequencymeter_task");
 
-  
-  //memcpy(&(fpga_freq), &(frequencymeter_task_arg->fpga_freq), sizeof(reciproc_freq_cfg_t));
- 
   measure->ready=false;
-
-  ESP_LOGI(TAG,"Starting frequencymeter_task 2");
 
   while(1) {
        vTaskDelay(1000 / portTICK_PERIOD_MS);
@@ -60,16 +93,42 @@ void frequencymeter_task(void *arg)
        reciproc_freq_toggle_led(&fpga_freq);
        reciproc_freq_TEST_SET_FREQ(&fpga_freq);
        reciproc_freq_read_status(&fpga_freq,rx_status);
-       ESP_LOGI(TAG,"reciproc_freq_read_status=0x%02X%02X%02X%02X",rx_status[0],rx_status[1],rx_status[2],rx_status[3]);
       
   }
 }
 
+esp_err_t init_read_status(meas_t *measure)
+{
+   read_status_task_arg_t *read_status_task_arg=malloc(sizeof(read_status_task_arg_t));; 
+
+   measure->size = 4*sizeof(uint8_t);
+   measure->pdata = malloc(measure->size * sizeof(uint8_t));
+   measure->pdata_cache = malloc(measure->size * sizeof(uint8_t));
+   measure->meas_func = NULL;
+
+   read_status_task_arg->measure=measure;
+   read_status_task_arg->fpga_freq = fpga_freq;
+ 
+   //create a frequencymeter on CPU1
+   if ( xTaskCreatePinnedToCore(
+		   read_status_task, 
+		   "read status task", 
+		   4096, 
+		   read_status_task_arg,
+		   tskIDLE_PRIORITY + 1,
+		   (TaskHandle_t*) &(measure->handle),
+		   1)					   == pdPASS)    {
+	    vTaskSetThreadLocalStoragePointer(measure->handle, 0, read_status_task_arg);
+   };
+
+   return ESP_OK;
+
+}
 esp_err_t init_frequencymeter(meas_t *measure)
 {
    int err;
    static reciproc_freq_dev *reciproc_freq_device;
-   frequencymeter_task_arg_t *frequencymeter_task_arg=malloc(sizeof(frequencymeter_task_arg_t));; 
+   frequencymeter_task_arg_t *frequencymeter_task_arg=malloc(sizeof(frequencymeter_task_arg_t)); 
    uint8_t reciproc_freq_status[RECIPROC_FREQ_MEAS_RX_BYTE_SIZE_32b_word];
 
 
@@ -101,6 +160,7 @@ esp_err_t init_frequencymeter(meas_t *measure)
     // check FPGA is OK
     //
     err = reciproc_freq_read_status(&fpga_freq,reciproc_freq_status);
+    ESP_LOGI(TAG,"status=0x%02X%02X%02X%02X",reciproc_freq_status[0],reciproc_freq_status[1],reciproc_freq_status[2],reciproc_freq_status[3]);
     if (err != ESP_OK) {
 	ESP_LOGE(TAG,"reciproc_freq_read_status() failed!");
 	return ESP_FAIL;
@@ -109,9 +169,14 @@ esp_err_t init_frequencymeter(meas_t *measure)
 	ESP_LOGE(TAG,"init_frequencymeter failed : reciproc_freq_meas fpga version incompatible (%d/%d)",reciproc_freq_status[RECIPROC_FREQ_MEAS_BYTE_POS_VERSION],RECIPROC_FREQ_MEAS_VERSION);
     	return ESP_FAIL;
     }
-    if (reciproc_freq_status[RECIPROC_FREQ_MEAS_BYTE_POS_STATUS] && RECIPROC_FREQ_MEAS_BIT_POS_STATUS_ERROR_FLAG) {
+    if (reciproc_freq_status[RECIPROC_FREQ_MEAS_BYTE_POS_STATUS] & RECIPROC_FREQ_MEAS_BIT_POS_STATUS_ERROR_FLAG) {
 	ESP_LOGE(TAG,"init_frequencymeter failed : reciproc_freq_meas fpga in error state");
-   	return ESP_FAIL;
+
+    ESP_LOGI(TAG,"status=0x%02X %02X %s",reciproc_freq_status[3],RECIPROC_FREQ_MEAS_BIT_POS_STATUS_ERROR_FLAG,reciproc_freq_status[RECIPROC_FREQ_MEAS_BYTE_POS_STATUS] && RECIPROC_FREQ_MEAS_BIT_POS_STATUS_ERROR_FLAG ? "oui":"non" );
+ 
+
+
+	return ESP_FAIL;
     }
  
     memcpy(&(reciproc_freq_device->pins),&fpga_freq.pins,sizeof(pin_settings));
@@ -131,11 +196,36 @@ esp_err_t init_frequencymeter(meas_t *measure)
 		   1)					   == pdPASS)    {
 	    vTaskSetThreadLocalStoragePointer(measure->handle, 0, frequencymeter_task_arg);
     };
-
+   
+   fpga_freq.reciproc_freq_device->dev_initialised=true; 
    return ESP_OK;
 
 }
 
+esp_err_t stop_read_status(meas_t *measure)
+{
+  static TaskHandle_t task_handle;
+
+  task_handle = measure->handle;
+
+  if (task_handle!=NULL) {
+    vTaskDelete(task_handle);
+
+
+    // libérer la mémoire passée à la tâche
+    read_status_task_arg_t *read_status_task_arg =
+        (read_status_task_arg_t *) pvTaskGetThreadLocalStoragePointer(measure->handle, 0);
+
+    if (read_status_task_arg) {
+        free(read_status_task_arg);
+    }
+
+    measure->handle = NULL;
+
+  }
+  return ESP_OK;
+
+}
 esp_err_t stop_frequencymeter(meas_t *measure)
 {
   static TaskHandle_t task_handle;
@@ -187,5 +277,12 @@ esp_err_t calc_frequencymeter(instance_meas_t *instance_meas)
     return ESP_OK;
 }
 
-
-
+esp_err_t calc_read_status(instance_meas_t *instance_meas)
+{
+    meas_t measure=instance_meas->measures;
+    memset(instance_meas->calc_value, 0, CALC_VALUE_SIZE*sizeof(char));
+ 
+    sprintf(instance_meas->calc_value,"0x%02X%02X%02X%02X",measure.pdata_cache[0],measure.pdata_cache[1],measure.pdata_cache[2],measure.pdata_cache[3]);
+	   
+    return ESP_OK;
+}

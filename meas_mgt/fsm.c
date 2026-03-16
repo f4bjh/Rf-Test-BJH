@@ -199,6 +199,9 @@ data_to_client_tag_t get_tag_measurement(meas_number_t meas_num)
     case NEXT_PART_BUILD_DATE:
       tag = NEXT_PART_BUILD_DATE_TAG;
       break;
+    case FREQ_STATUS:
+      tag = READ_STATUS_TAG;
+      break;
     case FREQUENCY:
       tag = FREQUENCY_TAG;
       break;

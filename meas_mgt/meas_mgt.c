@@ -66,6 +66,7 @@ instance_meas_per_html_page_t instance_meas_per_html_page[N_PAGES][N_MEAS+1] =
   },
   //frequencymeter.html
   {
+    {FREQ_STATUS,	      false, init_read_status,             calc_read_status,             {0},           NULL,        stop_read_status,     NULL},
     {FREQUENCY,               false, init_frequencymeter,          calc_frequencymeter,          {0},           NULL,        stop_frequencymeter,  NULL},
     LAST_INSTANCE_MEAS
   },
