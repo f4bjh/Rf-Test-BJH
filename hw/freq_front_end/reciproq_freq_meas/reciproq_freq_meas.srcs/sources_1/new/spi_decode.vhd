@@ -32,16 +32,23 @@ architecture rtl of spi_decode  is
 ----------------------------------------------------------------
 -- FIFO
 ----------------------------------------------------------------
-constant FIFO_DEPTH : integer := 8;
+constant FIFO_DEPTH_PER_VAR : integer := 8;
+constant FIFO_DEPTH : integer := 8*4;
+
 type fifo_array is array (0 to FIFO_DEPTH-1) of std_logic_vector(31 downto 0);
 
 signal fifo_mem    : fifo_array := (
-    x"00000000", x"00000001", x"00000002", x"00000003",
-    x"00000004", x"00000005", x"00000006", x"00000007"
+    x"00000000", x"00000001", x"00000002", x"00000003", x"00000004", x"00000005", x"00000006", x"00000007", --test data
+    x"00000000", x"00000000", x"00000000", x"00000000", x"00000000", x"00000000", x"00000000", x"00000000",--start_tick
+    x"00000000", x"00000000", x"00000000", x"00000000", x"00000000", x"00000000", x"00000000", x"00000000",--end_tick
+    x"00000000", x"00000000", x"00000000", x"00000000", x"00000000", x"00000000", x"00000000", x"00000000"--N_counted
 );
 
 signal fifo_rd_ptr : integer range 0 to FIFO_DEPTH-1 := 0;
-signal fifo_count  : integer range 0 to FIFO_DEPTH := FIFO_DEPTH;
+signal fifo_rd_ptr_var : integer range 0 to FIFO_DEPTH-1 := 0;
+
+signal fifo_count  : integer range 0 to FIFO_DEPTH_PER_VAR := FIFO_DEPTH_PER_VAR;
+signal fifo_count_start  : integer range 0 to FIFO_DEPTH_PER_VAR := FIFO_DEPTH_PER_VAR;
 signal fifo_full : std_logic := '0';
 
 ----------------------------------------------------------------
@@ -66,8 +73,8 @@ begin
 -- STATUS REGISTER
 ----------------------------------------------------------------
 status_reg(31 downto 24) <= x"00"; -- MAJOR VERSION
-status_reg(23 downto 16) <= x"02"; -- MINOR VERSION
-status_reg(16 downto 8)  <= (others => '0');
+status_reg(23 downto 16) <= x"03"; -- MINOR VERSION
+status_reg(15 downto 8)  <= (others => '0');
 status_reg(7) <= '0';
 status_reg(6) <= fifo_full;
 status_reg(5) <= error_flag;
@@ -78,9 +85,9 @@ status_reg(1) <= led_toggle;
 status_reg(0) <= '0';
 
 ----------------------------------------------------------------
--- FIFO READ (combinational read style)
+-- FIFO write
 ----------------------------------------------------------------
---fifo_dout <= fifo_mem(fifo_rd_ptr);
+--remplir fifo_array avec start_tick end_tick, N_counter <= fifo_mem(fifo_rd_ptr);
 
 ----------------------------------------------------------------
 -- COMMAND DECODE
@@ -133,7 +140,14 @@ begin
                 -- READ FIFO DATA
                 when x"10" =>
                     start_read_data <= '1';
-
+                    fifo_count_start <= FIFO_DEPTH_PER_VAR;
+                    case rx_word(23 downto 16) is
+                        when x"00" => fifo_rd_ptr_var <=0;
+                        when x"01" => fifo_rd_ptr_var <= 8;
+                        when x"02" => fifo_rd_ptr_var <= 16;
+                        when x"03" => fifo_rd_ptr_var <= 24;
+                        when others => error_flag <= '1';
+                     end case;
                 when others =>
                     error_flag <= '1';
             end case;
@@ -165,9 +179,11 @@ begin
                     tx_state <= TX_STATUS;
 
                 elsif start_read_data = '1' and fifo_count > 0 and tx_busy = '0' then
-                    tx_word <= fifo_mem(fifo_rd_ptr);
+                    fifo_rd_ptr <= fifo_rd_ptr_var;
+                    tx_word <= fifo_mem(fifo_rd_ptr_var);
                     tx_load <= '1';
                     word_cnt <= 0;
+                    fifo_count <= fifo_count_start;
                     tx_state <= TX_READ_DATA;
                 end if;
 
@@ -180,10 +196,10 @@ begin
             ----------------------------------------------------
             when TX_READ_DATA =>
                 if tx_busy = '0' and tx_load ='0' then
-                    if word_cnt < FIFO_DEPTH-1 and fifo_count > 1 then
-                        fifo_rd_ptr <= (fifo_rd_ptr + 1) mod FIFO_DEPTH;
+                    if word_cnt < FIFO_DEPTH_PER_VAR-1 and fifo_count > 1 then
+                        fifo_rd_ptr <= (fifo_rd_ptr + 1) mod FIFO_DEPTH_PER_VAR;
                         fifo_count  <= fifo_count - 1;
-                        tx_word     <= fifo_mem((fifo_rd_ptr + 1) mod FIFO_DEPTH);
+                        tx_word     <= fifo_mem((fifo_rd_ptr + 1) mod FIFO_DEPTH_PER_VAR);
                         tx_load     <= '1';
                         word_cnt    <= word_cnt + 1;
                     else

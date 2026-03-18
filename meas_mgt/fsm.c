@@ -62,7 +62,7 @@ void meas_fsm_task(void *arg)
     while(1) {   
      
       for (meas_num=0, instance_meas_temp=instance_meas;meas_num<n_meas;instance_meas_temp++,meas_num++) {
-        vTaskDelay(10 / portTICK_PERIOD_MS); 
+        vTaskDelay(FSM_MEASURMENT_TASK_WAKE_UP_TICK / portTICK_PERIOD_MS); 
 
 	if (instance_meas_temp->meas_num !=REMOVED_MEAS) {
           if (xQueueReceive(instance_meas_temp->q_action, (void*)&meas_action , 0 ) == pdTRUE) {

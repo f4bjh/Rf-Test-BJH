@@ -48,7 +48,7 @@ void read_status_task(void *arg)
    measure->ready=false;
 
   while(1) {
-	vTaskDelay(100 / portTICK_PERIOD_MS);
+	vTaskDelay(MEASURMENT_TASK_WAKE_UP_TICK / portTICK_PERIOD_MS);
 
 	if (fpga_freq.reciproc_freq_device) {
 

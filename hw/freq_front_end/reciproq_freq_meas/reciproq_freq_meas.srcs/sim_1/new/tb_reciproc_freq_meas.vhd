@@ -202,7 +202,17 @@ begin
     -- READ_DATA
     spi_device_transmit(cs_n, sck, mosi, miso,x"10000000", rx8);
     for i in rx8'range loop
-        report "READ_DATA(" & integer'image(i) & ") = 0x" &
+        report "1st READ_DATA(" & integer'image(i) & ") = 0x" &
+               slv_to_hex(rx8(i));
+    end loop;
+    spi_device_transmit(cs_n, sck, mosi, miso,x"10000000", rx8);
+    for i in rx8'range loop
+        report "2nd READ_DATA(" & integer'image(i) & ") = 0x" &
+               slv_to_hex(rx8(i));
+    end loop;
+    spi_device_transmit(cs_n, sck, mosi, miso,x"10000000", rx8);
+    for i in rx8'range loop
+        report "3rd READ_DATA(" & integer'image(i) & ") = 0x" &
                slv_to_hex(rx8(i));
     end loop;
            

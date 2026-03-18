@@ -1,6 +1,8 @@
 #include "cJSON.h"
 
 #define tskFSM_MEASURMENT tskIDLE_PRIORITY+1  
+#define FSM_MEASURMENT_TASK_WAKE_UP_TICK 10
+#define MEASURMENT_TASK_WAKE_UP_TICK 250
 
 //number of element in the queue that content json measurment value
 #define NB_OF_MEASUREMENT_IN_QUEUE  10

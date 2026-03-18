@@ -10,13 +10,13 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="118,833.385582 us"></ZoomStartTime>
-      <ZoomEndTime time="118,920.289856 us"></ZoomEndTime>
-      <Cursor1Time time="118,905.805810 us"></Cursor1Time>
+      <ZoomStartTime time="30,155.221322 us"></ZoomStartTime>
+      <ZoomEndTime time="30,494.721323 us"></ZoomEndTime>
+      <Cursor1Time time="30,341.556194 us"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="188"></NameColumnWidth>
-      <ValueColumnWidth column_width="100"></ValueColumnWidth>
+      <ValueColumnWidth column_width="92"></ValueColumnWidth>
    </column_width_setting>
    <WVObjectSize size="39" />
    <wvobject type="logic" fp_name="/tb_top_reciproc_freq_meas/clk_ref">
@@ -146,7 +146,6 @@
    <wvobject type="array" fp_name="/tb_top_reciproc_freq_meas/uut/spi_slave_inst/tx_shift">
       <obj_property name="ElementShortName">tx_shift[31:0]</obj_property>
       <obj_property name="ObjectShortName">tx_shift[31:0]</obj_property>
-      <obj_property name="isExpanded"></obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/tb_top_reciproc_freq_meas/uut/tx_busy">
       <obj_property name="ElementShortName">tx_busy</obj_property>
