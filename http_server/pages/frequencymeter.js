@@ -3,9 +3,13 @@ socket = new WebSocket("ws://" + serverIp + "/ws");
 
 function update_status(freq_status)
 {
-    // extraction de la version (bits 31..24)
-    let version = (freq_status >>> 24) & 0xFF;
-    document.getElementById("version").textContent = version;
+    // extraction de la version maj (bits 31..24)
+    let maj_version = (freq_status >>> 24) & 0xFF;
+    document.getElementById("maj_version").textContent = maj_version;
+    // extraction de la version in (bits 23..16)
+    let min_version = (freq_status >>> 16) & 0xFF;
+    document.getElementById("min_version").textContent = min_version;
+
 
     function set_button(id, bit)
     {
