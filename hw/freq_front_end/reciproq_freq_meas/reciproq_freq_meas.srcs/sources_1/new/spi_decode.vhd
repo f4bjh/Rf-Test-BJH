@@ -65,8 +65,9 @@ begin
 ----------------------------------------------------------------
 -- STATUS REGISTER
 ----------------------------------------------------------------
-status_reg(31 downto 24) <= x"01"; -- VERSION
-status_reg(23 downto 8)  <= (others => '0');
+status_reg(31 downto 24) <= x"00"; -- MAJOR VERSION
+status_reg(23 downto 16) <= x"02"; -- MINOR VERSION
+status_reg(16 downto 8)  <= (others => '0');
 status_reg(7) <= '0';
 status_reg(6) <= fifo_full;
 status_reg(5) <= error_flag;

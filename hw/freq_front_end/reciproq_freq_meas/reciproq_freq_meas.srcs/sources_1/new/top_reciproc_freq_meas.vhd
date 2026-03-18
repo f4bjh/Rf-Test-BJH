@@ -20,12 +20,12 @@ entity top_reciproc_freq_meas is
     NCO_OUT       : out std_logic
 
     -- Pour testbench
-    --done          : out std_logic;
-    --f_calc        : out unsigned(31 downto 0);
-    --start_tick    : out unsigned(63 downto 0);
-    --end_tick      : out unsigned(63 downto 0);
-    --N_counted     : out unsigned(31 downto 0);
-    --interp_period : out unsigned(63 downto 0);
+    -- done          : out std_logic;
+    -- f_calc        : out unsigned(31 downto 0);
+    -- start_tick    : out unsigned(63 downto 0);
+    -- end_tick      : out unsigned(63 downto 0);
+    -- N_counted     : out unsigned(31 downto 0);
+    -- interp_period : out unsigned(63 downto 0);
     --interp_valid  : out std_logic
   );
 end entity;
