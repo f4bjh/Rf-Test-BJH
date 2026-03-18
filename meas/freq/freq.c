@@ -160,18 +160,8 @@ esp_err_t init_frequencymeter(meas_t *measure)
     // check FPGA is OK
     //
     err = reciproc_freq_read_status(&fpga_freq,reciproc_freq_status);
-    ESP_LOGI(TAG,"status=0x%02X%02X%02X%02X",reciproc_freq_status[0],reciproc_freq_status[1],reciproc_freq_status[2],reciproc_freq_status[3]);
     if (err != ESP_OK) {
 	ESP_LOGE(TAG,"reciproc_freq_read_status() failed!");
-	return ESP_FAIL;
-    }
-    if ((reciproc_freq_status[RECIPROC_FREQ_MEAS_BYTE_POS_MAJ_VERSION] != RECIPROC_FREQ_MEAS_MAJ_VERSION)  || 
-	(reciproc_freq_status[RECIPROC_FREQ_MEAS_BYTE_POS_MIN_VERSION] != RECIPROC_FREQ_MEAS_MIN_VERSION)) {
-	ESP_LOGE(TAG,"init_frequencymeter failed : reciproc_freq_meas fpga version incompatible (%d/%d)",reciproc_freq_status[RECIPROC_FREQ_MEAS_BYTE_POS_VERSION],RECIPROC_FREQ_MEAS_VERSION);
-    	return ESP_FAIL;
-    }
-    if (reciproc_freq_status[RECIPROC_FREQ_MEAS_BYTE_POS_STATUS] & RECIPROC_FREQ_MEAS_BIT_POS_STATUS_ERROR_FLAG) {
-	ESP_LOGE(TAG,"init_frequencymeter failed : reciproc_freq_meas fpga in error state");
 	return ESP_FAIL;
     }
  
