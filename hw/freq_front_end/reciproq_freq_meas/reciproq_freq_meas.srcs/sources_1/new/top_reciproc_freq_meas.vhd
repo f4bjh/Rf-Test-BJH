@@ -15,18 +15,18 @@ entity top_reciproc_freq_meas is
     miso          : out  std_logic;
     cs_n          : in  std_logic;
     hf_freq_in    : in  std_logic;
-    start         : in  std_logic;
+    --start         : in  std_logic;
     LED0          : out std_logic;
     NCO_OUT       : out std_logic;
 
     -- Pour testbench
-    --done          : out std_logic;
-    --f_calc        : out unsigned(31 downto 0);
+    fifo_full          : out std_logic;
+    f_calc        : out unsigned(31 downto 0);
     --start_tick    : out unsigned(63 downto 0);
     --end_tick      : out unsigned(63 downto 0);
     --N_counted     : out unsigned(31 downto 0);
-    --interp_period : out unsigned(63 downto 0);
-    --interp_valid  : out std_logic
+    interp_period : out unsigned(63 downto 0);
+    interp_valid  : out std_logic
   );
 end entity;
 
@@ -51,23 +51,25 @@ architecture rtl of top_reciproc_freq_meas is
   signal nco_freq_word      : unsigned(23 downto 0);
   signal nco_freq_valid     : std_logic;
 
+  signal start          : std_logic;
   signal meas_done      : std_logic;                            -- measurement (capture of N periods) done (pulse)
   signal calc_done : std_logic;
-
+  signal   done        : std_logic;
+  
   --freq_counter
   -- START ** may be needed to comment for testbench **
   signal start_tick    : unsigned(63 downto 0);
   signal end_tick      : unsigned(63 downto 0);
   signal N_counted     : unsigned(31 downto 0);
-  signal interp_period : unsigned(63 downto 0);
-  signal interp_valid  : std_logic;
+  --signal interp_period : unsigned(63 downto 0);
+  --signal interp_valid  : std_logic;
   -- END ** may be needed to comment for testbench **
   signal ready         : std_logic;
  
   --calc
   -- START ** may be needed to comment for testbench **
-  signal   done        : std_logic;
-  signal  f_calc       : unsigned(31 downto 0);
+  --signal   done        : std_logic;
+  --signal  f_calc       : unsigned(31 downto 0);
   -- END ** may be needed to comment for testbench **
  
   
@@ -114,7 +116,15 @@ port map (
     led_off       => led_off,
     led_toggle    => led_toggle,
     nco_freq_word => nco_freq_word,
-    nco_freq_valid=> nco_freq_valid
+    nco_freq_valid=> nco_freq_valid,
+    
+    meas_done  => meas_done,
+    start_tick  => start_tick,
+    end_tick    => end_tick,
+    N_counted  => N_counted,
+    
+    fifo_full  => fifo_full,
+    start_meas => start
 );
 
   ------------------------------------------------------------------------

@@ -10,15 +10,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="30,155.221322 us"></ZoomStartTime>
-      <ZoomEndTime time="30,494.721323 us"></ZoomEndTime>
-      <Cursor1Time time="30,341.556194 us"></Cursor1Time>
+      <ZoomStartTime time="100,674.051190 us"></ZoomStartTime>
+      <ZoomEndTime time="100,815.451191 us"></ZoomEndTime>
+      <Cursor1Time time="100,735.851190 us"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="188"></NameColumnWidth>
-      <ValueColumnWidth column_width="92"></ValueColumnWidth>
+      <ValueColumnWidth column_width="64"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="39" />
+   <WVObjectSize size="38" />
    <wvobject type="logic" fp_name="/tb_top_reciproc_freq_meas/clk_ref">
       <obj_property name="ElementShortName">clk_ref</obj_property>
       <obj_property name="ObjectShortName">clk_ref</obj_property>
@@ -43,14 +43,6 @@
       <obj_property name="ElementShortName">s1</obj_property>
       <obj_property name="ObjectShortName">s1</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/tb_top_reciproc_freq_meas/start">
-      <obj_property name="ElementShortName">start</obj_property>
-      <obj_property name="ObjectShortName">start</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/tb_top_reciproc_freq_meas/done">
-      <obj_property name="ElementShortName">done</obj_property>
-      <obj_property name="ObjectShortName">done</obj_property>
-   </wvobject>
    <wvobject type="logic" fp_name="/tb_top_reciproc_freq_meas/uut/u_freq_counter/meas_done">
       <obj_property name="ElementShortName">meas_done</obj_property>
       <obj_property name="ObjectShortName">meas_done</obj_property>
@@ -66,34 +58,6 @@
    <wvobject type="array" fp_name="/tb_top_reciproc_freq_meas/uut/u_freq_counter/end_tick">
       <obj_property name="ElementShortName">end_tick[63:0]</obj_property>
       <obj_property name="ObjectShortName">end_tick[63:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/tb_top_reciproc_freq_meas/uut/u_freq_counter/ref_cnt">
-      <obj_property name="ElementShortName">ref_cnt[63:0]</obj_property>
-      <obj_property name="ObjectShortName">ref_cnt[63:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/tb_top_reciproc_freq_meas/uut/u_freq_counter/start_tick_r">
-      <obj_property name="ElementShortName">start_tick_r[63:0]</obj_property>
-      <obj_property name="ObjectShortName">start_tick_r[63:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/tb_top_reciproc_freq_meas/uut/u_freq_counter/end_tick_r">
-      <obj_property name="ElementShortName">end_tick_r[63:0]</obj_property>
-      <obj_property name="ObjectShortName">end_tick_r[63:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/tb_top_reciproc_freq_meas/uut/u_freq_counter/n_counter">
-      <obj_property name="ElementShortName">n_counter[31:0]</obj_property>
-      <obj_property name="ObjectShortName">n_counter[31:0]</obj_property>
-   </wvobject>
-   <wvobject type="other" fp_name="/tb_top_reciproc_freq_meas/f_direct">
-      <obj_property name="ElementShortName">f_direct</obj_property>
-      <obj_property name="ObjectShortName">f_direct</obj_property>
-   </wvobject>
-   <wvobject type="other" fp_name="/tb_top_reciproc_freq_meas/f_interp">
-      <obj_property name="ElementShortName">f_interp</obj_property>
-      <obj_property name="ObjectShortName">f_interp</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/tb_top_reciproc_freq_meas/f_calc">
-      <obj_property name="ElementShortName">f_calc[31:0]</obj_property>
-      <obj_property name="ObjectShortName">f_calc[31:0]</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/tb_top_reciproc_freq_meas/sck">
       <obj_property name="ElementShortName">sck</obj_property>
@@ -119,22 +83,6 @@
       <obj_property name="ElementShortName">NCO_OUT</obj_property>
       <obj_property name="ObjectShortName">NCO_OUT</obj_property>
    </wvobject>
-   <wvobject type="other" fp_name="/tb_top_reciproc_freq_meas/FREF_HZ">
-      <obj_property name="ElementShortName">FREF_HZ</obj_property>
-      <obj_property name="ObjectShortName">FREF_HZ</obj_property>
-   </wvobject>
-   <wvobject type="other" fp_name="/tb_top_reciproc_freq_meas/CLK_PER">
-      <obj_property name="ElementShortName">CLK_PER</obj_property>
-      <obj_property name="ObjectShortName">CLK_PER</obj_property>
-   </wvobject>
-   <wvobject type="other" fp_name="/tb_top_reciproc_freq_meas/STABILIZATION_TIME">
-      <obj_property name="ElementShortName">STABILIZATION_TIME</obj_property>
-      <obj_property name="ObjectShortName">STABILIZATION_TIME</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/tb_top_reciproc_freq_meas/TEST_FREQS">
-      <obj_property name="ElementShortName">TEST_FREQS[0:5]</obj_property>
-      <obj_property name="ObjectShortName">TEST_FREQS[0:5]</obj_property>
-   </wvobject>
    <wvobject type="logic" fp_name="/tb_top_reciproc_freq_meas/uut/spi_slave_inst/sclk_rise">
       <obj_property name="ElementShortName">sclk_rise</obj_property>
       <obj_property name="ObjectShortName">sclk_rise</obj_property>
@@ -146,6 +94,10 @@
    <wvobject type="array" fp_name="/tb_top_reciproc_freq_meas/uut/spi_slave_inst/tx_shift">
       <obj_property name="ElementShortName">tx_shift[31:0]</obj_property>
       <obj_property name="ObjectShortName">tx_shift[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/tb_top_reciproc_freq_meas/uut/spi_decode_inst/rx_valid">
+      <obj_property name="ElementShortName">rx_valid</obj_property>
+      <obj_property name="ObjectShortName">rx_valid</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/tb_top_reciproc_freq_meas/uut/tx_busy">
       <obj_property name="ElementShortName">tx_busy</obj_property>
@@ -167,12 +119,56 @@
       <obj_property name="ElementShortName">start_read_data</obj_property>
       <obj_property name="ObjectShortName">start_read_data</obj_property>
    </wvobject>
+   <wvobject type="logic" fp_name="/tb_top_reciproc_freq_meas/uut/spi_decode_inst/start_meas">
+      <obj_property name="ElementShortName">start_meas</obj_property>
+      <obj_property name="ObjectShortName">start_meas</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/tb_top_reciproc_freq_meas/uut/spi_decode_inst/start_meas_status">
+      <obj_property name="ElementShortName">start_meas_status</obj_property>
+      <obj_property name="ObjectShortName">start_meas_status</obj_property>
+   </wvobject>
    <wvobject type="other" fp_name="/tb_top_reciproc_freq_meas/uut/spi_decode_inst/word_cnt">
       <obj_property name="ElementShortName">word_cnt</obj_property>
       <obj_property name="ObjectShortName">word_cnt</obj_property>
    </wvobject>
+   <wvobject type="logic" fp_name="/tb_top_reciproc_freq_meas/uut/spi_decode_inst/fifo_full">
+      <obj_property name="ElementShortName">fifo_full</obj_property>
+      <obj_property name="ObjectShortName">fifo_full</obj_property>
+   </wvobject>
    <wvobject type="other" fp_name="/tb_top_reciproc_freq_meas/uut/spi_decode_inst/fifo_count">
       <obj_property name="ElementShortName">fifo_count</obj_property>
       <obj_property name="ObjectShortName">fifo_count</obj_property>
+   </wvobject>
+   <wvobject type="other" fp_name="/tb_top_reciproc_freq_meas/uut/spi_decode_inst/fifo_rd_ptr">
+      <obj_property name="ElementShortName">fifo_rd_ptr</obj_property>
+      <obj_property name="ObjectShortName">fifo_rd_ptr</obj_property>
+   </wvobject>
+   <wvobject type="other" fp_name="/tb_top_reciproc_freq_meas/uut/spi_decode_inst/fifo_rd_ptr_var">
+      <obj_property name="ElementShortName">fifo_rd_ptr_var</obj_property>
+      <obj_property name="ObjectShortName">fifo_rd_ptr_var</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_top_reciproc_freq_meas/uut/spi_decode_inst/fifo_mem">
+      <obj_property name="ElementShortName">fifo_mem[0:31][31:0]</obj_property>
+      <obj_property name="ObjectShortName">fifo_mem[0:31][31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_top_reciproc_freq_meas/uut/spi_decode_inst/delta_tick">
+      <obj_property name="ElementShortName">delta_tick[63:0]</obj_property>
+      <obj_property name="ObjectShortName">delta_tick[63:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_top_reciproc_freq_meas/uut/spi_decode_inst/fifo_wr_count">
+      <obj_property name="ElementShortName">fifo_wr_count[31:0]</obj_property>
+      <obj_property name="ObjectShortName">fifo_wr_count[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="other" fp_name="/tb_top_reciproc_freq_meas/uut/spi_decode_inst/fifo_fpga_counter_wr_ptr">
+      <obj_property name="ElementShortName">fifo_fpga_counter_wr_ptr</obj_property>
+      <obj_property name="ObjectShortName">fifo_fpga_counter_wr_ptr</obj_property>
+   </wvobject>
+   <wvobject type="other" fp_name="/tb_top_reciproc_freq_meas/uut/spi_decode_inst/fifo_delta_tick_wr_ptr">
+      <obj_property name="ElementShortName">fifo_delta_tick_wr_ptr</obj_property>
+      <obj_property name="ObjectShortName">fifo_delta_tick_wr_ptr</obj_property>
+   </wvobject>
+   <wvobject type="other" fp_name="/tb_top_reciproc_freq_meas/uut/spi_decode_inst/fifo_wr_ptr_var">
+      <obj_property name="ElementShortName">fifo_wr_ptr_var</obj_property>
+      <obj_property name="ObjectShortName">fifo_wr_ptr_var</obj_property>
    </wvobject>
 </wave_config>

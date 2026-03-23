@@ -21,8 +21,9 @@ architecture sim of tb_top_reciproc_freq_meas is
   signal sig_in    : std_logic := '0';
   signal sig_gen_out : std_logic := '0';
   signal use_nco_out : std_logic := '0';
-  signal start     : std_logic := '0';
-  signal done      : std_logic;
+  --signal start     : std_logic := '0';
+  signal fifo_full : std_logic := '0';
+  signal meas_ready : std_logic;
   signal f_calc    : unsigned(31 downto 0);
 
   signal sck       : std_logic := '0';
@@ -32,14 +33,20 @@ architecture sim of tb_top_reciproc_freq_meas is
   signal LED0      : std_logic;
   signal NCO_OUT   : std_logic;
   signal rx1 : t_word32_array(0 to 0);
+  signal rx2 : t_word32_array(0 to 1);
   signal rx4 : t_word32_array(0 to 3);
   signal rx8 : t_word32_array(0 to 7);
+  signal dt16 : t_word32_array(0 to 15);
+  signal N_counted8 : t_word32_array(0 to 7);
   
   -- Signaux exposés par le top
-  signal start_tick, end_tick : unsigned(63 downto 0);
+  --signal start_tick, end_tick : unsigned(63 downto 0);
+  signal delta_t : unsigned(63 downto 0);
   signal N_counted            : unsigned(31 downto 0);
   signal interp_period        : unsigned(63 downto 0);
   signal interp_valid         : std_logic;
+  --signal delta_tick           : unsigned(63 downto 0);
+  --signal done      : std_logic;
 
   type freq_array is array (0 to 5) of integer;
   constant TEST_FREQS : freq_array := (100_000, 123_456, 150_000,100_001,1_000_000, 10_000_000);
@@ -127,14 +134,14 @@ begin
       miso          => miso,
       cs_n          => cs_n,
       hf_freq_in    => sig_in,
-      start         => start,
-      done          => done,
+      --start         => start,
+      fifo_full          => fifo_full,
       f_calc        => f_calc,
       LED0          => LED0,
       NCO_OUT       => NCO_OUT,
-      start_tick    => start_tick,
-      end_tick      => end_tick,
-      N_counted     => N_counted,
+      --start_tick    => start_tick,
+      --end_tick      => end_tick,
+      --N_counted     => N_counted,
       interp_period => interp_period,
       interp_valid  => interp_valid
     );
@@ -159,6 +166,7 @@ begin
     end loop;
   end process;
 
+
   ------------------------------------------------------------------------
   -- Stimuli et calculs de fréquences
   ------------------------------------------------------------------------
@@ -168,6 +176,9 @@ begin
     variable t_start, t_end : time;
     variable dt : real;
     variable l : line;  -- ligne temporaire
+    variable delta_t_var : unsigned(63 downto 0);
+    variable N_counted_var : unsigned(31 downto 0);
+
   begin
     rst_n <= '0';
     wait for 10 us;
@@ -190,51 +201,43 @@ begin
 
     wait for 200 * per_sig;
 
-    start <= '1';
-    wait for CLK_PER;
-    start <= '0';
-    wait until done = '1';
-
-    -- READ_STATUS
+    spi_device_transmit(cs_n, sck, mosi, miso,x"01000000", rx1);
+    report "READ_STATUS = 0x" & slv_to_hex(rx1(0));
+    
+    spi_device_transmit(cs_n, sck, mosi, miso,x"02040000", rx1);
+    report "START MEASURMENT";
     spi_device_transmit(cs_n, sck, mosi, miso,x"01000000", rx1);
     report "READ_STATUS = 0x" & slv_to_hex(rx1(0));
 
     -- READ_DATA
-    spi_device_transmit(cs_n, sck, mosi, miso,x"10000000", rx8);
-    for i in rx8'range loop
-        report "1st READ_DATA(" & integer'image(i) & ") = 0x" &
-               slv_to_hex(rx8(i));
-    end loop;
-    spi_device_transmit(cs_n, sck, mosi, miso,x"10000000", rx8);
-    for i in rx8'range loop
-        report "2nd READ_DATA(" & integer'image(i) & ") = 0x" &
-               slv_to_hex(rx8(i));
-    end loop;
-    spi_device_transmit(cs_n, sck, mosi, miso,x"10000000", rx8);
-    for i in rx8'range loop
-        report "3rd READ_DATA(" & integer'image(i) & ") = 0x" &
-               slv_to_hex(rx8(i));
-    end loop;
-           
-      if end_tick > start_tick then
-        dt := real(to_integer(end_tick - start_tick)) / real(FREF_HZ);
-      else
-        dt := 0.0;
-      end if;
-      
-      if end_tick > start_tick and N_counted /= 0 then
-        f_est_d := FREF_HZ * real(to_integer(N_counted)) / real(to_integer(end_tick - start_tick));
-      else
-        f_est_d := 0.0;
-      end if;
+    wait until fifo_full = '1'; --TODO : through spi read status
+    report "FIFO IS FULL";
+    spi_device_transmit(cs_n, sck, mosi, miso,x"01000000", rx1);
+    report "READ_STATUS = 0x" & slv_to_hex(rx1(0));
 
-      if interp_valid = '1' and interp_period /= 0 then
-        f_est_i := FREF_HZ * real(to_integer(N_counted)) / real(to_integer(interp_period));
-      else
-        f_est_i := 0.0;
-      end if;
 
-      f_est_c := real(to_integer(f_calc));
+    spi_device_transmit(cs_n, sck, mosi, miso,x"10010008", dt16);
+    spi_device_transmit(cs_n, sck, mosi, miso,x"10020008", N_counted8);
+    for i in 0 to 7 loop
+        report "dt(" & integer'image(i) & ") = 0x" & slv_to_hex(dt16(2*i+1)) & slv_to_hex(dt16(2*i));
+        report "N_counted(" & integer'image(i) & ") = 0x" & slv_to_hex(N_counted8(i));
+        
+        delta_t_var(63 downto 32) := unsigned(dt16(2*i + 1));
+        delta_t_var(31 downto 0)  := unsigned(dt16(2*i));
+        N_counted_var := unsigned(N_counted8(i));
+    
+        dt := real(to_integer(delta_t_var(31 downto 0))) + real(to_integer(delta_t_var(63 downto 32))) * 2.0**32;
+        dt := dt / real(FREF_HZ);      
+        report "dt=" & real'image(dt) & " N_counted_var=" & integer'image(to_integer(N_counted_var));
+        f_est_d := FREF_HZ * real(to_integer(N_counted_var)) / real(to_integer(delta_t_var));
+    
+    --  if interp_valid = '1' and interp_period /= 0 then
+    --    f_est_i := FREF_HZ * real(to_integer(N_counted)) / real(to_integer(interp_period));
+    --  else
+    --    f_est_i := 0.0;
+    --  end if;
+
+    --  f_est_c := real(to_integer(f_calc));
 
       report
       "------------------------------" severity note;
@@ -265,7 +268,7 @@ begin
     
       wait for 200 us;
   
-
+    end loop;
     report "end testbench";
   end process;
 
