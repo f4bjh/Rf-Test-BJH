@@ -15,14 +15,13 @@ architecture sim of tb_top_reciproc_freq_meas is
   constant SPI_CLK  : integer := 1_000_000;
   constant SPI_CLK_PER : time := 1 us;
   constant STABILIZATION_TIME : time := 100 us;
-
+  constant FIFO_FULL_BIT   : integer := 6;
+  
   signal clk_ref   : std_logic := '0';
   signal rst_n     : std_logic := '0';
   signal sig_in    : std_logic := '0';
   signal sig_gen_out : std_logic := '0';
   signal use_nco_out : std_logic := '0';
-  --signal start     : std_logic := '0';
-  signal fifo_full : std_logic := '0';
   signal meas_ready : std_logic;
   signal f_calc    : unsigned(31 downto 0);
 
@@ -40,14 +39,11 @@ architecture sim of tb_top_reciproc_freq_meas is
   signal N_counted8 : t_word32_array(0 to 7);
   
   -- Signaux exposés par le top
-  --signal start_tick, end_tick : unsigned(63 downto 0);
   signal delta_t : unsigned(63 downto 0);
   signal N_counted            : unsigned(31 downto 0);
   signal interp_period        : unsigned(63 downto 0);
   signal interp_valid         : std_logic;
-  --signal delta_tick           : unsigned(63 downto 0);
-  --signal done      : std_logic;
-
+  
   type freq_array is array (0 to 5) of integer;
   constant TEST_FREQS : freq_array := (100_000, 123_456, 150_000,100_001,1_000_000, 10_000_000);
 
@@ -68,8 +64,6 @@ begin
     end loop;
     return result;
 end function;
-
-
 
 procedure spi_device_transmit (
     signal cs_n     : out std_logic;
@@ -134,14 +128,9 @@ begin
       miso          => miso,
       cs_n          => cs_n,
       hf_freq_in    => sig_in,
-      --start         => start,
-      fifo_full          => fifo_full,
       f_calc        => f_calc,
       LED0          => LED0,
       NCO_OUT       => NCO_OUT,
-      --start_tick    => start_tick,
-      --end_tick      => end_tick,
-      --N_counted     => N_counted,
       interp_period => interp_period,
       interp_valid  => interp_valid
     );
@@ -178,7 +167,8 @@ begin
     variable l : line;  -- ligne temporaire
     variable delta_t_var : unsigned(63 downto 0);
     variable N_counted_var : unsigned(31 downto 0);
-
+    variable status : std_logic_vector(31 downto 0);
+    
   begin
     rst_n <= '0';
     wait for 10 us;
@@ -209,13 +199,22 @@ begin
     spi_device_transmit(cs_n, sck, mosi, miso,x"01000000", rx1);
     report "READ_STATUS = 0x" & slv_to_hex(rx1(0));
 
-    -- READ_DATA
-    wait until fifo_full = '1'; --TODO : through spi read status
-    report "FIFO IS FULL";
+    -- polling FIFO FULL
+    for i in 0 to 1000 loop
+        spi_device_transmit(cs_n, sck, mosi, miso, x"01000000", rx1);
+
+        status := rx1(0);
+        exit when status(FIFO_FULL_BIT) = '1';
+
+        wait for 50 us;
+    end loop;
     spi_device_transmit(cs_n, sck, mosi, miso,x"01000000", rx1);
     report "READ_STATUS = 0x" & slv_to_hex(rx1(0));
-
-
+    if status(FIFO_FULL_BIT) = '0' then
+        report "Timeout FIFO FULL" severity failure;
+        wait;  -- bloque le process
+    end if;
+    
     spi_device_transmit(cs_n, sck, mosi, miso,x"10010008", dt16);
     spi_device_transmit(cs_n, sck, mosi, miso,x"10020008", N_counted8);
     for i in 0 to 7 loop

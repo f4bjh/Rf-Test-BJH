@@ -32,15 +32,17 @@ entity spi_decode is
         nco_freq_valid : out std_logic;
         
         -- from freq counter
+        start_meas  : out std_logic;
         meas_done   : in std_logic;                            -- measurement done (pulse)
         start_tick  : in unsigned(REF_CNT_W-1 downto 0);
         end_tick    : in unsigned(REF_CNT_W-1 downto 0);
-        N_counted   : in unsigned(31 downto 0);                 
-        start_meas  : out std_logic;
+        N_counted   : in unsigned(31 downto 0)                 
         
         
-        fifo_full   : out std_logic 
-
+        --from FIFO
+        
+        --from status register
+        
     );
 end entity;
 
@@ -74,9 +76,9 @@ signal fifo_fpga_counter_wr_ptr : integer range FPGA_COUNTER_PTR_START to (DELTA
 signal fifo_delta_tick_wr_ptr : integer range DELTA_TICK_PTR_START to (N_COUNTED_PTR_START-1) := DELTA_TICK_PTR_START;
 signal fifo_N_counted_wr_ptr : integer range N_COUNTED_PTR_START to (FIFO_DEPTH-1) := N_COUNTED_PTR_START;
 
-
 signal fifo_count  : integer range 0 to FIFO_DEPTH_PER_VAR := 0;
 signal fifo_rd  : std_logic := '0';
+signal fifo_full  : std_logic := '0';
 
 -- measurement data in
 signal delta_tick : unsigned(63 downto 0);
