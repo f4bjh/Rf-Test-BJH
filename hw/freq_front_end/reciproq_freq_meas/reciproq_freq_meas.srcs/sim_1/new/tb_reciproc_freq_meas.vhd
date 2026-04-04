@@ -23,7 +23,6 @@ architecture sim of tb_top_reciproc_freq_meas is
   signal sig_gen_out : std_logic := '0';
   signal use_nco_out : std_logic := '0';
   signal meas_ready : std_logic;
-  signal f_calc    : unsigned(31 downto 0);
 
   signal sck       : std_logic := '0';
   signal mosi      : std_logic := '0';
@@ -38,12 +37,9 @@ architecture sim of tb_top_reciproc_freq_meas is
   signal dt16 : t_word32_array(0 to 15);
   signal N_counted8 : t_word32_array(0 to 7);
   
-  -- Signaux exposés par le top
   signal delta_t : unsigned(63 downto 0);
   signal N_counted            : unsigned(31 downto 0);
-  signal interp_period        : unsigned(63 downto 0);
-  signal interp_valid         : std_logic;
-  
+ 
   type freq_array is array (0 to 5) of integer;
   constant TEST_FREQS : freq_array := (100_000, 123_456, 150_000,100_001,1_000_000, 10_000_000);
 
@@ -128,11 +124,8 @@ begin
       miso          => miso,
       cs_n          => cs_n,
       hf_freq_in    => sig_in,
-      f_calc        => f_calc,
       LED0          => LED0,
-      NCO_OUT       => NCO_OUT,
-      interp_period => interp_period,
-      interp_valid  => interp_valid
+      NCO_OUT       => NCO_OUT
     );
 
   ------------------------------------------------------------------------
@@ -230,14 +223,7 @@ begin
         report "dt=" & real'image(dt) & " N_counted_var=" & integer'image(to_integer(N_counted_var));
         f_est_d := FREF_HZ * real(to_integer(N_counted_var)) / real(to_integer(delta_t_var));
     
-    --  if interp_valid = '1' and interp_period /= 0 then
-    --    f_est_i := FREF_HZ * real(to_integer(N_counted)) / real(to_integer(interp_period));
-    --  else
-    --    f_est_i := 0.0;
-    --  end if;
-
-    --  f_est_c := real(to_integer(f_calc));
-
+ 
       report
       "------------------------------" severity note;
       report

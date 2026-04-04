@@ -15,14 +15,8 @@ entity top_reciproc_freq_meas is
     miso          : out  std_logic;
     cs_n          : in  std_logic;
     hf_freq_in    : in  std_logic;
-    --start         : in  std_logic;
     LED0          : out std_logic;
-    NCO_OUT       : out std_logic;
-
-    -- Pour testbench
-    f_calc        : out unsigned(31 downto 0);
-    interp_period : out unsigned(63 downto 0);
-    interp_valid  : out std_logic
+    NCO_OUT       : out std_logic
   );
 end entity;
 
@@ -31,8 +25,6 @@ architecture rtl of top_reciproc_freq_meas is
   constant USE_CALC_FREQ : boolean := false; -- mettre true pour activer
   
   -- SPI interface
-  signal spi_word       : std_logic_vector(31 downto 0);
-  signal spi_data_valid : std_logic;
   signal     rx_word    : std_logic_vector(31 downto 0);
   signal      rx_valid  : std_logic;
   signal      tx_word   : std_logic_vector(31 downto 0);
@@ -47,22 +39,13 @@ architecture rtl of top_reciproc_freq_meas is
   signal nco_freq_word      : unsigned(23 downto 0);
   signal nco_freq_valid     : std_logic;
 
+  --freq_counter
   signal start_meas          : std_logic;
   signal meas_done      : std_logic;                            -- measurement (capture of N periods) done (pulse)
-  signal calc_done : std_logic;
-  signal   done        : std_logic;
-  
-  --freq_counter
   signal start_tick    : unsigned(63 downto 0);
   signal end_tick      : unsigned(63 downto 0);
   signal N_counted     : unsigned(31 downto 0);
   signal ready         : std_logic;
- 
-  --calc
-  -- START ** may be needed to comment for testbench **
-  --signal   done        : std_logic;
-  --signal  f_calc       : unsigned(31 downto 0);
-  -- END ** may be needed to comment for testbench **
  
   
 begin
@@ -149,44 +132,7 @@ port map (
       N_counted  => N_counted
     );
 
-  ------------------------------------------------------------------------
-  -- Fractional interpolation
-  ------------------------------------------------------------------------
-  frac_interp_block: if USE_FRAC_INTERP generate
-      u_frac_interp: entity work.frac_interp
-        port map (
-          clk        => clk_master,
-          rst_n      => reset_n,
-          valid_in   => meas_done,
-          raw_period => end_tick - start_tick,
-          interp_out => interp_period,
-          valid_out  => interp_valid
-        );
-  end generate frac_interp_block;
-  
-  ------------------------------------------------------------------------
-  -- Complete frequency calculation using calc_freq
-  ------------------------------------------------------------------------
-  calc_freq_block: if USE_CALC_FREQ generate
-      u_calc_freq: entity work.calc_freq
-        generic map (FREF_HZ => FREF_HZ)
-        port map (
-          clk          => clk_master,
-          rst_n        => reset_n,
-          start        => interp_valid,
-          interp_period => interp_period,
-          N_counted    => N_counted,
-          done         => calc_done,
-          f_est_int    => f_calc,
-          f_est_frac   => open,
-          df_q16_16    => open
-        );
-  end generate calc_freq_block;
 
--- assignation à meas_done
- done <= calc_done when USE_CALC_FREQ else meas_done;
-
-    
   ------------------------------------------------------------------------
   -- LED management
   ------------------------------------------------------------------------
