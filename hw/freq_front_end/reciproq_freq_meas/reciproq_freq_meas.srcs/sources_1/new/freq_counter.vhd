@@ -176,7 +176,7 @@ begin
           when COMPLETE =>
             -- produce a one-cycle meas_done (done is driven from state)
             -- go back to IDLE ready for next measurement
-            state <= IDLE;
+            state <= ARMED;
 
           when ERROR =>
             -- remain in ERROR until start is released (simple ack)

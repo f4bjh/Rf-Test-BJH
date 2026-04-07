@@ -46,7 +46,20 @@ architecture rtl of top_reciproc_freq_meas is
   signal end_tick      : unsigned(63 downto 0);
   signal N_counted     : unsigned(31 downto 0);
   signal ready         : std_logic;
- 
+  
+  --fifo
+  signal fifo_rd_data  : std_logic_vector(31 downto 0);
+  signal fifo_rd       : std_logic;
+  signal fifo_data_type_req : std_logic_vector(7 downto 0);
+  signal fifo_count    : integer range 0 to 8;
+  signal fifo_full     : std_logic;
+  signal fifo_wr       : std_logic;
+  signal fifo_wr_count : std_logic_vector(7 downto 0);
+  signal delta_tick    : unsigned(63 downto 0);
+
+  --status register
+  signal error_flag    : std_logic;
+  signal status_reg    : std_logic_vector(31 downto 0);  
   
 begin
 
@@ -95,11 +108,55 @@ port map (
     
     start_meas => start_meas,
     meas_done  => meas_done,
-    start_tick  => start_tick,
-    end_tick    => end_tick,
-    N_counted  => N_counted 
 
+    fifo_rd_data        => fifo_rd_data,
+    fifo_rd             => fifo_rd,
+    fifo_data_type_req   => fifo_data_type_req,
+    fifo_count          => fifo_count,
+    fifo_full           => fifo_full,
+    fifo_wr             => fifo_wr,
+
+    error_flag => error_flag,
+    status_reg_in => status_reg
 );
+
+  ------------------------------------------------------------------------
+  -- FIFO
+  ------------------------------------------------------------------------
+u_fifo : entity work.meas_fifo
+  port map (
+    clk                 => clk_master,
+    reset_n             => reset_n,
+    fifo_wr_en          => fifo_wr,
+    delta_tick          => end_tick - start_tick,
+    N_counted           => N_counted,
+    wr_counter          => fifo_wr_count,
+    fifo_rd_en          => fifo_rd,
+    fifo_data_type_req  => fifo_data_type_req,
+    fifo_rd_data        => fifo_rd_data,
+    --fifo_count          => fifo_count,
+    fifo_full           => fifo_full
+  );
+
+  ------------------------------------------------------------------------
+  -- STATUS
+  ------------------------------------------------------------------------  
+u_status : entity work.status_reg_block
+  port map (
+    clk => clk_master,
+    reset_n => reset_n,
+    fifo_count => fifo_wr_count,
+    fifo_full => fifo_full,
+    error_flag => error_flag,
+    nco_freq_valid => nco_freq_valid,
+    led_on => led_on,
+    led_off => led_off,
+    led_toggle => led_toggle,
+    start_meas => start_meas,
+    meas_done => meas_done,
+    status_reg => status_reg
+  );
+
 
   ------------------------------------------------------------------------
   -- NCO

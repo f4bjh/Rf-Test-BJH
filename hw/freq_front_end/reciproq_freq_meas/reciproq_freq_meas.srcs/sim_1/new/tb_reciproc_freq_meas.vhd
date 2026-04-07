@@ -178,7 +178,7 @@ begin
     wait for 10 ms;
 
     use_nco_out <= '1';
-    f_sig := real(100_000);
+    f_sig := real(100_016);
 
     report "===== Test signal NCO 100kHz =====" severity note;
 
@@ -192,68 +192,73 @@ begin
     spi_device_transmit(cs_n, sck, mosi, miso,x"01000000", rx1);
     report "READ_STATUS = 0x" & slv_to_hex(rx1(0));
 
-    -- polling FIFO FULL
-    for i in 0 to 1000 loop
-        spi_device_transmit(cs_n, sck, mosi, miso, x"01000000", rx1);
 
-        status := rx1(0);
-        exit when status(FIFO_FULL_BIT) = '1';
 
-        wait for 50 us;
-    end loop;
-    spi_device_transmit(cs_n, sck, mosi, miso,x"01000000", rx1);
-    report "READ_STATUS = 0x" & slv_to_hex(rx1(0));
-    if status(FIFO_FULL_BIT) = '0' then
-        report "Timeout FIFO FULL" severity failure;
-        wait;  -- bloque le process
-    end if;
+    for nb_meas in 0 to 5 loop
+        report "Measure nr " & integer'image(nb_meas) ;
+        -- polling FIFO FULL
+        for i in 0 to 1000 loop
+            spi_device_transmit(cs_n, sck, mosi, miso, x"01000000", rx1);
     
-    spi_device_transmit(cs_n, sck, mosi, miso,x"10010008", dt16);
-    spi_device_transmit(cs_n, sck, mosi, miso,x"10020008", N_counted8);
-    for i in 0 to 7 loop
-        report "dt(" & integer'image(i) & ") = 0x" & slv_to_hex(dt16(2*i+1)) & slv_to_hex(dt16(2*i));
-        report "N_counted(" & integer'image(i) & ") = 0x" & slv_to_hex(N_counted8(i));
+            status := rx1(0);
+            exit when status(FIFO_FULL_BIT) = '1';
+    
+            wait for 1 ms;
+        end loop;
+        spi_device_transmit(cs_n, sck, mosi, miso,x"01000000", rx1);
+        report "READ_STATUS = 0x" & slv_to_hex(rx1(0));
+        if status(FIFO_FULL_BIT) = '0' then
+            report "Timeout FIFO FULL" severity failure;
+            wait;  -- bloque le process
+        end if;
         
-        delta_t_var(63 downto 32) := unsigned(dt16(2*i + 1));
-        delta_t_var(31 downto 0)  := unsigned(dt16(2*i));
-        N_counted_var := unsigned(N_counted8(i));
+        spi_device_transmit(cs_n, sck, mosi, miso,x"10010008", dt16);
+        spi_device_transmit(cs_n, sck, mosi, miso,x"10020008", N_counted8);
+        for i in 0 to 7 loop
+            report
+            "------------------------------" severity note;
+            report "dt(" & integer'image(i) & ") = 0x" & slv_to_hex(dt16(2*i+1)) & slv_to_hex(dt16(2*i));
+            report "N_counted(" & integer'image(i) & ") = 0x" & slv_to_hex(N_counted8(i));
+            
+            delta_t_var(63 downto 32) := unsigned(dt16(2*i + 1));
+            delta_t_var(31 downto 0)  := unsigned(dt16(2*i));
+            N_counted_var := unsigned(N_counted8(i));
+        
+            dt := real(to_integer(delta_t_var(31 downto 0))) + real(to_integer(delta_t_var(63 downto 32))) * 2.0**32;
+            dt := dt / real(FREF_HZ);      
+            report "dt=" & real'image(dt) & " N_counted_var=" & integer'image(to_integer(N_counted_var));
+            f_est_d := FREF_HZ * real(to_integer(N_counted_var)) / real(to_integer(delta_t_var));
+        
+     
     
-        dt := real(to_integer(delta_t_var(31 downto 0))) + real(to_integer(delta_t_var(63 downto 32))) * 2.0**32;
-        dt := dt / real(FREF_HZ);      
-        report "dt=" & real'image(dt) & " N_counted_var=" & integer'image(to_integer(N_counted_var));
-        f_est_d := FREF_HZ * real(to_integer(N_counted_var)) / real(to_integer(delta_t_var));
+            report
+            "Méthode       | Fréquence (Hz)     | Précision (Hz)" severity note;
+            report
+            "f_direct      | " & real'image(f_est_d) & " | " & real'image(abs(f_est_d - f_sig)) severity note;
+            report
+            "Temps mesure  : " & real'image(dt) & " s" severity note;
     
- 
-      report
-      "------------------------------" severity note;
-      report
-      "Méthode       | Fréquence (Hz)     | Précision (Hz)" severity note;
-      report
-      "f_direct      | " & real'image(f_est_d) & " | " & real'image(abs(f_est_d - f_sig)) severity note;
-      report
-      "Temps mesure  : " & real'image(dt) & " s" severity note;
-
-      write(l, string'("------------------------------"));
-      writeline(result_file, l);
+            write(l, string'("------------------------------"));
+            writeline(result_file, l);
+            write(l, string'("NCO 100kHz"));
+            writeline(result_file, l);
+            write(l, string'("Méthode       | Fréquence (Hz) | Précision (Hz) | t_measure"));
+            writeline(result_file, l);
+            write(l, string'("f_direct      | "));
+            write(l, real'image(f_est_d));
+            write(l, string'("   | "));
+            write(l, real'image(abs(f_est_d - f_sig)));
+            write(l, string'("   | "));
+            write(l, real'image(dt));
+            write(l, string'(" s"));
+            writeline(result_file, l);
+        
+            wait for 200 us;
       
-      write(l, string'("NCO 100kHz"));
-      writeline(result_file, l);
-      
-      write(l, string'("Méthode       | Fréquence (Hz) | Précision (Hz) | t_measure"));
-      writeline(result_file, l);
+        end loop;
+    end loop;    
     
-      write(l, string'("f_direct      | "));
-      write(l, real'image(f_est_d));
-      write(l, string'("   | "));
-      write(l, real'image(abs(f_est_d - f_sig)));
-      write(l, string'("   | "));
-      write(l, real'image(dt));
-      write(l, string'(" s"));
-      writeline(result_file, l);
     
-      wait for 200 us;
-  
-    end loop;
     report "end testbench";
   end process;
 
