@@ -178,7 +178,7 @@ begin
     wait for 10 ms;
 
     use_nco_out <= '1';
-    f_sig := real(100_016);
+    f_sig := real(100_001);
 
     report "===== Test signal NCO 100kHz =====" severity note;
 
