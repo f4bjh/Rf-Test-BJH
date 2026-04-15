@@ -27,7 +27,7 @@ set_property -dict { PACKAGE_PIN N18   IOSTANDARD LVCMOS33 } [get_ports { miso }
 set_property -dict { PACKAGE_PIN L18   IOSTANDARD LVCMOS33 } [get_ports { sclk }]; #IO_L8P_T1_D11_14 Sch=ja[4]
 set_property -dict { PACKAGE_PIN H17   IOSTANDARD LVCMOS33 } [get_ports { cs_n }]; #IO_L5P_T0_D06_14 Sch=ja[7]
 set_property -dict { PACKAGE_PIN H19   IOSTANDARD LVCMOS33 } [get_ports { NCO_OUT }]; #IO_L4P_T0_D04_14 Sch=ja[8]
-set_property -dict { PACKAGE_PIN J19   IOSTANDARD LVCMOS33 } [get_ports { start }]; #IO_L6N_T0_D08_VREF_14 Sch=ja[9]
+#set_property -dict { PACKAGE_PIN J19   IOSTANDARD LVCMOS33 } [get_ports { start }]; #IO_L6N_T0_D08_VREF_14 Sch=ja[9]
 set_property -dict { PACKAGE_PIN K18   IOSTANDARD LVCMOS33 } [get_ports { hf_freq_in }]; #IO_L8N_T1_D12_14 Sch=ja[10]
 
 ## Analog XADC Pins
