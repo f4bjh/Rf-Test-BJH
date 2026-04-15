@@ -111,7 +111,7 @@ end process;
 --fifo_count <= fifo_count_i;
 fifo_full_r <= '1' when fifo_count = FIFO_DEPTH_PER_VAR else '0';
 fifo_full <= fifo_full_r;
-wr_counter <= std_logic_vector(to_unsigned(wr_cnt,8));
+wr_counter <= std_logic_vector(to_unsigned(fifo_count,8));
 fifo_rd_data <= fifo_mem(fifo_rd_ptr) when (fifo_rd_ptr < 32) else (others => '0');
 
 end architecture;

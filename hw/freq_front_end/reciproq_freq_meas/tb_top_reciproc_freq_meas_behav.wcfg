@@ -10,15 +10,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="95.661668254 ms"></ZoomStartTime>
-      <ZoomEndTime time="114.601668255 ms"></ZoomEndTime>
-      <Cursor1Time time="101.461668254 ms"></Cursor1Time>
+      <ZoomStartTime time="95.392351710 ms"></ZoomStartTime>
+      <ZoomEndTime time="105.432351711 ms"></ZoomEndTime>
+      <Cursor1Time time="100.412351710 ms"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="168"></NameColumnWidth>
+      <NameColumnWidth column_width="164"></NameColumnWidth>
       <ValueColumnWidth column_width="60"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="64" />
+   <WVObjectSize size="65" />
    <wvobject type="logic" fp_name="/tb_top_reciproc_freq_meas/clk_ref">
       <obj_property name="ElementShortName">clk_ref</obj_property>
       <obj_property name="ObjectShortName">clk_ref</obj_property>
@@ -114,10 +114,6 @@
    <wvobject type="array" fp_name="/tb_top_reciproc_freq_meas/uut/spi_slave_inst/tx_shift">
       <obj_property name="ElementShortName">tx_shift[31:0]</obj_property>
       <obj_property name="ObjectShortName">tx_shift[31:0]</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/tb_top_reciproc_freq_meas/uut/spi_decode_inst/rx_valid">
-      <obj_property name="ElementShortName">rx_valid</obj_property>
-      <obj_property name="ObjectShortName">rx_valid</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_top_reciproc_freq_meas/uut/spi_slave_inst/rx_word">
       <obj_property name="ElementShortName">rx_word[31:0]</obj_property>
@@ -251,6 +247,10 @@
       <obj_property name="ElementShortName">fifo_wr</obj_property>
       <obj_property name="ObjectShortName">fifo_wr</obj_property>
    </wvobject>
+   <wvobject type="logic" fp_name="/tb_top_reciproc_freq_meas/uut/spi_decode_inst/rx_valid">
+      <obj_property name="ElementShortName">rx_valid</obj_property>
+      <obj_property name="ObjectShortName">rx_valid</obj_property>
+   </wvobject>
    <wvobject type="array" fp_name="/tb_top_reciproc_freq_meas/uut/spi_decode_inst/tx_word">
       <obj_property name="ElementShortName">tx_word[31:0]</obj_property>
       <obj_property name="ObjectShortName">tx_word[31:0]</obj_property>
@@ -274,5 +274,9 @@
    <wvobject type="other" fp_name="/tb_top_reciproc_freq_meas/uut/spi_decode_inst/nb_word">
       <obj_property name="ElementShortName">nb_word</obj_property>
       <obj_property name="ObjectShortName">nb_word</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_top_reciproc_freq_meas/uut/u_status/status_reg">
+      <obj_property name="ElementShortName">status_reg[31:0]</obj_property>
+      <obj_property name="ObjectShortName">status_reg[31:0]</obj_property>
    </wvobject>
 </wave_config>
