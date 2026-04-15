@@ -12,10 +12,10 @@ entity meas_fifo is
     reset_n : in std_logic;
 
     -- write
-    fifo_wr_en        : in  std_logic;
+    fifo_wr_en   : in  std_logic;
     delta_tick   : in  unsigned(63 downto 0);
     N_counted    : in  unsigned(31 downto 0);
-    wr_counter   : out std_logic_vector(7 downto 0);
+    fifo_cnt     : out std_logic_vector(7 downto 0);
 
     -- read
     fifo_rd_en        : in  std_logic;
@@ -111,7 +111,7 @@ end process;
 --fifo_count <= fifo_count_i;
 fifo_full_r <= '1' when fifo_count = FIFO_DEPTH_PER_VAR else '0';
 fifo_full <= fifo_full_r;
-wr_counter <= std_logic_vector(to_unsigned(fifo_count,8));
+fifo_cnt <= std_logic_vector(to_unsigned(fifo_count,8));
 fifo_rd_data <= fifo_mem(fifo_rd_ptr) when (fifo_rd_ptr < 32) else (others => '0');
 
 end architecture;

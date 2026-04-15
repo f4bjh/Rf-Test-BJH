@@ -41,7 +41,6 @@ entity spi_decode is
     fifo_rd_data : in  std_logic_vector(31 downto 0);
     fifo_rd      : out std_logic;
     fifo_data_type_req  : out std_logic_vector(7 downto 0);
-    fifo_count   : in  integer range 0 to FIFO_DEPTH_PER_VAR;
     fifo_full    : in  std_logic;
     fifo_wr   : out std_logic;
 
