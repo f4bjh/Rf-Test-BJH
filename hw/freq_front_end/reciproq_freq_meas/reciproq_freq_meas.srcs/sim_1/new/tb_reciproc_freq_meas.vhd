@@ -10,8 +10,8 @@ architecture sim of tb_top_reciproc_freq_meas is
 
   type t_word32_array is array (natural range <>) of std_logic_vector(31 downto 0);
 
-  constant FREF_HZ  : integer := 12_000_000;
-  constant CLK_PER  : time := 83.333 ns;
+  constant FREF_HZ  : integer := 100_000_000;
+  constant CLK_PER  : time := 10.000 ns;
   constant SPI_CLK  : integer := 1_000_000;
   constant SPI_CLK_PER : time := 1 us;
   constant STABILIZATION_TIME : time := 100 us;

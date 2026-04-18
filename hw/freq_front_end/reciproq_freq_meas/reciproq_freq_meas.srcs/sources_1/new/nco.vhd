@@ -14,7 +14,7 @@ end entity;
 
 architecture rtl of nco is
     constant PHASE_BITS : integer := 32;
-    constant CLK_MASTER  : integer := 12_000_000;  -- fréquence en Hz
+    constant CLK_MASTER  : integer := 100_000_000;  -- fréquence en Hz
 
     signal phase_acc : unsigned(PHASE_BITS-1 downto 0) := (others => '0');
     signal PHASE_INC : unsigned(PHASE_BITS-1 downto 0) := (others => '0');
