@@ -161,6 +161,9 @@ begin
     variable delta_t_var : unsigned(63 downto 0);
     variable N_counted_var : unsigned(31 downto 0);
     variable status : std_logic_vector(31 downto 0);
+    variable nb : integer;
+    variable cmd1, cmd2 : std_logic_vector(31 downto 0);
+
     
   begin
     rst_n <= '0';
@@ -191,7 +194,6 @@ begin
     report "START MEASURMENT";
     spi_device_transmit(cs_n, sck, mosi, miso,x"01000000", rx1);
     report "READ_STATUS = 0x" & slv_to_hex(rx1(0));
-
 
 
     for nb_meas in 0 to 5 loop
@@ -259,7 +261,50 @@ begin
     end loop;    
     
     
+    for nb_meas in 0 to 10 loop
+
+        report "Polling - Measure nr " & integer'image(nb_meas) ;
+        spi_device_transmit(cs_n, sck, mosi, miso,x"01000000", rx1);
+        report "READ_STATUS = 0x" & slv_to_hex(rx1(0));
+        nb := to_integer(unsigned(rx1(0)(15 downto 8)));
+        
+        if nb > 0 then
+
+            cmd1 := x"10010000" or std_logic_vector(to_unsigned(nb, 32));
+            cmd2 := x"10020000" or std_logic_vector(to_unsigned(nb, 32));
+
+            spi_device_transmit(cs_n, sck, mosi, miso, cmd1, dt16);
+            spi_device_transmit(cs_n, sck, mosi, miso, cmd2, N_counted8);
+
+            for i in 0 to nb-1 loop   -- ⚠️ souvent nb mesures → 0 à nb-1
+    
+                delta_t_var(63 downto 32) := unsigned(dt16(2*i + 1));
+                delta_t_var(31 downto 0)  := unsigned(dt16(2*i));
+    
+                N_counted_var := unsigned(N_counted8(i));
+    
+                dt := real(to_integer(delta_t_var(31 downto 0))) +
+                      real(to_integer(delta_t_var(63 downto 32))) * 2.0**32;
+    
+                dt := dt / real(FREF_HZ);
+    
+                report "dt=" & real'image(dt) &
+                       " N_counted_var=" & integer'image(to_integer(N_counted_var));
+    
+                f_est_d := FREF_HZ *
+                           real(to_integer(N_counted_var)) /
+                           real(to_integer(delta_t_var));
+                report "f_direct=" & real'image(f_est_d) severity note;
+    
+            end loop;
+        end if;
+
+        wait for 250 ms;
+
+    end loop; 
+    
     report "end testbench";
+    
   end process;
 
 end architecture;
