@@ -205,7 +205,7 @@ begin
             status := rx1(0);
             exit when status(FIFO_FULL_BIT) = '1';
     
-            wait for 1 ms;
+            wait for 250 ms;
         end loop;
         spi_device_transmit(cs_n, sck, mosi, miso,x"01000000", rx1);
         report "READ_STATUS = 0x" & slv_to_hex(rx1(0));
