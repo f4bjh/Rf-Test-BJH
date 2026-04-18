@@ -38,6 +38,8 @@ architecture rtl of top_reciproc_freq_meas is
   -- NCO
   signal nco_freq_word      : unsigned(23 downto 0);
   signal nco_freq_valid     : std_logic;
+  signal cfg_N              : unsigned(31 downto 0);
+
 
   --freq_counter
   signal start_meas          : std_logic;
@@ -102,8 +104,10 @@ port map (
     led_on        => led_on,
     led_off       => led_off,
     led_toggle    => led_toggle,
+    
     nco_freq_word => nco_freq_word,
     nco_freq_valid=> nco_freq_valid,
+    cfg_N      => cfg_N,
     
     start_meas => start_meas,
     meas_done  => meas_done,
@@ -176,7 +180,7 @@ u_status : entity work.status_reg_block
       clk_ref    => clk_master,
       rst_n      => reset_n,
       sig_in     => hf_freq_in,
-      cfg_N      => to_unsigned(1000, 32),
+      cfg_N      => cfg_N,
       start      => start_meas,
       ready      => ready,
       meas_done  => meas_done,

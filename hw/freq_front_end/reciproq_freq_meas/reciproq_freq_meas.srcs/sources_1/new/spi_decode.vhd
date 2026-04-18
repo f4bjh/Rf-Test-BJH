@@ -32,6 +32,7 @@ entity spi_decode is
     -- NCO
     nco_freq_word  : out unsigned(23 downto 0);
     nco_freq_valid : out std_logic;
+    cfg_N          : out unsigned(31 downto 0);
 
     -- measurement
     start_meas  : out std_logic;
@@ -87,17 +88,18 @@ fifo_wr <= '1' when (meas_done = '1' and fifo_full = '0') else '0';
 process(clk, reset_n)
 begin
     if reset_n = '0' then
-        start_status     <= '0';
-        start_read_data  <= '0';
-        led_on           <= '0';
-        led_off          <= '0';
-        led_toggle       <= '0';
-        nco_freq_word    <= (others => '0');
-        nco_freq_valid   <= '0';
-        error_flag       <= '0';
-        start_meas_r     <= '0';
+        start_status       <= '0';
+        start_read_data    <= '0';
+        led_on             <= '0';
+        led_off            <= '0';
+        led_toggle         <= '0';
+        nco_freq_word      <= (others => '0');
+        nco_freq_valid     <= '0';
+        error_flag         <= '0';
+        start_meas_r       <= '0';
         fifo_data_type_req <= x"00";
-        fifo_rd_i  <= '0';
+        fifo_rd_i          <= '0';
+        cfg_N              <= to_unsigned(100, 32);
         
     elsif rising_edge(clk) then
 
@@ -135,6 +137,22 @@ begin
                     end case;
 
                 -- NCO
+                when x"03" =>
+                    case rx_word(23 downto 0) is
+                        when x"000000" =>
+                            cfg_N <= to_unsigned(100, 32);
+                        when x"000001" =>
+                            cfg_N <= to_unsigned(1000, 32);    
+                        when x"000002" =>
+                            cfg_N <= to_unsigned(10000, 32);
+                        when x"000003" =>
+                            cfg_N <= to_unsigned(100000, 32);
+                        when x"000004" =>
+                            cfg_N <= to_unsigned(1000000, 32);
+                        when others =>
+                            error_flag <= '1';
+                    end case;
+        
                 when x"04" =>
                     nco_freq_word  <= unsigned(rx_word(23 downto 0));
                     nco_freq_valid <= '1';

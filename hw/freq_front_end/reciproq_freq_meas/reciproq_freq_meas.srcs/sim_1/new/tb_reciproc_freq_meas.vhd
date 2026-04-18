@@ -185,6 +185,8 @@ begin
 
     report "===== Test signal NCO 100kHz =====" severity note;
 
+    spi_device_transmit(cs_n, sck, mosi, miso, x"03000003", rx1);
+
     wait for 200 * per_sig;
 
     spi_device_transmit(cs_n, sck, mosi, miso,x"01000000", rx1);
