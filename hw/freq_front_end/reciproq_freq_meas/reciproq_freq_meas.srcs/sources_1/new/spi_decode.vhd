@@ -216,7 +216,7 @@ begin
                     tx_state <= TX_STATUS;
 
                 elsif start_read_data = '1' and tx_busy = '0' then
-                    word_cnt <= nb_word;
+                    word_cnt <= nb_word; 
                     tx_state <= TX_READ_DATA;
                 end if;
             ----------------------------------------------------
@@ -229,7 +229,9 @@ begin
             when TX_READ_DATA =>
                  if tx_busy = '0' and tx_load ='0' then
                     if word_cnt > 0 then
-                        fifo_rd_d  <= '1';
+                        if word_cnt > 1 then
+                            fifo_rd_d  <= '1'; --fifo_rd has been raised when fifo_rd_i was raised. Then, don't need to raise it when word_cnt=0
+                        end if;
                         tx_word    <= fifo_rd_data;
                         tx_load    <= '1';
                         word_cnt   <= word_cnt - 1;
