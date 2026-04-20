@@ -156,6 +156,7 @@ begin
     variable per_sig : time;
     variable f_est_d, f_est_i, f_est_c : real;
     variable t_start, t_end : time;
+    variable delta_t_ns : real;
     variable dt : real;
     variable l : line;  -- ligne temporaire
     variable delta_t_var : unsigned(63 downto 0);
@@ -163,8 +164,11 @@ begin
     variable status : std_logic_vector(31 downto 0);
     variable nb : integer;
     variable cmd1, cmd2 : std_logic_vector(31 downto 0);
+    variable f_int_part  : integer;
+    variable f_frac_part : integer;
+    variable err_abs  : real;
+    variable err_rel  : real;
 
-    
   begin
     rst_n <= '0';
     wait for 10 us;
@@ -177,15 +181,29 @@ begin
     wait for 10 ms;
 
     -- 100kHz init
+    report "===== Test signal NCO 100kHz =====" severity note;
     spi_device_transmit(cs_n, sck, mosi, miso, x"040186A0", rx1);
     wait for 10 ms;
 
     use_nco_out <= '1';
-    f_sig := real(100_001);
+    wait until rising_edge(NCO_OUT);
+    t_start := now;
+    
+    for i in 0 to 99 loop
+        wait until rising_edge(NCO_OUT);
+    end loop;
+    
+    t_end := now;
+    
+    if t_end > t_start then
+        delta_t_ns := real((t_end - t_start) / 1 ns);
+        f_sig := 100.0e9 / delta_t_ns;
+    else 
+        report "Erreur: delta_t nul !" severity error;
+    end if;
 
-    report "===== Test signal NCO 100kHz =====" severity note;
 
-    spi_device_transmit(cs_n, sck, mosi, miso, x"03000002", rx1);
+    spi_device_transmit(cs_n, sck, mosi, miso, x"03000001", rx1);
 
     wait for 200 * per_sig;
 
@@ -229,26 +247,33 @@ begin
                 f_est_d := FREF_HZ *
                            real(to_integer(N_counted_var)) /
                            real(to_integer(delta_t_var));
+                f_int_part  := integer(f_est_d);
+                f_frac_part := integer((f_est_d - real(f_int_part)) * 1.0e9);                           
+
+                err_abs := abs(f_est_d - f_sig);
+                err_rel := 100 * err_abs / f_sig;
 
                 report integer'image(i) & " - " &
                        "delta_t_var=0x" & slv_to_hex(dt16(2*i+1)) & slv_to_hex(dt16(2*i)) &
                        " | N_counted_var=0x" & slv_to_hex(N_counted8(i)) &  
-                       " | f_direct=" & real'image(f_est_d) &
+                       " | f_direct=" & integer'image(f_int_part) & "." & integer'image(f_frac_part) &
                        " | dt=" & real'image(dt) &
                        " | N_counted_var=" & integer'image(to_integer(N_counted_var)) severity note;
 
         
                 write(l, string'("------------------------------"));
                 writeline(result_file, l);
-                write(l, string'("NCO 100kHz"));
+                write(l, string'("Méthode     | Fréquence (Hz)   | Précision (Hz) | Précision relative % | t_measure"));
                 writeline(result_file, l);
-                write(l, string'("Méthode       | Fréquence (Hz) | Précision (Hz) | t_measure"));
-                writeline(result_file, l);
-                write(l, string'("f_direct      | "));
-                write(l, real'image(f_est_d));
+                write(l, string'("f_direct    | "));
+                write(l, f_int_part);
+                write(l, string'("."));
+                write(l, f_frac_part);
+                write(l, string'(" | "));
+                write(l, real'image(err_abs));
                 write(l, string'("   | "));
-                write(l, real'image(abs(f_est_d - f_sig)));
-                write(l, string'("   | "));
+                write(l, real'image(err_rel));
+                write(l, string'("         | "));
                 write(l, real'image(dt));
                 write(l, string'(" s"));
                 writeline(result_file, l);
