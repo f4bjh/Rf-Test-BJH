@@ -8,7 +8,7 @@ entity top_reciproc_freq_meas is
     FREF_HZ : natural := 12_000_000
   );
   port(
-    clk_master    : in  std_logic;
+    clk_in        : in  std_logic;
     reset_n       : in  std_logic;
     sclk          : in  std_logic;
     mosi          : in  std_logic;
@@ -24,6 +24,9 @@ architecture rtl of top_reciproc_freq_meas is
   constant USE_FRAC_INTERP : boolean := false; -- mettre true pour activer
   constant USE_CALC_FREQ : boolean := false; -- mettre true pour activer
   
+  signal clk_master : std_logic;
+  signal locked : std_logic;
+ 
   -- SPI interface
   signal     rx_word    : std_logic_vector(31 downto 0);
   signal      rx_valid  : std_logic;
@@ -62,7 +65,24 @@ architecture rtl of top_reciproc_freq_meas is
   signal error_flag    : std_logic;
   signal status_reg    : std_logic_vector(31 downto 0);  
   
+  component clk_wiz_0
+    port (
+        clk_in  : in  std_logic;
+        clk_master : out std_logic;
+        reset    : in  std_logic;
+        locked   : out std_logic
+    );
+end component;
+  
 begin
+
+u_clk_wiz : clk_wiz_0
+    port map (
+        clk_in  => clk_in,   -- ton horloge externe
+        clk_master => clk_master,  -- horloge générée
+        reset    => reset_n,
+        locked   => locked
+    );
 
   ------------------------------------------------------------------------
   -- SPI Slave

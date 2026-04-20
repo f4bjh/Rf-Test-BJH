@@ -80,20 +80,69 @@ void frequencymeter_task(void *arg)
   meas_t *measure = frequencymeter_task_arg->measure;
   //reciproc_freq_cfg_t fpga_freq;
   uint8_t rx_status[RECIPROC_FREQ_MEAS_RX_BYTE_SIZE_32b_word];
-
+  uint8_t nb_of_meas;
+  uint8_t meas[measure->size];
+  uint8_t delta_tick[2*RECIPROC_FREQ_MEAS_FIFO_DEPTH*BYTE_SIZE_32b_word];
+  uint8_t N_counted[RECIPROC_FREQ_MEAS_FIFO_DEPTH*BYTE_SIZE_32b_word];
+  uint8_t  led_cnt=0;
+  uint8_t i,j;
+  int base=0;
 
   ESP_LOGI(TAG,"Starting frequencymeter_task");
 
   measure->ready=false;
+  memset(meas, 0, measure->size);
+ 
+  //set NCO_freq
+  reciproc_freq_set_freq(&fpga_freq,100000);
 
+  //set cfg_N
+  reciproc_freq_set_cfg_N(&fpga_freq,RECIPROC_FREQ_MEAS_SUB_CMD_CFG_N_1000);
+  //start measurment
+  reciproc_freq_start_meas(&fpga_freq);
+
+  //Polling - Measure
   while(1) {
-       vTaskDelay(1000 / portTICK_PERIOD_MS);
+       vTaskDelay(MEASURMENT_TASK_WAKE_UP_TICK / portTICK_PERIOD_MS);
 
-       ESP_LOGI(TAG,"Talking to FPGA over SPI...");	
-       reciproc_freq_toggle_led(&fpga_freq);
-       reciproc_freq_TEST_SET_FREQ(&fpga_freq);
+       ESP_LOGI(TAG,"Talking to FPGA over SPI...");
+       if (led_cnt == 0)       
+       	reciproc_freq_toggle_led(&fpga_freq);
+       led_cnt = (led_cnt + 1) % 3;
        reciproc_freq_read_status(&fpga_freq,rx_status);
-      
+       nb_of_meas = rx_status[RECIPROC_FREQ_MEAS_BYTE_POS_FIFO_COUNT];
+
+       	if (nb_of_meas > 0 || (rx_status[RECIPROC_FREQ_MEAS_BYTE_POS_STATUS] & RECIPROC_FREQ_MEAS_BIT_POS_STATUS_FIFO_FULL)) {
+		reciproc_freq_read_delta_tick(&fpga_freq, delta_tick, nb_of_meas);
+		reciproc_freq_read_N_counted(&fpga_freq, N_counted, nb_of_meas);
+
+		//  uint8_t   | 8*64b_word  | 8*32b_word 
+		// nb_of_meas |  delta_tick | N_counted
+		meas[0] = nb_of_meas;
+		
+	    for (i = 0; i < 8*nb_of_meas; i+=8) {
+          ESP_LOGI(TAG,"delta_tick=0x%02X%02X%02X%02X%02X%02X%02X%02X",
+             delta_tick[i+0], delta_tick[i+1], delta_tick[i+2], delta_tick[i+3],
+             delta_tick[i+4], delta_tick[i+5], delta_tick[i+6], delta_tick[i+7]);
+
+          for (j = 0; j < 8; j++) {
+             meas[1 + i + j] = delta_tick[i + j];
+          }
+		}			
+		base = 1 + 8 * nb_of_meas;
+        for (i = 0; i < 4*nb_of_meas; i+=4) {
+   		   	ESP_LOGI(TAG,"N_counted=0x%02X%02X%02X%02X",
+        		N_counted[i+0], N_counted[i+1],
+        		N_counted[i+2], N_counted[i+3]);
+
+    		for (j = 0; j < 4; j++) {
+        		meas[base + i + j] = N_counted[i + j];
+    		}
+		}
+		
+		memcpy(measure->pdata,meas, measure->size );
+		measure->ready=true;
+	}
   }
 }
 
@@ -132,7 +181,7 @@ esp_err_t init_frequencymeter(meas_t *measure)
    uint8_t reciproc_freq_status[RECIPROC_FREQ_MEAS_RX_BYTE_SIZE_32b_word];
 
 
-   measure->size = sizeof(int);
+   measure->size = (2*RECIPROC_FREQ_MEAS_FIFO_DEPTH*sizeof(uint32_t)) + (RECIPROC_FREQ_MEAS_FIFO_DEPTH*sizeof(uint32_t)) + sizeof(uint8_t) ;
    measure->pdata = malloc(measure->size * sizeof(uint8_t));
    measure->pdata_cache = malloc(measure->size * sizeof(uint8_t));
    measure->meas_func = NULL;
@@ -244,6 +293,7 @@ esp_err_t calc_frequencymeter(instance_meas_t *instance_meas)
     memset(instance_meas->calc_value, 0, CALC_VALUE_SIZE*sizeof(char));
     unsigned int freq=0;
 
+#if 0
     //au depart,l'objectif etait d'obtenir une precision de 1mHz, sur le calibre 10MHz
     //mais ca suppose des lors d'avoir une fene^tre de 1000*1s...soit 1000s...ce qui n'est pas raisonnable
     //alors, a moins d'avoir correctement resolut li'ssue n°79 sur gitlab, qui vise a obtenir et ameliorer
@@ -257,7 +307,7 @@ esp_err_t calc_frequencymeter(instance_meas_t *instance_meas)
     freq |= ((*(measure.pdata_cache+1))<<8)&0xFF00;
     freq |= ((*(measure.pdata_cache+2))<<16)&0xFF0000;
     freq |= ((*(measure.pdata_cache+3))<<24)&0xFF000000;
-
+#endif
     sprintf(instance_meas->calc_value,"%llu", (unsigned long long int) 4*freq*1000 );
 
     return ESP_OK;

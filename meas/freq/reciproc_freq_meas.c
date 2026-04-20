@@ -121,7 +121,7 @@ esp_err_t reciproc_freq_toggle_led(reciproc_freq_cfg_t *pcfg)
 	uint8_t subcmd[RECIPROC_FREQ_MEAS_SUB_CMD_SIZE];
 
 	pcfg->reciproc_freq_device->led_state =!(pcfg->reciproc_freq_device->led_state);
-	cmd = RECIPROC_FREQ_MEAS_CMD_SPI_SET_LED_STATUS;
+	cmd = RECIPROC_FREQ_MEAS_CMD_SPI_CTRL;
 	subcmd[0] = (pcfg->reciproc_freq_device->led_state == true ? RECIPROC_FREQ_MEAS_SUB_CMD_SPI_LED_ON : RECIPROC_FREQ_MEAS_SUB_CMD_SPI_LED_OFF);
 	subcmd[1] = 0;
 	subcmd[2] = 0;
@@ -157,6 +157,59 @@ int32_t reciproc_freq_TEST_SET_FREQ(reciproc_freq_cfg_t *pcfg)
 
 }
 
+int32_t reciproc_freq_set_freq(reciproc_freq_cfg_t *pcfg, uint32_t nco_freq)
+{
+
+	int32_t ret=0;
+	uint8_t cmd;
+	uint8_t subcmd[RECIPROC_FREQ_MEAS_SUB_CMD_SIZE];
+
+	cmd = RECIPROC_FREQ_MEAS_CMD_SPI_SET_NCO_FREQ;
+	subcmd[0] = (uint8_t) (((nco_freq)&(0xFF0000))>> 16);
+	subcmd[1] = (uint8_t) (((nco_freq)&(0xFF00))>> 8);
+	subcmd[2] = (uint8_t) (((nco_freq)&(0xFF)));
+	
+	reciproc_freq_send_spi(pcfg,cmd,subcmd, 0, NULL);
+
+	return ret;
+
+}
+int32_t reciproc_freq_set_cfg_N(reciproc_freq_cfg_t *pcfg, uint32_t cfg_N)
+{
+
+	int32_t ret=0;
+	uint8_t cmd;
+	uint8_t subcmd[RECIPROC_FREQ_MEAS_SUB_CMD_SIZE];
+
+	cmd = RECIPROC_FREQ_MEAS_CMD_SPI_SET_CFG_N;
+	subcmd[0] = (uint8_t) (((cfg_N)&(0xFF0000))>> 16);
+	subcmd[1] = (uint8_t) (((cfg_N)&(0xFF00))>> 8);
+	subcmd[2] = (uint8_t) (((cfg_N)&(0xFF)));
+	
+	reciproc_freq_send_spi(pcfg,cmd,subcmd, 0, NULL);
+
+	return ret;
+
+}
+
+esp_err_t reciproc_freq_start_meas(reciproc_freq_cfg_t *pcfg)
+{
+
+	esp_err_t err=ESP_OK;
+	uint8_t cmd;
+	uint8_t subcmd[RECIPROC_FREQ_MEAS_SUB_CMD_SIZE];
+
+	cmd = RECIPROC_FREQ_MEAS_CMD_SPI_CTRL;
+	subcmd[0] = RECIPROC_FREQ_MEAS_SUB_CMD_START_MEAS;
+	subcmd[1] = 0;
+	subcmd[2] = 0;
+
+	err = reciproc_freq_send_spi(pcfg,cmd,subcmd,0, NULL);
+
+	return err;
+
+}
+
 esp_err_t reciproc_freq_read_status(reciproc_freq_cfg_t *pcfg,uint8_t *rx_status )
 {
 
@@ -175,6 +228,40 @@ esp_err_t reciproc_freq_read_status(reciproc_freq_cfg_t *pcfg,uint8_t *rx_status
 
 }
 
+esp_err_t reciproc_freq_read_delta_tick(reciproc_freq_cfg_t *pcfg,uint8_t *delta_tick, uint8_t nb_of_meas )
+{
+
+	esp_err_t err=ESP_OK;
+	uint8_t cmd;
+	uint8_t subcmd[RECIPROC_FREQ_MEAS_SUB_CMD_SIZE];
+
+	cmd = RECIPROC_FREQ_MEAS_CMD_SPI_GET_DATA;
+	subcmd[0] = RECIPROC_FREQ_MEAS_SUB_CMD_GET_MEAS_DELTA_TICK;
+	subcmd[1] = RECIPROC_FREQ_MEAS_SUB_CMD_DUMMY;
+	subcmd[2] = nb_of_meas;
+	
+	err = reciproc_freq_send_spi(pcfg,cmd,subcmd, 2*nb_of_meas*RECIPROC_FREQ_MEAS_RX_BYTE_SIZE_32b_word, delta_tick);
+
+	return err;
+
+}
+esp_err_t reciproc_freq_read_N_counted(reciproc_freq_cfg_t *pcfg,uint8_t *N_counted, uint8_t nb_of_meas )
+{
+
+	esp_err_t err=ESP_OK;
+	uint8_t cmd;
+	uint8_t subcmd[RECIPROC_FREQ_MEAS_SUB_CMD_SIZE];
+
+	cmd = RECIPROC_FREQ_MEAS_SUB_CMD_GET_MEAS_N_COUNTED;
+	subcmd[0] = RECIPROC_FREQ_MEAS_SUB_CMD_GET_MEAS_DELTA_TICK;
+	subcmd[1] = RECIPROC_FREQ_MEAS_SUB_CMD_DUMMY;
+	subcmd[2] = nb_of_meas;
+	
+	err = reciproc_freq_send_spi(pcfg,cmd,subcmd, nb_of_meas*RECIPROC_FREQ_MEAS_RX_BYTE_SIZE_32b_word, N_counted);
+
+	return err;
+
+}
 
 int32_t reciproc_freq_setup(reciproc_freq_dev **device,
 		            reciproc_freq_init_param init_param)
