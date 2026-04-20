@@ -78,15 +78,15 @@ begin
             case fifo_data_type_req is 
                 when  x"00" =>
                         fifo_rd_ptr <= 0 +  ptr_rd_fpga; 
-                        ptr_rd_fpga <= (ptr_rd_fpga + 1) mod (FIFO_DEPTH_PER_VAR+1);                        
+                        ptr_rd_fpga <= (ptr_rd_fpga + 1) mod (FIFO_DEPTH_PER_VAR);                        
                      
                 when  x"01" =>
                         fifo_rd_ptr <= 8 +  ptr_rd_dt; 
-                        ptr_rd_dt <= (ptr_rd_dt + 1) mod (2*FIFO_DEPTH_PER_VAR+1);                        
+                        ptr_rd_dt <= (ptr_rd_dt + 1) mod (2*FIFO_DEPTH_PER_VAR);                        
                 
                 when  x"02" =>
                         fifo_rd_ptr <= 24 +  ptr_rd_n; 
-                        ptr_rd_n <= (ptr_rd_n + 1) mod (FIFO_DEPTH_PER_VAR+1);                        
+                        ptr_rd_n <= (ptr_rd_n + 1) mod (FIFO_DEPTH_PER_VAR);                        
                     
                 when others =>
                      null;
