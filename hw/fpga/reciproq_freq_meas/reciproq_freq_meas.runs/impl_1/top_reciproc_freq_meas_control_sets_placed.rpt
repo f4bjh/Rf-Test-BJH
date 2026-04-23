@@ -1,0 +1,118 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+---------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2024.2 (lin64) Build 5239630 Fri Nov 08 22:34:34 MST 2024
+| Date         : Tue Apr 21 00:03:55 2026
+| Host         : f4bjh-minipc running 64-bit Ubuntu 24.04.4 LTS
+| Command      : report_control_sets -verbose -file top_reciproc_freq_meas_control_sets_placed.rpt
+| Design       : top_reciproc_freq_meas
+| Device       : xc7a35t
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+Control Set Information
+
+Table of Contents
+-----------------
+1. Summary
+2. Histogram
+3. Flip-Flop Distribution
+4. Detailed Control Set Information
+
+1. Summary
+----------
+
++----------------------------------------------------------+-------+
+|                          Status                          | Count |
++----------------------------------------------------------+-------+
+| Total control sets                                       |    40 |
+|    Minimum number of control sets                        |    40 |
+|    Addition due to synthesis replication                 |     0 |
+|    Addition due to physical synthesis replication        |     0 |
+| Unused register locations in slices containing registers |    77 |
++----------------------------------------------------------+-------+
+* Control sets can be merged at opt_design using control_set_merge or merge_equivalent_drivers
+** Run report_qor_suggestions for automated merging and remapping suggestions
+
+
+2. Histogram
+------------
+
++--------------------+-------+
+|       Fanout       | Count |
++--------------------+-------+
+| Total control sets |    40 |
+| >= 0 to < 4        |     2 |
+| >= 4 to < 6        |     3 |
+| >= 6 to < 8        |     3 |
+| >= 8 to < 10       |     1 |
+| >= 10 to < 12      |     0 |
+| >= 12 to < 14      |     3 |
+| >= 14 to < 16      |     0 |
+| >= 16              |    28 |
++--------------------+-------+
+* Control sets can be remapped at either synth_design or opt_design
+
+
+3. Flip-Flop Distribution
+-------------------------
+
++--------------+-----------------------+------------------------+-----------------+--------------+
+| Clock Enable | Synchronous Set/Reset | Asynchronous Set/Reset | Total Registers | Total Slices |
++--------------+-----------------------+------------------------+-----------------+--------------+
+| No           | No                    | No                     |              70 |           25 |
+| No           | No                    | Yes                    |              48 |           17 |
+| No           | Yes                   | No                     |              67 |           18 |
+| Yes          | No                    | No                     |             630 |          200 |
+| Yes          | No                    | Yes                    |             112 |           47 |
+| Yes          | Yes                   | No                     |             484 |          130 |
++--------------+-----------------------+------------------------+-----------------+--------------+
+
+
+4. Detailed Control Set Information
+-----------------------------------
+
++----------------------------+------------------------------------------------+---------------------------------+------------------+----------------+--------------+
+|        Clock Signal        |                  Enable Signal                 |         Set/Reset Signal        | Slice Load Count | Bel Load Count | Bels / Slice |
++----------------------------+------------------------------------------------+---------------------------------+------------------+----------------+--------------+
+|  u_clk_wiz/inst/clk_master | spi_slave_inst/miso_reg                        |                                 |                1 |              1 |         1.00 |
+|  u_clk_wiz/inst/clk_master | u_fifo/fifo_count[0]_i_1_n_0                   |                                 |                1 |              1 |         1.00 |
+|  u_clk_wiz/inst/clk_master | spi_decode_inst/fifo_data_type_req_reg[1]_1[0] |                                 |                2 |              4 |         2.00 |
+|  u_clk_wiz/inst/clk_master | u_freq_counter/FSM_onehot_state[4]_i_1_n_0     | u_freq_counter/reset_n          |                2 |              5 |         2.50 |
+|  u_clk_wiz/inst/clk_master | spi_slave_inst/sclk_rise                       | cs_n_IBUF                       |                1 |              5 |         5.00 |
+|  u_clk_wiz/inst/clk_master | spi_decode_inst/word_cnt                       | u_freq_counter/reset_n          |                3 |              6 |         2.00 |
+|  u_clk_wiz/inst/clk_master | spi_slave_inst/tx_shift0                       | spi_decode_inst/tx_load         |                2 |              6 |         3.00 |
+|  u_clk_wiz/inst/clk_master | spi_slave_inst/start_read_data_reg[0]          |                                 |                1 |              6 |         6.00 |
+|  u_clk_wiz/inst/clk_master | spi_slave_inst/rx_word_reg[16]_0[0]            | u_freq_counter/reset_n          |                3 |              8 |         2.67 |
+|  u_clk_wiz/inst/clk_master | spi_slave_inst/rx_word_reg[26]_0[0]            | u_freq_counter/reset_n          |                3 |             12 |         4.00 |
+|  u_clk_wiz/inst/clk_master | u_fifo/p_9_out                                 |                                 |                3 |             12 |         4.00 |
+|  u_clk_wiz/inst/clk_master | u_freq_counter/req_N                           | u_freq_counter/reset_n          |                3 |             12 |         4.00 |
+|  u_clk_wiz/inst/clk_master | spi_slave_inst/E[0]                            | u_freq_counter/reset_n          |               17 |             24 |         1.41 |
+|  u_clk_wiz/inst/clk_master | u_fifo/fifo_mem[25][31]_i_2_n_0                | u_fifo/fifo_mem[25][31]_i_1_n_0 |                9 |             29 |         3.22 |
+|  u_clk_wiz/inst/clk_master | u_fifo/fifo_mem[31][31]_i_2_n_0                | u_fifo/fifo_mem[31][31]_i_1_n_0 |               16 |             29 |         1.81 |
+|  u_clk_wiz/inst/clk_master | u_fifo/fifo_mem[30][31]_i_2_n_0                | u_fifo/fifo_mem[30][31]_i_1_n_0 |                7 |             29 |         4.14 |
+|  u_clk_wiz/inst/clk_master | u_fifo/fifo_mem[29][31]_i_2_n_0                | u_fifo/fifo_mem[29][31]_i_1_n_0 |                9 |             29 |         3.22 |
+|  u_clk_wiz/inst/clk_master | u_fifo/fifo_mem[28][31]_i_2_n_0                | u_fifo/fifo_mem[28][31]_i_1_n_0 |                5 |             29 |         5.80 |
+|  u_clk_wiz/inst/clk_master | u_fifo/fifo_mem[27][31]_i_2_n_0                | u_fifo/fifo_mem[27][31]_i_1_n_0 |               11 |             29 |         2.64 |
+|  u_clk_wiz/inst/clk_master | u_fifo/fifo_mem[26][31]_i_2_n_0                | u_fifo/fifo_mem[26][31]_i_1_n_0 |               10 |             29 |         2.90 |
+|  u_clk_wiz/inst/clk_master | u_fifo/fifo_mem[24][31]_i_2_n_0                | u_fifo/fifo_mem[24][31]_i_1_n_0 |                8 |             29 |         3.62 |
+|  u_clk_wiz/inst/clk_master | spi_decode_inst/nco_freq_valid                 | u_freq_counter/reset_n          |                9 |             30 |         3.33 |
+|  u_clk_wiz/inst/clk_master | spi_slave_inst/rx_shift                        |                                 |                9 |             31 |         3.44 |
+|  u_clk_wiz/inst/clk_master | spi_slave_inst/tx_shift[31]_i_1_n_0            |                                 |                6 |             31 |         5.17 |
+|  u_clk_wiz/inst/clk_master | spi_slave_inst/rx_word[31]_i_1_n_0             |                                 |                8 |             32 |         4.00 |
+|  u_clk_wiz/inst/clk_master | u_freq_counter/n_counter                       | u_freq_counter/reset_n          |                5 |             32 |         6.40 |
+|  u_clk_wiz/inst/clk_master | spi_decode_inst/tx_load_i_1_n_0                | u_freq_counter/reset_n          |               12 |             32 |         2.67 |
+|  u_clk_wiz/inst/clk_master | u_fifo/fifo_mem[9][2]_i_1_n_0                  |                                 |               24 |             64 |         2.67 |
+|  u_clk_wiz/inst/clk_master | u_fifo/fifo_mem[23][2]_i_1_n_0                 |                                 |               26 |             64 |         2.46 |
+|  u_clk_wiz/inst/clk_master | u_fifo/fifo_mem[21][2]_i_1_n_0                 |                                 |               18 |             64 |         3.56 |
+|  u_clk_wiz/inst/clk_master | u_fifo/fifo_mem[19][2]_i_1_n_0                 |                                 |               19 |             64 |         3.37 |
+|  u_clk_wiz/inst/clk_master | u_fifo/fifo_mem[17][2]_i_1_n_0                 |                                 |               20 |             64 |         3.20 |
+|  u_clk_wiz/inst/clk_master | u_fifo/fifo_mem[15][2]_i_1_n_0                 |                                 |               22 |             64 |         2.91 |
+|  u_clk_wiz/inst/clk_master | u_fifo/fifo_mem[13][2]_i_1_n_0                 |                                 |               22 |             64 |         2.91 |
+|  u_clk_wiz/inst/clk_master | u_fifo/fifo_mem[11][2]_i_1_n_0                 |                                 |               18 |             64 |         3.56 |
+|  u_clk_wiz/inst/clk_master | spi_decode_inst/cfg_N_reg[14]_0[0]             | u_freq_counter/reset_n          |               13 |             64 |         4.92 |
+|  u_clk_wiz/inst/clk_master | u_freq_counter/start_tick_r                    | u_freq_counter/reset_n          |               15 |             64 |         4.27 |
+|  u_clk_wiz/inst/clk_master | u_freq_counter/end_tick_r                      | u_freq_counter/reset_n          |               14 |             64 |         4.57 |
+|  u_clk_wiz/inst/clk_master |                                                |                                 |               25 |             70 |         2.80 |
+|  u_clk_wiz/inst/clk_master |                                                | u_freq_counter/reset_n          |               35 |            115 |         3.29 |
++----------------------------+------------------------------------------------+---------------------------------+------------------+----------------+--------------+
+
+
