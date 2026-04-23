@@ -4,3 +4,7 @@ build/
 managed_components/
 dependencies.lock
 .*
+~*lck
+*auto_*
+*.zip
+*.bak

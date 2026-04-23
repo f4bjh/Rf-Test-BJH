@@ -38,15 +38,15 @@ Rf-Test-BJH is an amateur radio project of a universal radio test bench.
 
 ## User manuals : 
 
-[How to setup wifi](./doc/Rf-Test-BJH/setup-wifi.md)
+[How to setup wifi](./doc/Rf-Test-BJH/how-to/setup-wifi.md)
 
-[How to upload firware](./doc/Rf-Test-BJH/update-fw.md)
+[How to upload firware](./doc/Rf-Test-BJH/how-to/update-fw.md)
 
-[User guide for developpers](./doc/Rf-Test-BJH/for_developpers.md)
+[User guide for developpers](./doc/Rf-Test-BJH/how-to/for_developpers.md)
 
 ## Screenshot
 
-![Index](./doc/Rf-Test-BJH/index.gif)
+![Index](./doc/Rf-Test-BJH/how-to/index.gif)
 
 ## Developpement documentation
 

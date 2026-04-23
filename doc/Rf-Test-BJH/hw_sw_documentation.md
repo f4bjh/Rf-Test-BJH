@@ -1,20 +1,20 @@
 # SH/HW documentation
 
 ## SW architecture
-![SW architecture](archi-sw.drawio.svg)
+![SW architecture](./archi/archi-sw.drawio.svg)
 
-![Partition table](partition-table.drawio.svg)
+![Partition table](./archi/partition-table.drawio.svg)
 
 ## HW architecture
 
 ### Mecanic architecture
-![Mecanic structure](meca_struct.drawio.svg)
+![Mecanic structure](./archi/meca_struct.drawio.svg)
 
 ### Module connections
-![Module connections](hw-synoptique.drawio.svg)
+![Module connections](./archi/hw-synoptique.drawio.svg)
 
 ### Frequencymeter HW architecture
-![Frequencymeter HW architecture](rf-freq-archi.drawio.svg)
+![Frequencymeter HW architecture](./archi/rf-freq-archi.drawio.svg)
 
 
 Note : in doc folder of this repo, you will find pdf version of this documentation

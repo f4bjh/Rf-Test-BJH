@@ -1,0 +1,9 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP ERA-2+
+D RF Amplifier SMT Gain Block, DC - 6000 MHz, 50
+K
+F https://componentsearchengine.com/Datasheets/1/ERA-2+.pdf
+$ENDCMP
+#
+#End Doc Library
