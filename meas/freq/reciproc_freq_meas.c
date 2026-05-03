@@ -234,13 +234,31 @@ esp_err_t reciproc_freq_read_delta_tick(reciproc_freq_cfg_t *pcfg,uint8_t *delta
 	esp_err_t err=ESP_OK;
 	uint8_t cmd;
 	uint8_t subcmd[RECIPROC_FREQ_MEAS_SUB_CMD_SIZE];
+	uint8_t nb_of_meas_cnt = nb_of_meas;
+	uint8_t *p_delta_tick = delta_tick;
 
-	cmd = RECIPROC_FREQ_MEAS_CMD_SPI_GET_DATA;
-	subcmd[0] = RECIPROC_FREQ_MEAS_SUB_CMD_GET_MEAS_DELTA_TICK;
-	subcmd[1] = RECIPROC_FREQ_MEAS_SUB_CMD_DUMMY;
-	subcmd[2] = nb_of_meas;
+	if (!nb_of_meas_cnt || !p_delta_tick) {
+		err = ESP_ERR_INVALID_ARG;
+		ESP_LOGE(TAG,"invalid paramter in reciproc_freq_read_delta_tick %d", err);
+ 		return err;
+	}
+
+
+	while (nb_of_meas_cnt) {
+
+		cmd = RECIPROC_FREQ_MEAS_CMD_SPI_GET_DATA;
+		subcmd[0] = RECIPROC_FREQ_MEAS_SUB_CMD_GET_MEAS_DELTA_TICK;
+		subcmd[1] = RECIPROC_FREQ_MEAS_SUB_CMD_DUMMY;
+		subcmd[2] = 1;
 	
-	err = reciproc_freq_send_spi(pcfg,cmd,subcmd, 2*nb_of_meas*RECIPROC_FREQ_MEAS_RX_BYTE_SIZE_32b_word, delta_tick);
+		err = reciproc_freq_send_spi(pcfg,cmd,subcmd, 2*RECIPROC_FREQ_MEAS_RX_BYTE_SIZE_32b_word, p_delta_tick);
+
+		if (err != ESP_OK)
+			return err;
+
+		p_delta_tick++;
+		nb_of_meas_cnt--;
+	}
 
 	return err;
 
