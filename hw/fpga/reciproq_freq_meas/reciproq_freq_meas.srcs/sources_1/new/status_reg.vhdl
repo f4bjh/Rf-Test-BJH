@@ -18,6 +18,8 @@ entity status_reg_block is
 
     start_meas        : in std_logic;
     meas_done         : in std_logic;
+    
+    pll_locked        : in std_logic;
 
     status_reg        : out std_logic_vector(31 downto 0)
   );
@@ -42,7 +44,7 @@ status_reg(5) <= error_flag;
 status_reg(4) <= nco_freq_valid;
 status_reg(3) <= led_on_state;
 status_reg(2) <= led_off_state;
-status_reg(1) <= '0';
+status_reg(1) <= pll_locked;
 status_reg(0) <= '0';
 
 -- start_meas status

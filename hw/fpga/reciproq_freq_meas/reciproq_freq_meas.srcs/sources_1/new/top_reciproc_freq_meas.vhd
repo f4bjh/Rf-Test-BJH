@@ -63,7 +63,10 @@ architecture rtl of top_reciproc_freq_meas is
 
   --status register
   signal error_flag    : std_logic;
-  signal status_reg    : std_logic_vector(31 downto 0);  
+  signal status_reg    : std_logic_vector(31 downto 0); 
+  
+  --clk_wizard
+  signal rst_clk_wiz : std_logic; 
   
   component clk_wiz_0
     port (
@@ -76,11 +79,13 @@ end component;
   
 begin
 
+rst_clk_wiz <= not reset_n;
+
 u_clk_wiz : clk_wiz_0
     port map (
         clk_in  => clk_in,   -- ton horloge externe
         clk_master => clk_master,  -- horloge générée
-        reset    => reset_n,
+        reset    => rst_clk_wiz,
         locked   => locked
     );
 
@@ -175,6 +180,7 @@ u_status : entity work.status_reg_block
     led_toggle => led_toggle,
     start_meas => start_meas,
     meas_done => meas_done,
+    pll_locked => locked,
     status_reg => status_reg
   );
 
