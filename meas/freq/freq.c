@@ -1,3 +1,4 @@
+#include <inttypes.h>
 #include "main.h"
 #include "reciproc_freq_meas.h"
 #include "freq.h"
@@ -121,23 +122,30 @@ void frequencymeter_task(void *arg)
 		meas[0] = nb_of_meas;
 		
 	    for (i = 0; i < 8*nb_of_meas; i+=8) {
-          ESP_LOGI(TAG,"delta_tick=0x%02X%02X%02X%02X%02X%02X%02X%02X",
-             delta_tick[i+0], delta_tick[i+1], delta_tick[i+2], delta_tick[i+3],
-             delta_tick[i+4], delta_tick[i+5], delta_tick[i+6], delta_tick[i+7]);
+#if 0
+          	ESP_LOGI(TAG,"delta_tick=0x%02X%02X%02X%02X%02X%02X%02X%02X",
+	             delta_tick[i+0], delta_tick[i+1], delta_tick[i+2], delta_tick[i+3],
+	             delta_tick[i+4], delta_tick[i+5], delta_tick[i+6], delta_tick[i+7]);
+#endif
 
-          for (j = 0; j < 8; j++) {
-             meas[1 + i + j] = delta_tick[i + j];
-          }
-		}			
-		base = 1 + 8 * nb_of_meas;
-        for (i = 0; i < 4*nb_of_meas; i+=4) {
+	        for (j = 0; j < 4; j++) {
+             		meas[1 + i + j] = delta_tick[i + j + 4];
+             		meas[1 + i + j + 4] = delta_tick[i + j];
+ 
+          	}
+	    }			
+	
+    	    base = 1 + 8 * nb_of_meas;
+            for (i = 0; i < 4*nb_of_meas; i+=4) {
+#if 0
    		   	ESP_LOGI(TAG,"N_counted=0x%02X%02X%02X%02X",
-        		N_counted[i+0], N_counted[i+1],
-        		N_counted[i+2], N_counted[i+3]);
+        			N_counted[i+0], N_counted[i+1],
+        			N_counted[i+2], N_counted[i+3]);
+#endif
 
-    		for (j = 0; j < 4; j++) {
-        		meas[base + i + j] = N_counted[i + j];
-    		}
+    			for (j = 0; j < 4; j++) {
+        			meas[base + i + j] = N_counted[i + j];
+    			}
 		}
 		
 		memcpy(measure->pdata,meas, measure->size );
@@ -148,7 +156,7 @@ void frequencymeter_task(void *arg)
 
 esp_err_t init_read_status(meas_t *measure)
 {
-   read_status_task_arg_t *read_status_task_arg=malloc(sizeof(read_status_task_arg_t));; 
+   read_status_task_arg_t *read_status_task_arg=malloc(sizeof(read_status_task_arg_t)); 
 
    measure->size = 4*sizeof(uint8_t);
    measure->pdata = malloc(measure->size * sizeof(uint8_t));
@@ -291,24 +299,58 @@ esp_err_t calc_frequencymeter(instance_meas_t *instance_meas)
 {
     meas_t measure=instance_meas->measures;
     memset(instance_meas->calc_value, 0, CALC_VALUE_SIZE*sizeof(char));
-    unsigned int freq=0;
+    double freq;
+    double freq_moy=0;
+    uint8_t nb_of_meas=0;
+    int i;
+    uint64_t delta_tick;
+    uint32_t N_counted;
 
-#if 0
-    //au depart,l'objectif etait d'obtenir une precision de 1mHz, sur le calibre 10MHz
-    //mais ca suppose des lors d'avoir une fene^tre de 1000*1s...soit 1000s...ce qui n'est pas raisonnable
-    //alors, a moins d'avoir correctement resolut li'ssue n°79 sur gitlab, qui vise a obtenir et ameliorer
-    //la precision pour obtenir cette precision attendue de 1mHz, pour le moment, on met en place un
-    //espece de contournement, dans la but d'affichier artificiellement une frequence avec une precision de 1mHz
-    //par exemple, pour 4MHz, on va afficher 4 000 000, 000 Hz. Les 3 zero aprs la virgule etant ajouté hardcodé ci-dessous
-    //note : on est oblige de passer un variable tampon "freq", car pdata_cache est un pointeur sur un octet seulement
+ 	ESP_LOGI(TAG,"calc_frequencymeter 0x%02X",measure.pdata_cache[0]);
+	nb_of_meas = measure.pdata_cache[0];
 
 
-    freq = *(measure.pdata_cache);
-    freq |= ((*(measure.pdata_cache+1))<<8)&0xFF00;
-    freq |= ((*(measure.pdata_cache+2))<<16)&0xFF0000;
-    freq |= ((*(measure.pdata_cache+3))<<24)&0xFF000000;
-#endif
-    sprintf(instance_meas->calc_value,"%llu", (unsigned long long int) 4*freq*1000 );
+	for (i = 0; i < nb_of_meas; i++) {
+
+	    delta_tick =
+		((uint64_t)measure.pdata_cache[1 + i*8 + 0] << 56) |
+		((uint64_t)measure.pdata_cache[1 + i*8 + 1] << 48) |
+		((uint64_t)measure.pdata_cache[1 + i*8 + 2] << 40) |
+		((uint64_t)measure.pdata_cache[1 + i*8 + 3] << 32) |
+		((uint64_t)measure.pdata_cache[1 + i*8 + 4] << 24) |
+		((uint64_t)measure.pdata_cache[1 + i*8 + 5] << 16) |
+		((uint64_t)measure.pdata_cache[1 + i*8 + 6] << 8)  |
+		((uint64_t)measure.pdata_cache[1 + i*8 + 7]);
+
+	    N_counted =
+		((uint32_t)measure.pdata_cache[1 + 8*nb_of_meas + i*4 + 0] << 24) |
+		((uint32_t)measure.pdata_cache[1 + 8*nb_of_meas + i*4 + 1] << 16) |
+		((uint32_t)measure.pdata_cache[1 + 8*nb_of_meas + i*4 + 2] << 8)  |
+		((uint32_t)measure.pdata_cache[1 + 8*nb_of_meas + i*4 + 3]);
+
+	    ESP_LOGI(TAG, "N_counted = 0x%08" PRIX32, N_counted);
+	    ESP_LOGI(TAG, "delta_tick = 0x%016" PRIX64, delta_tick);
+
+	    if (delta_tick == 0) {
+		ESP_LOGE(TAG, "Division par zéro !");
+		freq = 0;
+		continue;
+
+	    } else {
+
+	        freq = (100000000.0 * (double)N_counted) / (double)delta_tick;
+
+	    }
+
+	    freq_moy += freq;
+	}
+
+	freq_moy /= nb_of_meas;
+
+	snprintf(instance_meas->calc_value, CALC_VALUE_SIZE, "%.3f", freq_moy);
+	ESP_LOGI(TAG, "freq = %s Hz", instance_meas->calc_value);
+
+
 
     return ESP_OK;
 }
