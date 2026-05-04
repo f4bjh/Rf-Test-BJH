@@ -25,6 +25,8 @@ architecture rtl of top_reciproc_freq_meas is
   constant USE_CALC_FREQ : boolean := false; -- mettre true pour activer
   
   signal clk_master : std_logic;
+  signal clk_wiz_out : std_logic;
+  signal clk_wiz_enable : std_logic :='1';
   signal locked : std_logic;
  
   -- SPI interface
@@ -80,11 +82,13 @@ end component;
 begin
 
 rst_clk_wiz <= not reset_n;
+clk_master <= clk_wiz_out when clk_wiz_enable = '1' else clk_in;
 
+ 
 u_clk_wiz : clk_wiz_0
     port map (
         clk_in  => clk_in,   -- ton horloge externe
-        clk_master => clk_master,  -- horloge générée
+        clk_master => clk_wiz_out,  -- horloge générée
         reset    => rst_clk_wiz,
         locked   => locked
     );
