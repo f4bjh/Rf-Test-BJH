@@ -256,7 +256,7 @@ esp_err_t reciproc_freq_read_delta_tick(reciproc_freq_cfg_t *pcfg,uint8_t *delta
 		if (err != ESP_OK)
 			return err;
 
-		p_delta_tick++;
+		p_delta_tick+=2*RECIPROC_FREQ_MEAS_RX_BYTE_SIZE_32b_word;
 		nb_of_meas_cnt--;
 	}
 
@@ -270,8 +270,8 @@ esp_err_t reciproc_freq_read_N_counted(reciproc_freq_cfg_t *pcfg,uint8_t *N_coun
 	uint8_t cmd;
 	uint8_t subcmd[RECIPROC_FREQ_MEAS_SUB_CMD_SIZE];
 
-	cmd = RECIPROC_FREQ_MEAS_SUB_CMD_GET_MEAS_N_COUNTED;
-	subcmd[0] = RECIPROC_FREQ_MEAS_SUB_CMD_GET_MEAS_DELTA_TICK;
+	cmd = RECIPROC_FREQ_MEAS_CMD_SPI_GET_DATA;
+	subcmd[0] = RECIPROC_FREQ_MEAS_SUB_CMD_GET_MEAS_N_COUNTED;
 	subcmd[1] = RECIPROC_FREQ_MEAS_SUB_CMD_DUMMY;
 	subcmd[2] = nb_of_meas;
 	
