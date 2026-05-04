@@ -35,6 +35,7 @@ architecture sim of tb_top_reciproc_freq_meas is
   signal rx4 : t_word32_array(0 to 3);
   signal rx8 : t_word32_array(0 to 7);
   signal dt16 : t_word32_array(0 to 15);
+  signal dt2 : t_word32_array(0 to 1);
   signal N_counted8 : t_word32_array(0 to 7);
   
   signal delta_t : unsigned(63 downto 0);
@@ -117,7 +118,7 @@ begin
   uut: entity work.top_reciproc_freq_meas
     generic map (FREF_HZ => FREF_HZ)
     port map (
-      clk_master    => clk_ref,
+      clk_in        => clk_ref,
       reset_n       => rst_n,
       sclk           => sck,
       mosi          => mosi,
@@ -228,14 +229,19 @@ begin
 
         if nb > 0 or status(FIFO_FULL_BIT) = '1' then
 
-            cmd1 := x"10010000" or std_logic_vector(to_unsigned(nb, 32));
-            cmd2 := x"10020000" or std_logic_vector(to_unsigned(nb, 32));
+            cmd1 := x"10010001";
 
-            spi_device_transmit(cs_n, sck, mosi, miso, cmd1, dt16);
+            for nb_of_meas_cnt in 0 to nb-1 loop
+              spi_device_transmit(cs_n, sck, mosi, miso, cmd1, dt2);
+              dt16(2*nb_of_meas_cnt)     <= dt2(0);
+              dt16(2*nb_of_meas_cnt + 1) <= dt2(1); 
+            end loop;
+
+            cmd2 := x"10020000" or std_logic_vector(to_unsigned(nb, 32));
             spi_device_transmit(cs_n, sck, mosi, miso, cmd2, N_counted8);
 
             for i in 0 to nb-1 loop   -- ⚠️ souvent nb mesures → 0 à nb-1
-    
+                    
                 delta_t_var(63 downto 32) := unsigned(dt16(2*i + 1));
                 delta_t_var(31 downto 0)  := unsigned(dt16(2*i));
                 N_counted_var := unsigned(N_counted8(i));
