@@ -6,7 +6,13 @@
 #include "esp_log.h"
 
 #include "meas_mgt.h"
-#include "meas.h"
+#include "chip_info.h"
+#include "spi.h"
+#include "reciproc_freq_meas.h"
+#include "freq.h"
+//#include "adf4351_v2.h"
+//#include "rf_gen.h"
+
 
 static const char *TAG = "meas_mgt";
 
@@ -48,8 +54,10 @@ instance_meas_per_html_page_t instance_meas_per_html_page[N_PAGES][N_MEAS+1] =
   },
   //generator.html
   {
-	  //param default to set : rf status off + 100MHz + 5dBm
-    {RF_GEN_STATUS,           false, init_rf_gen,                  calc_rf_gen,                  {0,0x00,0xE1, 0xF5,0x05,3},  NULL,        stop_rf_gen,         update_rf_gen},
+    //param default to set : rf status off + 100MHz + 5dBm
+    //{RF_GEN_STATUS,           false, init_rf_gen,                  calc_rf_gen,                  {0,0x00,0xE1, 0xF5,0x05,3},  NULL,        stop_rf_gen,         update_rf_gen},
+    {RF_GEN_STATUS,           false, NULL,                  NULL,                  {0,0,0,0,0,0},  NULL,        NULL,         NULL},
+
 #if 0
     {RF_GEN_FREQ,             false, NULL,                         NULL,                         {0},           NULL,        NULL,                update_rf_gen},
     {RF_GEN_POW,              false, NULL,                         NULL,                         {0},           NULL,        NULL,                update_rf_gen},
@@ -58,6 +66,7 @@ instance_meas_per_html_page_t instance_meas_per_html_page[N_PAGES][N_MEAS+1] =
   },
   //frequencymeter.html
   {
+    {FREQ_STATUS,	      false, init_read_status,             calc_read_status,             {0},           NULL,        stop_read_status,     NULL},
     {FREQUENCY,               false, init_frequencymeter,          calc_frequencymeter,          {0},           NULL,        stop_frequencymeter,  NULL},
     LAST_INSTANCE_MEAS
   },

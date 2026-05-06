@@ -304,7 +304,7 @@ void ws_async_send(void *arg)
 
         json_string = instance_meas->json_meas.json_string;
 	    
-	    memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
+	memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
         ws_pkt.payload = (uint8_t*)json_string;
         ws_pkt.len = strlen(json_string);
         ws_pkt.type = HTTPD_WS_TYPE_TEXT;

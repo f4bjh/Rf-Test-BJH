@@ -1,6 +1,129 @@
 var serverIp = window.location.hostname;
 socket = new WebSocket("ws://" + serverIp + "/ws");
 
+function update_status(freq_status)
+{
+    // extraction de la version maj (bits 31..24)
+    let maj_version = (freq_status >>> 24) & 0xFF;
+    document.getElementById("maj_version").textContent = maj_version;
+    // extraction de la version in (bits 23..16)
+    let min_version = (freq_status >>> 16) & 0xFF;
+    document.getElementById("min_version").textContent = min_version;
+
+
+    function set_button(id, bit)
+    {
+        let button = document.getElementById(id);
+        let value = (freq_status >> bit) & 1;
+
+        if (value)
+        {
+            button.classList.remove("green");
+            button.classList.add("red");
+        }
+        else
+        {
+            button.classList.remove("red");
+            button.classList.add("green");
+        }
+    }
+
+    set_button("fifo_full", 6);
+    set_button("error_flag", 5);
+    set_button("nco_freq_valid", 4);
+    set_button("led_on", 3);
+    set_button("led_off", 2);
+    set_button("led_toggle", 1);
+}
+
+let freq_digit_element;
+
+window.addEventListener("DOMContentLoaded", () => {
+    freq_digit_element = document.getElementById('freq-digit');
+});
+
+function update_freq(freq)
+{
+    if (!freq_digit_element) return;
+
+    let strFreq = String(freq).replace('.', '').padStart(11, '0');
+
+    for (let i = 0; i < 11; i++) {
+         freq_digits[i] = parseInt(strFreq[10-i]);
+    }
+
+    //here, it depends on precision user set in page
+    //but precision will be set according this : 
+    // input freq range   |   precision
+    //  0 - 10 MHz        |   mHz       ex : 4294967.155Hz  (ie 4MHz)
+    // 10MHz - 1200MHz    |  1/10       ex : 42120785.1 (ie 42MHz)
+    // 1200MHz - 5GHz     |   Hz        ex : 400014004   (ie 4GHz)
+    // it will have to be managed in meas/freq/freq
+    // 1st case (0-10MHz) : 24 bits of data before coma + 10 bits after coma
+    // 				max = 16.77MHz          /  max = 1023
+    // 			        nb de digit = 8         /  nb digit = 3
+    // 2nd case (10MHz-1200MHz) : 28 bits of data before coma + 4 bits after coma
+    // 3rd case (1200MHz-5GHz) : 32 bits of data 
+
+    if (freq_range === "10MHz") {
+        freq_digit_element.innerHTML = `
+	<div class='s7s'><input value='` + freq_digits[10] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[9] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='entre-digit'>&nbsp</div>
+	<div class='s7s'><input value='` + freq_digits[8] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[7] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[6] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='entre-digit'>&nbsp</div>
+        <div class='s7s'><input value='` + freq_digits[5] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[4] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[3] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='entre-digit'>.</div>
+        <div class='s7s'><input value='` + freq_digits[2] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[1] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[0] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='unit-Hz'>Hz</div>
+        `;
+    }
+    if (freq_range === "1200MHz") {
+        freq_digit_element.innerHTML = `
+        <div class='s7s'><input value='` + freq_digits[9] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[8] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[7] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='entre-digit'>&nbsp</div>
+        <div class='s7s'><input value='` + freq_digits[6] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[5] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[4] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='entre-digit'>&nbsp</div>
+        <div class='s7s'><input value='` + freq_digits[3] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[2] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[1] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='entre-digit'>.</div>
+        <div class='s7s'><input value='` + freq_digits[0] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='unit-Hz'>Hz</div>
+        `;		
+    }
+    if (freq_range === "5GHz") {
+        freq_digit_element.innerHTML = `
+        <div class='s7s'><input value='` + freq_digits[9] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='entre-digit'>&nbsp</div>
+        <div class='s7s'><input value='` + freq_digits[8] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[7] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[6] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='entre-digit'>&nbsp</div>
+        <div class='s7s'><input value='` + freq_digits[5] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[4] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[3] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='entre-digit'>&nbsp</div>
+        <div class='s7s'><input value='` + freq_digits[2] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[1] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[0] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='unit-Hz'>Hz</div>
+        `;
+    }
+}
+
+
+
 socket.onopen = function () {
         // Extraire le paramètre d'identification de la page
 	const url = window.location.href;
@@ -37,8 +160,9 @@ socket.addEventListener('close', (event) => {
 });
 
 let freq = `unknown`;
-let freq_digit=new Array(10).fill(0);
-let freq_range = `4MHz`; // Valeur par défaut
+let freq_digits=new Array(11).fill(0);
+let freq_range = `10MHz`; // Valeur par défaut
+let freq_status = `unknown`;
 
 function send_freq_range_update(freq_range) {
     const jsonData = {
@@ -75,83 +199,21 @@ socket.addEventListener('message', (event) => {
     console.log(`l : ${json_data.l}`);
     console.log(`v : ${json_data.v}`);
 
-    const freq_digit = document.getElementById('freq-digit'); //MSB
-                    
-
     switch (json_data.t) {
-    case 0xB: 
+    
+    case 0xB:
         if (json_data.l !== 0) {
-        freq = `${json_data.v}`;
+        freq_status = `${json_data.v}`;
+	update_status(Number(freq_status));
         }
         break;
-    }
+    case 0xC: 
+        if (json_data.l !== 0) {
+        freq = `${json_data.v}`;
+	update_freq(freq);
+        }
+        break;
+    } 
 
-    let strFreq = String(freq).padStart(10, '0');
-
-    for (let i = 0; i < 10; i++) {
-        freq_digit[i] = parseInt(strFreq[9-i]);
-    }
-
-    //here, it depends on precision user set in page
-    //but precision will be set according this : 
-    // input freq range   |   precision
-    //  0 - 4 MHz         |   mHz       ex : 4294967.155Hz  (ie 4MHz)
-    // 4MHz - 250MHz      |  1/10       ex : 42120785.1 (ie 42MHz)
-    // 250MHz - 4GHz      |   Hz        ex : 400014004   (ie 4GHz)
-    // it will have to be managed in meas/freq/freq
-    // 1st case (0-4MHz) : 22 bits of data before coma + 10 bits after coma
-    // 2nd case (4MHz-250MHz) : 28 bits of data before coma + 4 bits after coma
-    // 3rd case (250MHz-4GHz) : 32 bits of data 
-
-    if (freq_range === "4MHz") {
-        freq_digit.innerHTML = `
-        <div class='s7s'><input value='` + freq_digit[6] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='entre-digit'>&nbsp</div>
-        <div class='s7s'><input value='` + freq_digit[5] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='s7s'><input value='` + freq_digit[4] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='s7s'><input value='` + freq_digit[3] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='entre-digit'>.</div>
-        <div class='s7s'><input value='` + freq_digit[2] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='s7s'><input value='` + freq_digit[1] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='s7s'><input value='` + freq_digit[0] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='unit-Hz'>Hz</div>
-        `;
-    }
-    if (freq_range === "250MHz") {
-        freq_digit.innerHTML = `
-        <div class='s7s'><input value='` + freq_digit[9] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='s7s'><input value='` + freq_digit[8] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='s7s'><input value='` + freq_digit[7] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='entre-digit'>&nbsp</div>
-        <div class='s7s'><input value='` + freq_digit[6] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='s7s'><input value='` + freq_digit[5] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='s7s'><input value='` + freq_digit[4] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='entre-digit'>&nbsp</div>
-        <div class='s7s'><input value='` + freq_digit[3] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='s7s'><input value='` + freq_digit[2] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='s7s'><input value='` + freq_digit[1] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='entre-digit'>.</div>
-        <div class='s7s'><input value='` + freq_digit[0] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='unit-Hz'>Hz</div>
-        `;		
-    }
-    if (freq_range === "4GHz") {
-        freq_digit.innerHTML = `
-        <div class='s7s'><input value='` + freq_digit[9] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='entre-digit'>&nbsp</div>
-        <div class='s7s'><input value='` + freq_digit[8] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='s7s'><input value='` + freq_digit[7] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='s7s'><input value='` + freq_digit[6] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='entre-digit'>&nbsp</div>
-        <div class='s7s'><input value='` + freq_digit[5] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='s7s'><input value='` + freq_digit[4] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='s7s'><input value='` + freq_digit[3] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='entre-digit'>&nbsp</div>
-        <div class='s7s'><input value='` + freq_digit[2] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='s7s'><input value='` + freq_digit[1] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='s7s'><input value='` + freq_digit[0] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='unit-Hz'>Hz</div>
-        `;
-    }
-});
+    });
 
