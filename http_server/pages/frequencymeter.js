@@ -36,13 +36,20 @@ function update_status(freq_status)
     set_button("led_toggle", 1);
 }
 
+let freq_digit_element;
+
+window.addEventListener("DOMContentLoaded", () => {
+    freq_digit_element = document.getElementById('freq-digit');
+});
+
 function update_freq(freq)
 {
+    if (!freq_digit_element) return;
 
-    let strFreq = String(freq).padStart(11, '0');
+    let strFreq = String(freq).replace('.', '').padStart(11, '0');
 
     for (let i = 0; i < 11; i++) {
-        freq_digit[i] = parseInt(strFreq[10-i]);
+         freq_digits[i] = parseInt(strFreq[10-i]);
     }
 
     //here, it depends on precision user set in page
@@ -59,57 +66,57 @@ function update_freq(freq)
     // 3rd case (1200MHz-5GHz) : 32 bits of data 
 
     if (freq_range === "10MHz") {
-        freq_digit.innerHTML = `
-	<div class='s7s'><input value='` + freq_digit[10] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='s7s'><input value='` + freq_digit[9] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        freq_digit_element.innerHTML = `
+	<div class='s7s'><input value='` + freq_digits[10] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[9] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
         <div class='entre-digit'>&nbsp</div>
-	<div class='s7s'><input value='` + freq_digit[8] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='s7s'><input value='` + freq_digit[7] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='s7s'><input value='` + freq_digit[6] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+	<div class='s7s'><input value='` + freq_digits[8] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[7] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[6] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
         <div class='entre-digit'>&nbsp</div>
-        <div class='s7s'><input value='` + freq_digit[5] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='s7s'><input value='` + freq_digit[4] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='s7s'><input value='` + freq_digit[3] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[5] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[4] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[3] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
         <div class='entre-digit'>.</div>
-        <div class='s7s'><input value='` + freq_digit[2] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='s7s'><input value='` + freq_digit[1] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='s7s'><input value='` + freq_digit[0] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[2] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[1] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[0] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
         <div class='unit-Hz'>Hz</div>
         `;
     }
     if (freq_range === "1200MHz") {
-        freq_digit.innerHTML = `
-        <div class='s7s'><input value='` + freq_digit[9] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='s7s'><input value='` + freq_digit[8] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='s7s'><input value='` + freq_digit[7] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        freq_digit_element.innerHTML = `
+        <div class='s7s'><input value='` + freq_digits[9] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[8] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[7] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
         <div class='entre-digit'>&nbsp</div>
-        <div class='s7s'><input value='` + freq_digit[6] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='s7s'><input value='` + freq_digit[5] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='s7s'><input value='` + freq_digit[4] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[6] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[5] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[4] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
         <div class='entre-digit'>&nbsp</div>
-        <div class='s7s'><input value='` + freq_digit[3] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='s7s'><input value='` + freq_digit[2] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='s7s'><input value='` + freq_digit[1] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[3] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[2] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[1] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
         <div class='entre-digit'>.</div>
-        <div class='s7s'><input value='` + freq_digit[0] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[0] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
         <div class='unit-Hz'>Hz</div>
         `;		
     }
     if (freq_range === "5GHz") {
-        freq_digit.innerHTML = `
-        <div class='s7s'><input value='` + freq_digit[9] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        freq_digit_element.innerHTML = `
+        <div class='s7s'><input value='` + freq_digits[9] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
         <div class='entre-digit'>&nbsp</div>
-        <div class='s7s'><input value='` + freq_digit[8] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='s7s'><input value='` + freq_digit[7] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='s7s'><input value='` + freq_digit[6] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[8] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[7] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[6] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
         <div class='entre-digit'>&nbsp</div>
-        <div class='s7s'><input value='` + freq_digit[5] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='s7s'><input value='` + freq_digit[4] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='s7s'><input value='` + freq_digit[3] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[5] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[4] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[3] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
         <div class='entre-digit'>&nbsp</div>
-        <div class='s7s'><input value='` + freq_digit[2] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='s7s'><input value='` + freq_digit[1] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
-        <div class='s7s'><input value='` + freq_digit[0] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[2] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[1] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
+        <div class='s7s'><input value='` + freq_digits[0] + `'/><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg><seg></seg></div>
         <div class='unit-Hz'>Hz</div>
         `;
     }
@@ -153,7 +160,7 @@ socket.addEventListener('close', (event) => {
 });
 
 let freq = `unknown`;
-let freq_digit=new Array(11).fill(0);
+let freq_digits=new Array(11).fill(0);
 let freq_range = `10MHz`; // Valeur par défaut
 let freq_status = `unknown`;
 
@@ -191,9 +198,6 @@ socket.addEventListener('message', (event) => {
     console.log(`t : ${json_data.t}`);
     console.log(`l : ${json_data.l}`);
     console.log(`v : ${json_data.v}`);
-
-    const freq_digit = document.getElementById('freq-digit'); //MSB
-                    
 
     switch (json_data.t) {
     
