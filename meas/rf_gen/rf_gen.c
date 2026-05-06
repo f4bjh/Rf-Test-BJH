@@ -26,9 +26,6 @@ static ADF4351_cfg_t vfo ={
     .gpio_ce = GPIO_RF_GEN_CE,
     .gpio_cs = 14, // dummy pin
     .gpio_le = GPIO_RF_GEN_LE, 
-    .gpio_sclk = GPIO_RF_GEN_CLK,
-    .gpio_mosi = GPIO_RF_GEN_DATA, 
-    .gpio_miso = -1, // dummy pin
     .gpio_ld = GPIO_RF_GEN_PLL_LOCKED,
   }
 };
@@ -43,7 +40,7 @@ void rf_gen_task(void *arg)
   measure->ready=false;
 
   while(1) {
-       vTaskDelay(100 / portTICK_PERIOD_MS);
+       vTaskDelay(MEASURMENT_TASK_WAKE_UP_TICK / portTICK_PERIOD_MS);
 
        //TO DO
        //

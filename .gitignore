@@ -8,3 +8,16 @@ dependencies.lock
 *auto_*
 *.zip
 *.bak
+*backup*
+*.str
+*.zip
+vivado.jou
+vivado.log
+vivado_*
+*.cache/
+*.cache/wt/
+*.gen/
+*.hw/
+*.ip_user_files/
+*.runs/
+*.sim/

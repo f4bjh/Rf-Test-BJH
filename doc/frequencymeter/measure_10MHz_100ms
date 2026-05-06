@@ -1,0 +1,3 @@
+------------------------------
+Méthode     | Fréquence (Hz)   | Précision (Hz) | Précision relative % | t_measure
+f_direct    | 50000000.0 | 4.000000e+07   | 4.000000e+02         | -4.294967e+01 s

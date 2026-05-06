@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<EDKSYSTEM EDWVERSION="1.2" TIMESTAMP="Wed Sep 17 07:31:12 2025" VIVADOVERSION="2024.2">
+
+  <SYSTEMINFO ARCH="artix7" DEVICE="7a35t" NAME="design_1" PACKAGE="cpg236" SPEEDGRADE="-1"/>
+
+  <EXTERNALPORTS/>
+
+  <EXTERNALINTERFACES/>
+
+  <MODULES>
+    <MODULE COREREVISION="1" FULLNAME="/Stimu2_0" HWVERSION="1.0" INSTANCE="Stimu2_0" IPTYPE="PERIPHERAL" IS_ENABLE="1" MODCLASS="PERIPHERAL" MODTYPE="Stimu2" VLNV="xilinx.com:module_ref:Stimu2:1.0">
+      <DOCUMENTS/>
+      <PARAMETERS>
+        <PARAMETER NAME="Component_Name" VALUE="design_1_Stimu2_0_0"/>
+        <PARAMETER NAME="EDK_IPTYPE" VALUE="PERIPHERAL"/>
+      </PARAMETERS>
+      <PORTS>
+        <PORT DIR="O" NAME="tb_clock12M" SIGIS="undef" SIGNAME="Stimu2_0_tb_clock12M">
+          <CONNECTIONS>
+            <CONNECTION INSTANCE="oscillator2_0" PORT="clock12M"/>
+          </CONNECTIONS>
+        </PORT>
+        <PORT DIR="O" NAME="tb_reset" POLARITY="ACTIVE_LOW" SIGIS="rst" SIGNAME="Stimu2_0_tb_reset">
+          <CONNECTIONS>
+            <CONNECTION INSTANCE="oscillator2_0" PORT="reset_n"/>
+          </CONNECTIONS>
+        </PORT>
+      </PORTS>
+      <BUSINTERFACES/>
+    </MODULE>
+    <MODULE COREREVISION="1" FULLNAME="/oscillator2_0" HWVERSION="1.0" INSTANCE="oscillator2_0" IPTYPE="PERIPHERAL" IS_ENABLE="1" MODCLASS="PERIPHERAL" MODTYPE="oscillator2" VLNV="xilinx.com:module_ref:oscillator2:1.0">
+      <DOCUMENTS/>
+      <PARAMETERS>
+        <PARAMETER NAME="MAX" VALUE="&quot;00000001&quot;"/>
+        <PARAMETER NAME="Component_Name" VALUE="design_1_oscillator2_0_0"/>
+        <PARAMETER NAME="EDK_IPTYPE" VALUE="PERIPHERAL"/>
+      </PARAMETERS>
+      <PORTS>
+        <PORT CLKFREQUENCY="100000000" DIR="O" NAME="clk" SIGIS="clk"/>
+        <PORT DIR="O" NAME="clkn" SIGIS="undef"/>
+        <PORT DIR="I" NAME="clock12M" SIGIS="undef" SIGNAME="Stimu2_0_tb_clock12M">
+          <CONNECTIONS>
+            <CONNECTION INSTANCE="Stimu2_0" PORT="tb_clock12M"/>
+          </CONNECTIONS>
+        </PORT>
+        <PORT DIR="I" NAME="reset_n" POLARITY="ACTIVE_LOW" SIGIS="rst" SIGNAME="Stimu2_0_tb_reset">
+          <CONNECTIONS>
+            <CONNECTION INSTANCE="Stimu2_0" PORT="tb_reset"/>
+          </CONNECTIONS>
+        </PORT>
+      </PORTS>
+      <BUSINTERFACES/>
+    </MODULE>
+  </MODULES>
+
+</EDKSYSTEM>

@@ -6,7 +6,7 @@
 #include <sys/param.h>
 
 #include "meas_mgt.h"
-#include "meas.h"
+#include "rf_gen.h"
 #include "gpio.h"
 
 static char TAG[] = "rf_gen";
@@ -27,9 +27,6 @@ static adf4351_cfg_t vfo ={
     .gpio_ce = GPIO_RF_GEN_CE,
     .gpio_cs = 14, // dummy pin
     .gpio_le = GPIO_RF_GEN_LE, 
-    .gpio_sclk = GPIO_RF_GEN_CLK,
-    .gpio_mosi = GPIO_RF_GEN_DATA, 
-    .gpio_miso = -1, // dummy pin
     .gpio_ld = GPIO_RF_GEN_PLL_LOCKED,
   },
   .adf4351_device = NULL
@@ -79,7 +76,7 @@ void rf_gen_task(void *arg)
   measure->ready=false;
 
   while(1) {
-       vTaskDelay(100 / portTICK_PERIOD_MS);
+       vTaskDelay(MEASURMENT_TASK_WAKE_UP_TICK / portTICK_PERIOD_MS);
 
        //TO DO
        //
@@ -188,8 +185,7 @@ esp_err_t init_rf_gen(meas_t *measure)
 
    rf_gen_task_arg.vfo = vfo;
 
-    //create a rf_gen on CPU1
-   //CPU number set in measure->meas_param_in[0]
+   //create a rf_gen on CPU1
    xTaskCreatePinnedToCore(rf_gen_task, 
 		   "rf_gen task", 
 		   configMINIMAL_STACK_SIZE, 

@@ -256,7 +256,13 @@ li > a:after { content:  ' +'; }
     --c-h-np: calc(var(--bar-p-t) + var(--bar-h-t));
     --c-h: calc(calc(var(--c-h-np) + var(--padding-p)) + var(--bar-pad));
   }
-  
+
+  #freq-digit {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+
   .s7s {
     display: inline-block !important; /* Force les chiffres à s'afficher sur une seule ligne */
     margin-right: 5px; /* Espacement entre les chiffres */
