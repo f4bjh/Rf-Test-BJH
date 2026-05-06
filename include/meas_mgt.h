@@ -1,6 +1,8 @@
 #include "cJSON.h"
 
 #define tskFSM_MEASURMENT tskIDLE_PRIORITY+1  
+#define FSM_MEASURMENT_TASK_WAKE_UP_TICK 10
+#define MEASURMENT_TASK_WAKE_UP_TICK 250
 
 //number of element in the queue that content json measurment value
 #define NB_OF_MEASUREMENT_IN_QUEUE  10
@@ -31,6 +33,7 @@ typedef enum {
   CURRENT_PART_BUILD_DATE_TAG,
   NEXT_PART_VERSION_TAG,
   NEXT_PART_BUILD_DATE_TAG,
+  READ_STATUS_TAG,
   FREQUENCY_TAG,
   RF_GEN_TAG, //not sure there will be some data to display in html page from rf_gen
 } data_to_client_tag_t;
@@ -54,6 +57,7 @@ typedef enum {
 	CURRENT_PART_BUILD_DATE,
 	NEXT_PART_VERSION,
 	NEXT_PART_BUILD_DATE,
+        FREQ_STATUS,
 	FREQUENCY,
 	RF_GEN_STATUS,
 	RF_GEN_FREQ,

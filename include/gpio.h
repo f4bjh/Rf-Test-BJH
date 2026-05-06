@@ -4,14 +4,13 @@
 #define GPIO_DUMMY 0
 
 //bus SPI
-#define GPIO_SPI_MOSI   13
-//#define GPIO_SPI_MISO tbd
+#define GPIO_SPI_MOSI   11
+#define GPIO_SPI_MISO   13
 #define GPIO_SPI_CLK    12 
 #define GPIO_SPI_POR    14
 
-
 //frquencymeter
-#define	GPIO_FREQUENCYMETER_INPUT	4
+#define	GPIO_FREQUENCYMETER_START	4
 #define GPIO_FREQUENCYMETER_CS_N	6 
 
 //rf generator

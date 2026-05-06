@@ -19,7 +19,7 @@
 
 #define EXAMPLE_HTTP_QUERY_KEY_MAX_LEN  (64)
 #define tskHTTP_SERVER tskFSM_MEASURMENT+1
-#define HTTP_SERVER_WAKE_UP_TICK 250
+#define HTTP_SERVER_WAKE_UP_TICK 100
 #define DISABLE_WDT_TASK
 
 /* Type of Unescape algorithms to be used */

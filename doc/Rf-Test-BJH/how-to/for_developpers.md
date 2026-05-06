@@ -68,7 +68,20 @@ afin de s'assurer que ce résultat est complet :
 $  xtensa-esp-elf-nm --numeric-sort build/Rf-Test-BJH.elf | grep " T "
 ```
 cette dernière commande liste les symboles. Il suffit de vérifier que l'adresse de la fonction suivante, se situe bien après la dernière addresse de la fonction recherchée auparavant  
- 
+- vivado stuff
+
+to develop vhdl : 
+```
+$  source ../../Xilinx/Vivado/2024.2/settings64.sh
+$  vivado &
+```
+
+you can use vivado to flash FPGA. In a lighter way, with vivado_lab (flash tools from xilinx) :  
+```
+$ LC_ALL=en_US.UTF-8 vivado_lab &
+
+```
+  
 
 - gdb
 
@@ -150,4 +163,3 @@ strange behavior of the compilator so far. Need to clean the project :
 $ idf.py clean
 $ idf.py build
 ```
-
